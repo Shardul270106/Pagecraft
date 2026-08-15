@@ -1,0 +1,113 @@
+.navbar-wrap {
+  position: relative;
+  z-index: 40;
+  width: 100%;
+  padding: 2px 24px 0;
+  margin: 0;
+}
+
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  width: 100%;
+  max-width: var(--page-max-width);
+  margin: 0 auto;
+
+  background: var(--surface-card);
+  border-radius: var(--radius-nav);
+  box-shadow: var(--shadow-md);
+
+  padding: 12px 12px 12px 20px;
+  gap: 16px;
+}
+
+/* Brand */
+.navbar__brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.navbar__mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: var(--color-highlighter-yellow);
+  border-radius: 9px;
+}
+
+.navbar__wordmark {
+  font-family: var(--font-poppins);
+  font-weight: var(--font-weight-medium);
+  font-size: 18px;
+  color: var(--color-carbon);
+}
+
+/* Links */
+.navbar__links {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.navbar__links a {
+  font-family: var(--font-inter);
+  font-weight: var(--font-weight-medium);
+  font-size: 15px;
+  color: var(--color-carbon);
+  opacity: 0.75;
+  transition: opacity 0.15s ease;
+}
+
+.navbar__links a:hover {
+  opacity: 1;
+}
+
+/* Actions */
+.navbar__actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+/* IMPORTANT:
+   Push page content below the fixed navbar
+*/
+body {
+  padding-top: 45px;
+}
+
+/* Tablet */
+@media (max-width: 860px) {
+  .navbar__links {
+    display: none;
+  }
+}
+
+/* Mobile */
+@media (max-width: 520px) {
+  .navbar-wrap {
+    padding: 10px 12px 0;
+  }
+
+  .navbar {
+    padding: 10px 14px;
+  }
+
+  .navbar__actions .pill-btn--ghost {
+    display: none;
+  }
+
+  body {
+    padding-top: 75px;
+  }
+}

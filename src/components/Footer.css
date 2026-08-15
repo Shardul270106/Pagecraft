@@ -1,0 +1,136 @@
+/* ---- CTA band ---- */
+
+.cta-band {
+  padding-bottom: 0;
+}
+
+.cta-card {
+  background: var(--color-carbon, #111);
+  border-radius: var(--radius-cards-lg);
+  padding: 64px 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 20px;
+  color: #fff;
+}
+
+.cta-card__title {
+  font-family: var(--font-poppins);
+  font-weight: var(--font-weight-bold);
+  font-size: 40px;
+  letter-spacing: -1px;
+  line-height: 1.15;
+  color: #fff;
+}
+
+.cta-card__emoji {
+  display: inline-block;
+  margin-left: 8px;
+}
+
+.cta-card__sub {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.7);
+  max-width: 420px;
+}
+
+/* ---- footer ---- */
+
+.site-footer {
+  padding: 64px 0 32px;
+}
+
+.site-footer__inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 40px;
+  flex-wrap: wrap;
+  padding-bottom: 48px;
+  border-bottom: 1px solid var(--color-hairline-gray);
+}
+
+.site-footer__brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.navbar__mark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: var(--color-highlighter-yellow, #e6e51e);
+  border-radius: 9px;
+}
+
+.navbar__wordmark {
+  font-family: var(--font-poppins);
+  font-weight: var(--font-weight-bold);
+  font-size: 20px;
+  color: var(--color-carbon);
+}
+
+.site-footer__links {
+  display: flex;
+  gap: 64px;
+  flex-wrap: wrap;
+}
+
+.site-footer__col {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 120px;
+}
+
+.site-footer__heading {
+  font-family: var(--font-poppins);
+  font-weight: var(--font-weight-medium);
+  font-size: 13px;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: var(--color-carbon);
+  opacity: 0.4;
+  margin-bottom: 4px;
+}
+
+.site-footer__col a {
+  font-size: 15px;
+  color: var(--color-carbon);
+  opacity: 0.72;
+  text-decoration: none;
+  transition: opacity 0.15s ease;
+}
+
+.site-footer__col a:hover {
+  opacity: 1;
+  text-decoration: underline;
+}
+
+.site-footer__bottom {
+  padding-top: 24px;
+  font-size: 13px;
+  color: var(--color-carbon);
+  opacity: 0.5;
+}
+
+@media (max-width: 720px) {
+  .cta-card {
+    padding: 48px 24px;
+  }
+  .cta-card__title {
+    font-size: 30px;
+  }
+  .site-footer__inner {
+    flex-direction: column;
+    gap: 32px;
+  }
+  .site-footer__links {
+    gap: 32px;
+  }
+}

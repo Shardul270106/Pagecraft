@@ -1,0 +1,93 @@
+.mockup-frame__scene {
+  position: relative;
+  width: 100%;
+  height: 560px;
+  background: transparent;
+  overflow: hidden;
+}
+
+.mockup-frame__loading {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-inter);
+  font-size: 14px;
+  color: var(--color-carbon);
+  opacity: 0.5;
+}
+
+.mockup-frame__fallback {
+  width: 100%;
+  height: 100%;
+  min-height: 560px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background: transparent;
+}
+
+.mockup-fallback-content {
+  max-width: 420px;
+  padding: 30px;
+}
+
+.mockup-fallback-icon {
+  font-size: 42px;
+  margin-bottom: 15px;
+}
+
+.mockup-fallback-content h3 {
+  margin: 0 0 10px;
+  font-family: var(--font-inter);
+  font-size: 22px;
+}
+
+.mockup-fallback-content p {
+  margin: 0 0 20px;
+  font-family: var(--font-inter);
+  font-size: 14px;
+  line-height: 1.6;
+  opacity: 0.65;
+}
+
+.mockup-fallback-button {
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: var(--font-inter);
+}
+
+/* Badge cover — replicates the page's dot-grid so it blends in seamlessly.
+   Uses background-attachment: fixed so the dots align with the page's
+   own dot-grid regardless of where this section sits on the page. */
+.mockup-frame__badge-cover {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 160px;
+  height: 56px;
+  background-color: var(--surface-canvas);
+  background-image: radial-gradient(var(--color-hairline-gray) 1.4px, transparent 1.4px);
+  background-size: 22px 22px;
+  background-attachment: fixed;
+  z-index: 10;
+  pointer-events: none;
+}
+
+@media (max-width: 720px) {
+  .mockup-frame__scene {
+    height: 380px;
+  }
+
+  .mockup-frame__fallback {
+    min-height: 380px;
+  }
+
+  .mockup-frame__badge-cover {
+    width: 130px;
+    height: 44px;
+  }
+}

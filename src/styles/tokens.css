@@ -1,0 +1,232 @@
+/* ==========================================================================
+   Aaply Design Tokens — source of truth for Pagecraft's visual system
+   ========================================================================== */
+:root {
+  /* Colors */
+  --color-highlighter-yellow: #e6e51e;
+  --color-annotation-red: #f34646;
+  --color-signal-blue: #466cf3;
+  --color-peach-wash: #ff8562;
+  --color-carbon: #000000;
+  --color-paper-white: #ffffff;
+  --color-graphite-mist: #f2f2f2;
+  --color-hairline-gray: #e6e6e6;
+  --color-shadow-gray: #cccccc;
+  --color-sunbeam: #fff705;
+    --color-mint-fresh: #baf3d6;
+  --color-sand-dune: #f1e3c6;
+
+  /* Typography — Font Families */
+  --font-poppins: 'Poppins', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-inter: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+  /* Typography — Scale */
+  --text-caption: 14px;
+  --leading-caption: 1.57;
+  --text-body: 16px;
+  --leading-body: 1.53;
+  --text-subheading: 18px;
+  --leading-subheading: 1.4;
+  --tracking-subheading: -0.5px;
+  --text-heading-sm: 27px;
+  --leading-heading-sm: 1.33;
+  --tracking-heading-sm: -0.49px;
+  --text-heading: 34px;
+  --leading-heading: 1.05;
+  --tracking-heading: -0.65px;
+  --text-heading-lg: 52px;
+  --leading-heading-lg: 1;
+  --tracking-heading-lg: -3.85px;
+  --text-display: 57px;
+  --leading-display: 1.05;
+  --tracking-display: -4.22px;
+
+  /* Typography — Weights */
+  --font-weight-light: 300;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-bold: 700;
+
+  /* Layout */
+  --page-max-width: 1200px;
+  --section-gap: 100px;
+  --card-padding: 40px;
+  --element-gap: 20px;
+
+  /* Border Radius */
+  --radius-2xl: 16px;
+  --radius-nav: 30px;
+  --radius-cards: 32px;
+  --radius-cards-lg: 40px;
+  --radius-inputs: 16px;
+  --radius-full: 3000px;
+  --radius-productframe: 16px;
+
+  /* Shadows */
+  --shadow-md: rgba(0, 0, 0, 0.2) 0px 10px 10px -5px;
+
+  /* Surfaces */
+  --surface-canvas: #f2f2f2;
+  --surface-card: #ffffff;
+  --surface-tinted-accent: #ff8562;
+  --surface-highlight-frame: #fff705;
+
+  
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  margin: 0;
+  background: var(--surface-canvas);
+  color: var(--color-carbon);
+  font-family: var(--font-inter);
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+  /* dot-grid canvas texture */
+  background-image: radial-gradient(var(--color-hairline-gray) 1.4px, transparent 1.4px);
+  background-size: 22px 22px;
+}
+
+h1, h2, h3, h4 {
+  margin: 0;
+  font-family: var(--font-poppins);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-carbon);
+}
+
+p {
+  margin: 0;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font-family: var(--font-inter);
+  cursor: pointer;
+}
+
+img, svg {
+  display: block;
+  max-width: 100%;
+}
+
+::selection {
+  background: var(--color-highlighter-yellow);
+  color: var(--color-carbon);
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-signal-blue);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ==========================================================================
+   Shared components
+   ========================================================================== */
+
+.pill-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: var(--radius-full);
+  padding: 16px 32px;
+  font-family: var(--font-inter);
+  font-weight: var(--font-weight-medium);
+  font-size: 16px;
+  border: none;
+  white-space: nowrap;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.pill-btn:hover {
+  transform: translateY(-2px);
+}
+
+.pill-btn:active {
+  transform: translateY(0);
+}
+
+.pill-btn--yellow {
+  background: var(--color-highlighter-yellow);
+  color: var(--color-carbon);
+}
+
+.pill-btn--black {
+  background: var(--color-carbon);
+  color: var(--color-paper-white);
+}
+
+.pill-btn--ghost {
+  background: transparent;
+  color: var(--color-carbon);
+  border: 1px solid var(--color-carbon);
+  padding: 12px 24px;
+  font-size: 15px;
+}
+
+.pill-btn--sm {
+  padding: 10px 20px;
+  font-size: 14px;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  border-radius: var(--radius-full);
+  padding: 6px 14px;
+  font-family: var(--font-inter);
+  font-weight: var(--font-weight-medium);
+  font-size: 13px;
+  background: var(--color-annotation-red);
+  color: var(--color-paper-white);
+}
+
+.container {
+  width: 100%;
+  max-width: var(--page-max-width);
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.section {
+  padding-top: var(--section-gap);
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-inter);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--text-caption);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--color-carbon);
+  background: var(--color-hairline-gray);
+  border-radius: var(--radius-full);
+  padding: 6px 16px;
+}
+

@@ -1,0 +1,681 @@
+/* ==========================================================================
+   AuthModal — login / signup popup
+   ========================================================================== */
+
+.auth-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 24px;
+
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(2px);
+
+  animation: auth-fade-in 0.18s ease;
+}
+
+@keyframes auth-fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+
+/* ==========================================================================
+   MODAL
+   ========================================================================== */
+
+.auth-modal {
+  position: relative;
+
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+
+  width: 100%;
+  max-width: 980px;      /* was 920px — slightly bigger */
+  height: min(680px, 90vh);   /* fixed height instead of just max-height */
+  max-height: 90vh;
+
+  background: var(--surface-card);
+  border-radius: var(--radius-cards-lg);
+  box-shadow: var(--shadow-md);
+
+  overflow: hidden;
+
+  animation: auth-pop-in 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes auth-pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+
+/* ==========================================================================
+   CLOSE BUTTON
+   ========================================================================== */
+
+.auth-modal__close {
+  position: absolute;
+
+  top: 20px;
+  right: 20px;
+
+  z-index: 20;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 34px;
+  height: 34px;
+
+  border: none;
+  border-radius: var(--radius-full);
+
+  background: rgba(255, 255, 255, 0.85);
+
+  color: var(--color-carbon);
+
+  cursor: pointer;
+
+  transition:
+    background 0.15s ease,
+    transform 0.15s ease;
+}
+
+.auth-modal__close:hover {
+  background: var(--color-highlighter-yellow);
+  transform: scale(1.05);
+}
+
+
+/* ==========================================================================
+   VIDEO / ILLUSTRATION PANEL
+   ========================================================================== */
+
+.auth-modal__illustration {
+  position: relative;
+  isolation: isolate;
+
+  min-width: 0;
+  height: 100%;          /* was min-height: 520px — now matches parent exactly */
+
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+
+  padding: 40px 32px;
+
+  background: var(--color-carbon);
+  overflow: hidden;
+}
+
+
+/* VIDEO */
+
+.auth-modal__video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: 30% 5% ;  /* shifts the visible window up/down to keep the subject in frame */
+  z-index: 0;
+  opacity: 1;
+  background: #000;
+  pointer-events: none;
+}
+
+/* Optional overlay */
+
+.auth-modal__video-overlay {
+  position: absolute;
+
+  inset: 0;
+
+  z-index: 1;
+
+  background:
+    linear-gradient(
+      to top,
+      rgba(0, 0, 0, 0.72),
+      rgba(0, 0, 0, 0.08) 55%,
+      rgba(0, 0, 0, 0.05)
+    );
+
+  pointer-events: none;
+}
+
+
+/* ==========================================================================
+   VIDEO TEXT
+   ========================================================================== */
+
+.auth-modal__illustration-copy {
+  position: relative;
+
+  z-index: 5;
+
+  pointer-events: none;
+}
+
+.auth-modal__eyebrow {
+  font-family: var(--font-inter);
+
+  font-weight: var(--font-weight-medium);
+
+  font-size: var(--text-caption);
+
+  letter-spacing: 0.02em;
+
+  text-transform: lowercase;
+
+  color: var(--color-shadow-gray);
+
+  margin-bottom: 16px;
+}
+
+.auth-modal__marker-heading {
+  font-family: var(--font-poppins);
+
+  font-weight: var(--font-weight-bold);
+
+  font-size: var(--text-heading-sm);
+
+  line-height: var(--leading-heading-sm);
+
+  letter-spacing: var(--tracking-heading-sm);
+
+  color: var(--color-paper-white);
+
+  margin: 0;
+}
+
+.auth-modal__marker-swipe {
+  position: relative;
+
+  display: inline-block;
+
+  z-index: 1;
+}
+
+.auth-modal__marker-swipe::before {
+  content: '';
+
+  position: absolute;
+
+  left: -4px;
+  right: -4px;
+  bottom: 2px;
+
+  height: 0.5em;
+
+  background: var(--color-highlighter-yellow);
+
+  z-index: -1;
+
+  border-radius: 3px;
+
+  animation: auth-marker-draw 1.4s ease-out forwards;
+}
+
+@keyframes auth-marker-draw {
+  from {
+    width: 0;
+  }
+
+  to {
+    width: 100%;
+  }
+}
+
+.auth-modal__illustration-sub {
+  margin-top: 12px;
+
+  font-family: var(--font-inter);
+
+  font-size: var(--text-body);
+
+  color: var(--color-shadow-gray);
+}
+
+
+/* ==========================================================================
+   FORM PANEL
+   ========================================================================== */
+
+.auth-modal__form-panel {
+  height: 100%;           /* fills the fixed modal height */
+  padding: 48px 44px;
+
+  overflow-y: auto;       /* scrolls internally when signup content is taller */
+  min-width: 0;
+
+  background: var(--surface-card);
+}
+
+/* ==========================================================================
+   LOGIN / SIGNUP TABS
+   ========================================================================== */
+
+.auth-modal__tabs {
+  position: relative;
+
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+
+  background: var(--color-graphite-mist);
+
+  border-radius: var(--radius-full);
+
+  padding: 4px;
+
+  margin-bottom: 28px;
+}
+
+.auth-modal__tab {
+  position: relative;
+
+  z-index: 2;
+
+  padding: 10px 0;
+
+  border: none;
+
+  background: transparent;
+
+  border-radius: var(--radius-full);
+
+  font-family: var(--font-inter);
+
+  font-weight: var(--font-weight-medium);
+
+  font-size: 14px;
+
+  color: var(--color-shadow-gray);
+
+  cursor: pointer;
+
+  transition: color 0.2s ease;
+}
+
+.auth-modal__tab.is-active {
+  color: var(--color-carbon);
+}
+
+.auth-modal__tab-indicator {
+  position: absolute;
+
+  top: 4px;
+  left: 4px;
+
+  width: calc(50% - 4px);
+  height: calc(100% - 8px);
+
+  background: var(--color-paper-white);
+
+  border-radius: var(--radius-full);
+
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+
+  transition:
+    transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  z-index: 1;
+}
+
+.auth-modal__tab-indicator.is-signup {
+  transform: translateX(100%);
+}
+
+
+/* ==========================================================================
+   HEADINGS
+   ========================================================================== */
+
+.auth-modal__heading {
+  font-family: var(--font-poppins);
+
+  font-size: var(--text-heading-sm);
+
+  line-height: var(--leading-heading-sm);
+
+  letter-spacing: var(--tracking-heading-sm);
+
+  margin: 0 0 6px;
+}
+
+.auth-modal__subheading {
+  font-family: var(--font-inter);
+
+  font-size: var(--text-body);
+
+  color: var(--color-shadow-gray);
+
+  margin: 0 0 24px;
+}
+
+
+/* ==========================================================================
+   GOOGLE BUTTON
+   ========================================================================== */
+
+.auth-modal__social-btn {
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 10px;
+
+  width: 100%;
+
+  padding: 13px 20px;
+
+  border: 1px solid var(--color-hairline-gray);
+
+  border-radius: var(--radius-inputs);
+
+  background: var(--color-paper-white);
+
+  font-family: var(--font-inter);
+
+  font-weight: var(--font-weight-medium);
+
+  font-size: 14px;
+
+  color: var(--color-carbon);
+
+  cursor: pointer;
+
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.auth-modal__social-btn:hover {
+  background: var(--color-graphite-mist);
+
+  border-color: var(--color-shadow-gray);
+}
+
+
+/* ==========================================================================
+   DIVIDER
+   ========================================================================== */
+
+.auth-modal__divider {
+  display: flex;
+
+  align-items: center;
+
+  gap: 12px;
+
+  margin: 22px 0;
+
+  color: var(--color-shadow-gray);
+
+  font-family: var(--font-inter);
+
+  font-size: 13px;
+}
+
+.auth-modal__divider::before,
+.auth-modal__divider::after {
+  content: '';
+
+  flex: 1;
+
+  height: 1px;
+
+  background: var(--color-hairline-gray);
+}
+
+
+/* ==========================================================================
+   FORM
+   ========================================================================== */
+
+.auth-modal__form {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 16px;
+}
+
+.auth-modal__field {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 6px;
+
+  font-family: var(--font-inter);
+
+  font-weight: var(--font-weight-medium);
+
+  font-size: 13px;
+
+  color: var(--color-carbon);
+}
+
+.auth-modal__input {
+  width: 100%;
+
+  box-sizing: border-box;
+
+  padding: 13px 16px;
+
+  border: 1px solid var(--color-hairline-gray);
+
+  border-radius: var(--radius-inputs);
+
+  font-family: var(--font-inter);
+
+  font-size: 15px;
+
+  color: var(--color-carbon);
+
+  background: var(--color-paper-white);
+
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.auth-modal__input::placeholder {
+  color: var(--color-shadow-gray);
+}
+
+.auth-modal__input:focus-visible {
+  outline: none;
+
+  border-color: var(--color-signal-blue);
+
+  box-shadow:
+    0 0 0 3px rgba(70, 108, 243, 0.15);
+}
+
+.auth-modal__input.has-error {
+  border-color: var(--color-annotation-red);
+}
+
+.auth-modal__error {
+  font-weight: var(--font-weight-regular);
+
+  font-size: 12.5px;
+
+  color: var(--color-annotation-red);
+}
+
+
+/* ==========================================================================
+   PASSWORD
+   ========================================================================== */
+
+.auth-modal__password-wrap {
+  position: relative;
+
+  display: flex;
+
+  width: 100%;
+}
+
+.auth-modal__password-wrap .auth-modal__input {
+  flex: 1;
+
+  padding-right: 60px;
+}
+
+.auth-modal__password-toggle {
+  position: absolute;
+
+  top: 50%;
+  right: 14px;
+
+  transform: translateY(-50%);
+
+  border: none;
+
+  background: transparent;
+
+  font-family: var(--font-inter);
+
+  font-weight: var(--font-weight-medium);
+
+  font-size: 12.5px;
+
+  color: var(--color-signal-blue);
+
+  cursor: pointer;
+}
+
+
+/* ==========================================================================
+   FORGOT PASSWORD
+   ========================================================================== */
+
+.auth-modal__forgot {
+  align-self: flex-end;
+
+  margin-top: -6px;
+
+  font-family: var(--font-inter);
+
+  font-size: 13px;
+
+  font-weight: var(--font-weight-medium);
+
+  color: var(--color-signal-blue);
+}
+
+
+/* ==========================================================================
+   SUBMIT
+   ========================================================================== */
+
+.auth-modal__submit {
+  width: 100%;
+
+  margin-top: 6px;
+
+  font-weight: var(--font-weight-bold);
+}
+
+
+/* ==========================================================================
+   SWITCH
+   ========================================================================== */
+
+.auth-modal__switch {
+  margin-top: 24px;
+
+  text-align: center;
+
+  font-family: var(--font-inter);
+
+  font-size: 14px;
+
+  color: var(--color-shadow-gray);
+}
+
+.auth-modal__switch-link {
+  border: none;
+
+  background: transparent;
+
+  font-family: var(--font-inter);
+
+  font-weight: var(--font-weight-bold);
+
+  font-size: 14px;
+
+  color: var(--color-carbon);
+
+  text-decoration: underline;
+
+  text-decoration-color: var(--color-highlighter-yellow);
+
+  text-decoration-thickness: 2px;
+
+  text-underline-offset: 3px;
+
+  cursor: pointer;
+}
+
+
+/* ==========================================================================
+   RESPONSIVE
+   ========================================================================== */
+
+@media (max-width: 720px) {
+  .auth-modal {
+    grid-template-columns: 1fr;
+    height: min(88vh, 720px);
+    max-height: 92vh;
+    overflow: hidden;      /* was overflow-y: auto on the whole modal */
+  }
+
+  .auth-modal__illustration {
+    height: 200px;         /* fixed on mobile too, not min-height */
+    padding: 28px 24px;
+  }
+
+  .auth-modal__form-panel {
+    height: calc(100% - 200px);
+    padding: 32px 24px 36px;
+    overflow-y: auto;
+  }
+}
+
+
+/* ==========================================================================
+   REDUCED MOTION
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-modal__marker-swipe::before {
+    animation: none;
+  }
+}
+

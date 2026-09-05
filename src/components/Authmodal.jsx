@@ -7,6 +7,9 @@ export default function AuthModal({
   onClose,
   initialTab = 'login',
   onSubmit,
+  onGoogleClick,
+  isLoading,
+  apiError,
 }) {
   const [tab, setTab] = useState(initialTab);
   const [showPassword, setShowPassword] = useState(false);
@@ -218,11 +221,20 @@ export default function AuthModal({
               : 'Log in to keep working on your pages.'}
           </p>
 
+          {/* API ERROR */}
+          {apiError && (
+            <p className="auth-modal__error" style={{ marginBottom: 12 }}>
+              {apiError}
+            </p>
+          )}
+
           {/* GOOGLE */}
 
           <button
             type="button"
             className="auth-modal__social-btn"
+            onClick={onGoogleClick}
+            disabled={isLoading}
           >
             <svg
               width="18"
@@ -357,9 +369,9 @@ export default function AuthModal({
             </label>
 
             {/* FORGOT PASSWORD */}
-
+             
             {!isSignup && (
-              <a
+            <a  
                 href="#"
                 className="auth-modal__forgot"
                 onClick={(e) => e.preventDefault()}
@@ -373,8 +385,11 @@ export default function AuthModal({
             <button
               type="submit"
               className="pill-btn pill-btn--yellow auth-modal__submit"
+              disabled={isLoading}
             >
-              {isSignup
+              {isLoading
+                ? 'Please wait...'
+                : isSignup
                 ? 'Create account'
                 : 'Log in'}
             </button>

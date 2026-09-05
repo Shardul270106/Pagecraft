@@ -1,17 +1,20 @@
 import { useState, useEffect } from 'react';
 import './Navbar.css';
 import AuthModal from './AuthModal';
+import { useNavigate } from 'react-router-dom';
 
 const NAV_LINKS = ['Templates', 'Live preview', 'Pricing'];
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
+
 export default function Navbar() {
   const [authOpen, setAuthOpen] = useState(false);
   const [authTab, setAuthTab] = useState('login');
   const [isLoading, setIsLoading] = useState(false);
   const [apiError, setApiError] = useState('');
+  const navigate = useNavigate();
 
   // Load Google Identity Services script once
   useEffect(() => {
@@ -54,7 +57,7 @@ export default function Navbar() {
       localStorage.setItem('token', result.token);
       localStorage.setItem('user', JSON.stringify(result.user));
       setAuthOpen(false);
-      // redirect to dashboard here if needed
+      navigate('/home');
     } catch (err) {
       console.error('Google auth error:', err);
       setApiError('Something went wrong. Please try again.');
@@ -108,7 +111,7 @@ export default function Navbar() {
       localStorage.setItem('token', result.token);
       localStorage.setItem('user', JSON.stringify(result.user));
       setAuthOpen(false);
-      // redirect to dashboard here if needed
+      navigate('/home');
     } catch (err) {
       console.error('Auth error:', err);
       setApiError('Could not reach the server. Please try again.');

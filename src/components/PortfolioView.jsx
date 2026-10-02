@@ -5,6 +5,8 @@ import LinkifiedText, { getLinkifiedParts } from './LinkifiedText';
 import grungeWallpaper from '../assets/grunge/bg.jpg';
 import grungeSymbol from '../assets/grunge/symbolWhite.svg';
 import grungeBarcode from '../assets/grunge/barcode.svg';
+import pagecraftCursor from '../assets/pagecraft-cursor.svg';
+import PortfolioIcon from './PortfolioIcon';
 
 const FOLIO_LINKS = [
   ['services', 'Services'],
@@ -62,7 +64,7 @@ function updateIframeAnchorFromText(node) {
   }
 }
 
-export function PortfolioView({ portfolio, editable = false, onUpdate, onTemplateContentChange, onTemplateImageSelect, onUndo, onRedo, onUploadImage }) {
+export function PortfolioView({ portfolio, editable = false, onUpdate, onTemplateContentChange, onTemplateImageSelect, onUndo, onRedo, onUploadImage, onCanvasElementUpdate, selectedCanvasElement, onCanvasElementSelect, onCanvasWheelZoom }) {
   const theme = portfolio?.theme || {};
   const sections = portfolio?.sections || [];
   const isFolio = portfolio?.templateId === 'folio-freelancer';
@@ -80,12 +82,12 @@ export function PortfolioView({ portfolio, editable = false, onUpdate, onTemplat
     return isGrunge ? `#grunge-${type}-${index}` : `#folio-section-${type}-${index}`;
   };
 
-  if (isIPortfolio) return <IPortfolioFrame portfolio={portfolio} editable={editable} onContentChange={onTemplateContentChange} onImageSelect={onTemplateImageSelect} onUndo={onUndo} onRedo={onRedo} />;
-  if (isGrunge) return <GrungePortfolio portfolio={portfolio} sections={sections} header={header} editable={editable} onUpdate={onUpdate} onUploadImage={onUploadImage} sectionHref={sectionHref} />;
-  if (isResumeTemplate(portfolio?.templateId)) return <ResumePortfolio portfolio={portfolio} editable={editable} onUpdate={onUpdate} />;
+  if (isIPortfolio) return <PortfolioComposition {...{ portfolio, editable, selectedCanvasElement, onCanvasElementUpdate, onCanvasElementSelect }}><IPortfolioFrame portfolio={portfolio} editable={editable} onContentChange={onTemplateContentChange} onImageSelect={onTemplateImageSelect} onUndo={onUndo} onRedo={onRedo} onZoomWheel={onCanvasWheelZoom} /></PortfolioComposition>;
+  if (isGrunge) return <PortfolioComposition {...{ portfolio, editable, selectedCanvasElement, onCanvasElementUpdate, onCanvasElementSelect }}><GrungePortfolio portfolio={portfolio} sections={sections} header={header} editable={editable} onUpdate={onUpdate} onUploadImage={onUploadImage} sectionHref={sectionHref} /></PortfolioComposition>;
+  if (isResumeTemplate(portfolio?.templateId)) return <PortfolioComposition {...{ portfolio, editable, selectedCanvasElement, onCanvasElementUpdate, onCanvasElementSelect }}><ResumePortfolio portfolio={portfolio} editable={editable} onUpdate={onUpdate} /></PortfolioComposition>;
 
-  return (
-    <article className={`portfolio-page layout-${isFolio ? 'folio' : (theme.layout || 'modern')} ${isFolio ? 'portfolio-page--folio' : ''}`} style={style}>
+  return <PortfolioComposition {...{ portfolio, editable, selectedCanvasElement, onCanvasElementUpdate, onCanvasElementSelect }}>
+    <article className={`portfolio-page layout-${isFolio ? 'folio' : (theme.layout || 'modern')} portfolio-page--${portfolio.templateId || 'professional-portfolio'} ${isFolio ? 'portfolio-page--folio' : ''}`} style={style}>
       {isFolio && <nav className="folio-nav" aria-label="Portfolio navigation">
         <a className="folio-nav__brand" href="#folio-hero">{header?.title || portfolio.title}</a>
         <div className="folio-nav__links">{FOLIO_LINKS.filter(([type]) => sectionHref(type)).map(([type, label]) => <a key={type} href={sectionHref(type)}>{label}</a>)}</div>
@@ -107,12 +109,12 @@ export function PortfolioView({ portfolio, editable = false, onUpdate, onTemplat
                   {sectionHref('contact') && <a className="folio-button folio-button--light" href={sectionHref('contact')}>Get in touch</a>}
                 </div>}
               </div>
-              {section.image ? <img className={`portfolio-page__image ${isFolio ? 'folio-hero__image' : ''}`} src={section.image} alt="Profile or portfolio" /> : isFolio && <div className="folio-hero__portrait" aria-hidden="true"><span>{(section.title || 'P').trim().charAt(0).toUpperCase()}</span><i /></div>}
+              {section.image ? <img className={`portfolio-page__image ${isFolio ? 'folio-hero__image' : ''}`} src={section.image} alt="Profile or portfolio" /> : isFolio ? <div className="folio-hero__portrait" aria-hidden="true"><span>{(section.title || 'P').trim().charAt(0).toUpperCase()}</span><i /></div> : portfolio?.templateId === 'architect-portfolio' ? <div className="portfolio-page__architect-art" aria-hidden="true"><span /><i /><b /></div> : null}
               {portfolio?.ownerName && <small>Portfolio by {portfolio.ownerName}</small>}
             </header>
           );
           return (
-            <section className={`portfolio-page__section ${isFolio ? `folio-section folio-section--${section.type}` : ''}`} id={sectionId} key={section.id}>
+            <section className={`portfolio-page__section portfolio-page__section--${section.type} ${isFolio ? `folio-section folio-section--${section.type}` : ''}`} id={sectionId} key={section.id}>
               {editable ? <input aria-label={`${label} heading`} value={section.title} onChange={(event) => onUpdate(section.id, 'title', event.target.value)} /> : <h2>{section.title || label}</h2>}
               {section.image && <img className="portfolio-page__image" src={section.image} alt={`${label} visual`} />}
               {editable ? <textarea aria-label={`${label} content`} value={section.body} onChange={(event) => onUpdate(section.id, 'body', event.target.value)} rows={Math.max(3, section.body.split('\n').length)} /> : <p><LinkifiedText>{section.body}</LinkifiedText></p>}
@@ -122,21 +124,84 @@ export function PortfolioView({ portfolio, editable = false, onUpdate, onTemplat
       </div>
       <footer className={`portfolio-page__footer ${isFolio ? 'folio-footer' : ''}`}>{isFolio ? <><span>{header?.title || portfolio.title}</span><span>Designed with care · Built with Pagecraft</span></> : 'Made with Pagecraft'}</footer>
     </article>
-  );
+  </PortfolioComposition>;
 }
 
-function IPortfolioFrame({ portfolio, editable, onContentChange, onImageSelect, onUndo, onRedo }) {
+function PortfolioComposition({ portfolio, editable, selectedCanvasElement, onCanvasElementUpdate, onCanvasElementSelect, children }) {
+  const templateClass = portfolio?.templateId === 'folio-freelancer' || portfolio?.templateId === 'editorial-studio-portfolio' || portfolio?.templateId === 'architect-portfolio' ? 'portfolio-composition--wide' : portfolio?.templateId === 'grunge-portfolio' || portfolio?.templateId === 'iportfolio-bootstrap' ? 'portfolio-composition--full' : isResumeTemplate(portfolio?.templateId) ? 'portfolio-composition--resume' : '';
+  return <div className={`portfolio-composition ${templateClass}`} style={{ '--portfolio-font': portfolio?.theme?.font || 'Inter' }}><div className="portfolio-composition__content">{children}</div><CanvasElementsLayer elements={portfolio?.canvasElements || []} editable={editable} selectedId={selectedCanvasElement} onUpdate={onCanvasElementUpdate} onSelect={onCanvasElementSelect} /></div>;
+}
+
+function CanvasElementsLayer({ elements, editable, selectedId, onUpdate, onSelect }) {
+  const layerRef = useRef(null);
+  const dragRef = useRef(null);
+  const pointerMove = (event) => {
+    if (!dragRef.current || !layerRef.current) return;
+    const rect = layerRef.current.getBoundingClientRect();
+    const element = dragRef.current.element;
+    if (dragRef.current.mode === 'resize') {
+      const start = dragRef.current;
+      const width = Math.max(8, Math.min(90, start.startWidth + ((event.clientX - start.startX) / rect.width) * 100));
+      const height = Math.max(30, Math.min(720, start.startHeight + event.clientY - start.startY));
+      onUpdate?.(element.id, { width, height });
+      return;
+    }
+    const x = Math.max(0, Math.min(96, ((event.clientX - rect.left) / rect.width) * 100 - dragRef.current.offsetX));
+    const y = Math.max(0, Math.min(99, ((event.clientY - rect.top) / rect.height) * 100 - dragRef.current.offsetY));
+    onUpdate?.(element.id, { x, y });
+  };
+  const stopDrag = () => { dragRef.current = null; window.removeEventListener('pointermove', pointerMove); window.removeEventListener('pointerup', stopDrag); };
+  const startDrag = (event, element) => {
+    if (!editable) return;
+    event.preventDefault();
+    event.stopPropagation();
+    onSelect?.(element.id);
+    const rect = layerRef.current.getBoundingClientRect();
+    const pointX = ((event.clientX - rect.left) / rect.width) * 100;
+    const pointY = ((event.clientY - rect.top) / rect.height) * 100;
+    dragRef.current = { element, offsetX: pointX - element.x, offsetY: pointY - element.y };
+    window.addEventListener('pointermove', pointerMove);
+    window.addEventListener('pointerup', stopDrag, { once: true });
+  };
+  const startResize = (event, element) => {
+    if (!editable) return;
+    event.preventDefault();
+    event.stopPropagation();
+    onSelect?.(element.id);
+    dragRef.current = { element, mode: 'resize', startX: event.clientX, startY: event.clientY, startWidth: element.width, startHeight: element.height };
+    window.addEventListener('pointermove', pointerMove);
+    window.addEventListener('pointerup', stopDrag, { once: true });
+  };
+  return <div className="portfolio-canvas-layer" ref={layerRef} aria-label="Custom portfolio elements">
+    {elements.map((element) => {
+      const style = { left: `${element.x}%`, top: `${element.y}%`, width: `${element.width}%`, color: element.color, fontSize: `${element.fontSize}px` };
+      const selected = editable && selectedId === element.id;
+      return <div key={element.id} className={`portfolio-canvas-element portfolio-canvas-element--${element.type} ${selected ? 'is-selected' : ''}`} style={style} onClick={() => editable && onSelect?.(element.id)}>
+        {editable && <button type="button" className="portfolio-canvas-element__handle" aria-label={`Move ${element.type} element`} title="Drag to move" onPointerDown={(event) => startDrag(event, element)}>✥</button>}
+        {element.type === 'text' && <div className="portfolio-canvas-element__text">{element.text || 'Your text'}</div>}
+        {element.type === 'icon' && <PortfolioIcon name={element.iconName} className="portfolio-canvas-element__icon" style={{ height: `${element.height}px` }} />}
+        {element.type === 'image' && (element.image ? <img src={element.image} alt="Custom portfolio element" style={{ height: `${element.height}px` }} /> : <span className="portfolio-canvas-element__empty">Add a photo from the Elements panel</span>)}
+        {element.type === 'rectangle' && <div className="portfolio-canvas-element__shape" style={{ height: `${element.height}px`, background: element.color }} />}
+        {element.type === 'circle' && <div className="portfolio-canvas-element__shape portfolio-canvas-element__shape--circle" style={{ height: `${element.height}px`, background: element.color }} />}
+        {element.type === 'line' && <div className="portfolio-canvas-element__shape portfolio-canvas-element__shape--line" style={{ height: `${element.height}px`, background: element.color }} />}
+        {editable && element.type !== 'text' && <button type="button" className="portfolio-canvas-element__resize" aria-label={`Resize ${element.type} element`} title="Drag to resize" onPointerDown={(event) => startResize(event, element)} />}
+      </div>;
+    })}
+  </div>;
+}
+
+function IPortfolioFrame({ portfolio, editable, onContentChange, onImageSelect, onUndo, onRedo, onZoomWheel }) {
   const frameRef = useRef(null);
-  const stateRef = useRef({ editable, content: portfolio.templateContent || [], images: portfolio.templateImages || [], onContentChange, onImageSelect, onUndo, onRedo });
+  const stateRef = useRef({ editable, content: portfolio.templateContent || [], images: portfolio.templateImages || [], onContentChange, onImageSelect, onUndo, onRedo, onZoomWheel });
 
   useEffect(() => {
-    stateRef.current = { editable, content: portfolio.templateContent || [], images: portfolio.templateImages || [], onContentChange, onImageSelect, onUndo, onRedo };
+    stateRef.current = { editable, content: portfolio.templateContent || [], images: portfolio.templateImages || [], onContentChange, onImageSelect, onUndo, onRedo, onZoomWheel };
     const imageNodes = frameRef.current?.contentDocument?.querySelectorAll('img') || [];
     imageNodes.forEach((node, index) => {
       if (portfolio.templateImages?.[index]) node.src = portfolio.templateImages[index];
       else if (node.dataset.pagecraftOriginalSrc) node.src = node.dataset.pagecraftOriginalSrc;
     });
-  }, [editable, portfolio.templateContent, portfolio.templateImages, onContentChange, onImageSelect, onUndo, onRedo]);
+  }, [editable, portfolio.templateContent, portfolio.templateImages, onContentChange, onImageSelect, onUndo, onRedo, onZoomWheel]);
 
   useEffect(() => {
     const frame = frameRef.current;
@@ -146,6 +211,21 @@ function IPortfolioFrame({ portfolio, editable, onContentChange, onImageSelect, 
       const doc = frame.contentDocument;
       const current = stateRef.current;
       if (!doc?.body) return;
+      if (doc.__pagecraftWheelZoom) doc.removeEventListener('wheel', doc.__pagecraftWheelZoom, true);
+      doc.__pagecraftWheelZoom = (event) => {
+        const currentState = stateRef.current;
+        if (!event.ctrlKey && !event.metaKey) return;
+        event.preventDefault();
+        currentState.onZoomWheel?.(event.deltaY);
+      };
+      doc.addEventListener('wheel', doc.__pagecraftWheelZoom, { capture: true, passive: false });
+      let cursorStyle = doc.getElementById('pagecraft-custom-cursor-style');
+      if (!cursorStyle) {
+        cursorStyle = doc.createElement('style');
+        cursorStyle.id = 'pagecraft-custom-cursor-style';
+        doc.head.appendChild(cursorStyle);
+      }
+      cursorStyle.textContent = `body,body *{cursor:url("${pagecraftCursor}") 5 5,auto!important}input[type="text"],input[type="search"],input[type="email"],input[type="url"],input[type="tel"],input[type="password"],input[type="number"],textarea,[contenteditable="true"]{cursor:text!important}`;
       doc.onkeydown = current.editable ? (event) => {
         if (!(event.ctrlKey || event.metaKey) || event.altKey) return;
         const key = event.key.toLowerCase();

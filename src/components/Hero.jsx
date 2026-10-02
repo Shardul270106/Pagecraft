@@ -1,29 +1,28 @@
 import ProductMockup from './ProductMockup';
 import './Hero.css';
 
-export default function Hero() {
+export default function Hero({ onStartBuilding }) {
   return (
     <section className="hero" id="top">
       <div className="container hero__inner">
         <div className="hero__text">
-          <span className="eyebrow eyebrow--pill">New feature</span>
+            <span className="eyebrow eyebrow--pill">Your next page, made yours</span>
 
           <h1 className="hero__headline">
-            Create Your
+            Your work deserves
             <br />
-            Custom
-            <br />
-            Portfolio.
+            a better stage.
           </h1>
 
           <p className="hero__sub">
-            Pagecraft turns a blank canvas into a published portfolio in minutes.
+            Build a polished portfolio from a template, then make every detail your own.
           </p>
 
           <div className="hero__ctas">
-            <a href="#templates" className="pill-btn pill-btn--yellow">
-              Start building free
-            </a>
+            <button type="button" className="pill-btn pill-btn--yellow" onClick={onStartBuilding}>
+              Create your portfolio
+            </button>
+            <a href="#templates" className="hero__secondary-link">Explore templates <span aria-hidden="true">↓</span></a>
           </div>
         </div>
 

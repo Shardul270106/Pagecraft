@@ -2,8 +2,12 @@ import { useState, useEffect, useRef } from 'react';
 import './Navbar.css';
 import AuthModal from './AuthModal';
 import { useNavigate } from 'react-router-dom';
+import { TEMPLATES } from '../data/templates';
 
-const NAV_LINKS = ['Templates', 'Live preview', 'Pricing'];
+const NAV_LINKS = [
+  { label: 'Templates', target: '#templates' },
+  { label: 'How it works', target: '#features' },
+];
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
@@ -11,13 +15,27 @@ let googleInitialized = false;
 let googleResponseHandler = null;
 
 
-export default function Navbar() {
+export default function Navbar({ authRequest, selectedTemplateId, onOpenAuth, onCloseAuth }) {
   const [authOpen, setAuthOpen] = useState(false);
   const [authTab, setAuthTab] = useState('login');
   const [isLoading, setIsLoading] = useState(false);
   const [apiError, setApiError] = useState('');
   const navigate = useNavigate();
   const googleResponseHandlerRef = useRef(null);
+  const selectedTemplateName = TEMPLATES.find((item) => item.templateId === selectedTemplateId)?.name;
+
+  const continueAfterAuth = () => {
+    const templateId = sessionStorage.getItem('pagecraft:template');
+    sessionStorage.removeItem('pagecraft:template');
+    navigate(templateId ? `/home?template=${encodeURIComponent(templateId)}` : '/home');
+  };
+
+  useEffect(() => {
+    if (!authRequest) return;
+    setAuthTab(authRequest);
+    setApiError('');
+    setAuthOpen(true);
+  }, [authRequest]);
 
   // Load Google Identity Services script once
   useEffect(() => {
@@ -47,9 +65,7 @@ export default function Navbar() {
   }, []);
 
   function openAuth(tab) {
-    setAuthTab(tab);
-    setApiError('');
-    setAuthOpen(true);
+    onOpenAuth?.(tab);
   }
 
   // Called when Google returns an ID token
@@ -74,7 +90,8 @@ export default function Navbar() {
       localStorage.setItem('token', result.token);
       localStorage.setItem('user', JSON.stringify(result.user));
       setAuthOpen(false);
-      navigate('/home');
+      onCloseAuth?.();
+      continueAfterAuth();
     } catch (err) {
       console.error('Google auth error:', err);
       setApiError('Something went wrong. Please try again.');
@@ -130,7 +147,8 @@ export default function Navbar() {
       localStorage.setItem('token', result.token);
       localStorage.setItem('user', JSON.stringify(result.user));
       setAuthOpen(false);
-      navigate('/home');
+      onCloseAuth?.();
+      continueAfterAuth();
     } catch (err) {
       console.error('Auth error:', err);
       setApiError('Could not reach the server. Please try again.');
@@ -160,8 +178,8 @@ export default function Navbar() {
 
           <ul className="navbar__links">
             {NAV_LINKS.map((link) => (
-              <li key={link}>
-                <a href={`#${link.toLowerCase().replace(' ', '-')}`}>{link}</a>
+              <li key={link.target}>
+                <a href={link.target}>{link.label}</a>
               </li>
             ))}
           </ul>
@@ -187,12 +205,13 @@ export default function Navbar() {
 
       <AuthModal
         isOpen={authOpen}
-        onClose={() => setAuthOpen(false)}
+        onClose={() => { setAuthOpen(false); onCloseAuth?.(); }}
         initialTab={authTab}
         onSubmit={handleAuthSubmit}
         onGoogleClick={handleGoogleClick}
         isLoading={isLoading}
         apiError={apiError}
+        selectedTemplateName={selectedTemplateName}
       />
     </header>
   );

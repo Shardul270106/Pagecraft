@@ -23,7 +23,7 @@ const FEATURES = [
 
 export default function Features() {
   return (
-    <section className="features section">
+    <section className="features section" id="features">
       <div className="container">
         <div className="section-heading">
           <span className="eyebrow">Why Pagecraft</span>

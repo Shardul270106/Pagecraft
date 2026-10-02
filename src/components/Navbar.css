@@ -79,17 +79,10 @@
   flex-shrink: 0;
 }
 
-/* IMPORTANT:
-   Push page content below the fixed navbar
-*/
-body {
-  padding-top: 45px;
-}
-
 /* Tablet */
 @media (max-width: 860px) {
   .navbar__links {
-    display: none;
+    gap: 14px;
   }
 }
 
@@ -100,14 +93,21 @@ body {
   }
 
   .navbar {
+    flex-wrap: wrap;
     padding: 10px 14px;
   }
+
+  .navbar__links {
+    order: 3;
+    flex: 1 0 100%;
+    justify-content: center;
+    padding: 4px 0 2px;
+  }
+
+  .navbar__links a { font-size: 13px; }
 
   .navbar__actions .pill-btn--ghost {
     display: none;
   }
 
-  body {
-    padding-top: 75px;
-  }
 }

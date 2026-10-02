@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import './Authmodal.css';
 import authVideo from '../assets/video1.mp4';
 
@@ -10,11 +11,13 @@ export default function AuthModal({
   onGoogleClick,
   isLoading,
   apiError,
+  selectedTemplateName,
 }) {
   const [tab, setTab] = useState(initialTab);
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
   const dialogRef = useRef(null);
+  const returnFocusRef = useRef(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -27,9 +30,28 @@ export default function AuthModal({
   useEffect(() => {
     if (!isOpen) return;
 
+    returnFocusRef.current = document.activeElement;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    dialogRef.current?.querySelector('button, input')?.focus();
+
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
         onClose?.();
+        return;
+      }
+      if (e.key !== 'Tab') return;
+
+      const focusable = dialogRef.current?.querySelectorAll('button:not([disabled]), input:not([disabled]), a[href]');
+      if (!focusable?.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
       }
     };
 
@@ -37,6 +59,8 @@ export default function AuthModal({
 
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = previousOverflow;
+      returnFocusRef.current?.focus?.();
     };
   }, [isOpen, onClose]);
 
@@ -79,7 +103,7 @@ export default function AuthModal({
     }
   }
 
-  return (
+  return createPortal((
     <div
       className="auth-modal-overlay"
       onMouseDown={(e) => {
@@ -225,7 +249,9 @@ export default function AuthModal({
 
           <p className="auth-modal__subheading">
             {isSignup
-              ? 'Start building your first page for free.'
+              ? selectedTemplateName
+                ? `Create an account and we’ll start a ${selectedTemplateName} draft for you.`
+                : 'Start building your first page for free.'
               : 'Log in to keep working on your pages.'}
           </p>
 
@@ -430,5 +456,5 @@ export default function AuthModal({
         </div>
       </div>
     </div>
-  );
+  ), document.body);
 }

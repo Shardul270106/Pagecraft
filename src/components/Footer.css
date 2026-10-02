@@ -112,6 +112,19 @@
   text-decoration: underline;
 }
 
+.site-footer__col button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-carbon);
+  font: inherit;
+  font-size: 15px;
+  text-align: left;
+  opacity: .72;
+}
+
+.site-footer__col button:hover { opacity: 1; text-decoration: underline; }
+
 .site-footer__bottom {
   padding-top: 24px;
   font-size: 13px;

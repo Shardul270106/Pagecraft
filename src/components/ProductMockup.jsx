@@ -177,42 +177,6 @@ export default function ProductMockup() {
   }, []);
 
   /* -------------------------------------------------------
-     Block wheel / pinch interaction
-     ------------------------------------------------------- */
-  useEffect(() => {
-    const node = sceneRef.current;
-
-    if (!node) return;
-
-    const blockWheel = (event) => {
-      event.preventDefault();
-      event.stopPropagation();
-    };
-
-    const blockPinch = (event) => {
-      if (event.touches && event.touches.length > 1) {
-        event.preventDefault();
-        event.stopPropagation();
-      }
-    };
-
-    node.addEventListener("wheel", blockWheel, {
-      passive: false,
-      capture: true,
-    });
-
-    node.addEventListener("touchmove", blockPinch, {
-      passive: false,
-      capture: true,
-    });
-
-    return () => {
-      node.removeEventListener("wheel", blockWheel, true);
-      node.removeEventListener("touchmove", blockPinch, true);
-    };
-  }, []);
-
-  /* -------------------------------------------------------
      Retry
      ------------------------------------------------------- */
   const retrySpline = () => {

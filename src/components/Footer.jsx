@@ -1,12 +1,6 @@
 import './Footer.css';
 
-const FOOTER_LINKS = {
-  Product: ['Templates', 'Sections', 'Pricing', 'Changelog'],
-  Resources: ['Guides', 'Examples', 'Support'],
-  Company: ['About', 'Careers', 'Contact'],
-};
-
-export default function Footer() {
+export default function Footer({ onStartBuilding }) {
   return (
     <>
       <section className="cta-band section">
@@ -14,15 +8,12 @@ export default function Footer() {
           <div className="cta-card">
             <h2 className="cta-card__title">
               Your portfolio is one drag away
-              <span role="img" aria-label="party popper" className="cta-card__emoji">
-                🎉
-              </span>
             </h2>
             <p className="cta-card__sub">Free to start. No credit card, no blank-page dread.</p>
             <div className="hero__ctas">
-              <a href="#signup" className="pill-btn pill-btn--yellow">
+              <button type="button" onClick={onStartBuilding} className="pill-btn pill-btn--yellow">
                 Start building free
-              </a>
+              </button>
               <a href="#templates" className="pill-btn pill-btn--black">
                 Browse templates
               </a>
@@ -45,20 +36,19 @@ export default function Footer() {
                 />
               </svg>
             </span>
-            <span className="navbar__wordmark">pagecraft</span>
+            <a href="#top" className="navbar__wordmark">pagecraft</a>
           </div>
 
           <div className="site-footer__links">
-            {Object.entries(FOOTER_LINKS).map(([heading, links]) => (
-              <div className="site-footer__col" key={heading}>
-                <span className="site-footer__heading">{heading}</span>
-                {links.map((link) => (
-                  <a href="#" key={link}>
-                    {link}
-                  </a>
-                ))}
-              </div>
-            ))}
+            <div className="site-footer__col">
+              <span className="site-footer__heading">Explore</span>
+              <a href="#templates">Templates</a>
+              <a href="#features">How it works</a>
+            </div>
+            <div className="site-footer__col">
+              <span className="site-footer__heading">Your next step</span>
+              <button type="button" onClick={onStartBuilding}>Create a portfolio</button>
+            </div>
           </div>
         </div>
 

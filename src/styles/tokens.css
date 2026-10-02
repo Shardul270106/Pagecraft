@@ -95,6 +95,7 @@ body {
   font-family: var(--font-inter);
   font-size: var(--text-body);
   line-height: var(--leading-body);
+  cursor: url('../assets/pagecraft-cursor.svg') 5 5, auto;
   /* dot-grid canvas texture */
   background-image: radial-gradient(var(--color-hairline-gray) 1.4px, transparent 1.4px);
   background-size: 22px 22px;
@@ -116,10 +117,9 @@ a {
   text-decoration: none;
 }
 
-button {
-  font-family: var(--font-inter);
-  cursor: pointer;
-}
+button { font-family: var(--font-inter); }
+body, body * { cursor: url('../assets/pagecraft-cursor.svg') 5 5, auto !important; }
+input[type="text"], input[type="search"], input[type="email"], input[type="url"], input[type="tel"], input[type="password"], input[type="number"], textarea, [contenteditable="true"] { cursor: text !important; }
 
 img, svg {
   display: block;

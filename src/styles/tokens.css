@@ -15,6 +15,9 @@
   --color-sunbeam: #fff705;
     --color-mint-fresh: #baf3d6;
   --color-sand-dune: #f1e3c6;
+  --color-folio-orange: #ff6b2b;
+  --color-grunge-white: #181818;
+  --color-charcoal: #313b4e;
 
   /* Typography — Font Families */
   --font-poppins: 'Poppins', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -229,4 +232,3 @@ img, svg {
   border-radius: var(--radius-full);
   padding: 6px 16px;
 }
-

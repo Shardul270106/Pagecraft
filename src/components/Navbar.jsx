@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import './Navbar.css';
 import AuthModal from './AuthModal';
 import { useNavigate } from 'react-router-dom';
@@ -7,6 +7,8 @@ const NAV_LINKS = ['Templates', 'Live preview', 'Pricing'];
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+let googleInitialized = false;
+let googleResponseHandler = null;
 
 
 export default function Navbar() {
@@ -15,18 +17,33 @@ export default function Navbar() {
   const [isLoading, setIsLoading] = useState(false);
   const [apiError, setApiError] = useState('');
   const navigate = useNavigate();
+  const googleResponseHandlerRef = useRef(null);
 
   // Load Google Identity Services script once
   useEffect(() => {
-    const script = document.createElement('script');
-    script.src = 'https://accounts.google.com/gsi/client';
-    script.async = true;
-    script.defer = true;
-    document.body.appendChild(script);
-
-    return () => {
-      document.body.removeChild(script);
+    const scriptUrl = 'https://accounts.google.com/gsi/client';
+    let script = document.querySelector(`script[src="${scriptUrl}"]`);
+    const initializeGoogle = () => {
+      if (googleInitialized || !GOOGLE_CLIENT_ID || !window.google?.accounts?.id) return;
+      window.google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: (response) => googleResponseHandler?.(response),
+      });
+      googleInitialized = true;
     };
+
+    if (window.google?.accounts?.id) initializeGoogle();
+    if (!script) {
+      script = document.createElement('script');
+      script.src = scriptUrl;
+      script.async = true;
+      script.defer = true;
+      document.body.appendChild(script);
+    }
+    script.addEventListener('load', initializeGoogle);
+    initializeGoogle();
+
+    return () => script.removeEventListener('load', initializeGoogle);
   }, []);
 
   function openAuth(tab) {
@@ -66,17 +83,19 @@ export default function Navbar() {
     }
   }
 
+  googleResponseHandlerRef.current = handleGoogleResponse;
+  googleResponseHandler = (response) => googleResponseHandlerRef.current?.(response);
+
   // Triggered by the "Continue with Google" button in AuthModal
   function handleGoogleClick() {
-    if (!window.google) {
+    if (!GOOGLE_CLIENT_ID) {
+      setApiError('Google sign-in is not configured for this site.');
+      return;
+    }
+    if (!window.google?.accounts?.id || !googleInitialized) {
       setApiError('Google sign-in is still loading. Try again in a moment.');
       return;
     }
-
-    window.google.accounts.id.initialize({
-      client_id: GOOGLE_CLIENT_ID,
-      callback: handleGoogleResponse,
-    });
 
     window.google.accounts.id.prompt();
   }

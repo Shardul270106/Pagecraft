@@ -58,16 +58,24 @@ export default function AuthModal({
 
     if (!data.email?.trim()) {
       nextErrors.email = 'Enter your email.';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email.trim())) {
+      nextErrors.email = 'Enter a valid email address.';
     }
 
     if (!data.password || data.password.length < 8) {
       nextErrors.password = 'Use at least 8 characters.';
+    } else if (isSignup && data.password.length > 128) {
+      nextErrors.password = 'Use no more than 128 characters.';
     }
 
     setErrors(nextErrors);
 
     if (Object.keys(nextErrors).length === 0) {
-      onSubmit?.(tab, data);
+      onSubmit?.(tab, {
+        ...data,
+        name: data.name?.trim(),
+        email: data.email.trim().toLowerCase(),
+      });
     }
   }
 

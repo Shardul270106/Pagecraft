@@ -16,6 +16,14 @@ const initialSection = (type, index) => ({
   body: type === 'header' ? 'Your role · A short introduction about what you do.' : `Add your ${SECTION_LIBRARY[type]?.label?.toLowerCase() || type} here. Tell visitors what makes your work worth exploring.`,
   image: '',
 });
+const normalizeSectionCanvas = (portfolio) => ({
+  ...portfolio,
+  canvasElements: (portfolio.canvasElements || []).map((element) => {
+    if (!element.sectionId || element.sectionCanvasVersion) return element;
+    // Earlier saved objects used coordinates inside a narrow section media column.
+    return { ...element, x: Math.min(100 - element.width * 0.32, 65 + (element.x || 0) * 0.32), width: Math.max(element.type === 'text' ? 30 : 8, element.width * 0.32), sectionCanvasVersion: 1 };
+  }),
+});
 
 export default function Editor() {
   const { id } = useParams();
@@ -39,6 +47,7 @@ export default function Editor() {
   const [previewDevice, setPreviewDevice] = useState('desktop');
   const [selectedTemplateImage, setSelectedTemplateImage] = useState(null);
   const [selectedCanvasElement, setSelectedCanvasElement] = useState(null);
+  const [selectedSectionId, setSelectedSectionId] = useState('');
   const [activePanel, setActivePanel] = useState('sections');
   const [canvasZoom, setCanvasZoom] = useState(100);
   const zoomCanvasByWheel = useCallback((deltaY) => {
@@ -46,12 +55,21 @@ export default function Editor() {
   }, []);
   const isIPortfolio = portfolio?.templateId === 'iportfolio-bootstrap';
   const isResume = portfolio?.templateId?.startsWith('resume-');
+  const supportsSectionCanvas = Boolean(portfolio && !isIPortfolio && !isResume && portfolio.templateId !== 'grunge-portfolio');
+
+  useEffect(() => {
+    if (!portfolio?.sections?.length) return;
+    if (!portfolio.sections.some((section) => section.id === selectedSectionId)) {
+      setSelectedSectionId(portfolio.sections.find((section) => section.type === 'header')?.id || portfolio.sections[0].id);
+    }
+  }, [portfolio?.id, portfolio?.sections, selectedSectionId]);
 
   const setPortfolioDirect = useCallback((next) => {
-    if (portfolioRef.current?.id !== next?.id) historyRef.current = { past: [], future: [], lastKey: null, lastAt: 0 };
+    const normalized = normalizeSectionCanvas(next);
+    if (portfolioRef.current?.id !== normalized?.id) historyRef.current = { past: [], future: [], lastKey: null, lastAt: 0 };
     dirtyRef.current = false;
-    portfolioRef.current = next;
-    setPortfolio(next);
+    portfolioRef.current = normalized;
+    setPortfolio(normalized);
     setMessage('All changes saved');
     setHistoryRevision((revision) => revision + 1);
   }, []);
@@ -149,7 +167,7 @@ export default function Editor() {
       try {
         const draft = JSON.parse(sessionStorage.getItem(draftStorageKey) || 'null');
         if (!draft?.title || !draft?.templateId) throw new Error('No unsaved template draft was found.');
-        const unsavedDraft = { ...draft, id, published: false, slug: '', visits: 0, canvasElements: draft.canvasElements || [], templateContent: draft.templateContent || [], templateImages: draft.templateImages || [] };
+        const unsavedDraft = normalizeSectionCanvas({ ...draft, id, published: false, slug: '', visits: 0, canvasElements: draft.canvasElements || [], templateContent: draft.templateContent || [], templateImages: draft.templateImages || [] });
         portfolioRef.current = unsavedDraft;
         dirtyRef.current = false;
         setPortfolio(unsavedDraft);
@@ -171,7 +189,7 @@ export default function Editor() {
   const updateSection = (sectionId, field, value) => setPortfolioTracked((current) => ({
     ...current,
     sections: current.sections.map((section) => section.id === sectionId ? { ...section, [field]: value } : section),
-  }), ['title', 'body'].includes(field) ? `section:${sectionId}:${field}` : null);
+  }), ['title', 'body'].includes(field) ? `section:${sectionId}:${field}` : ['contentOffsetX', 'contentOffsetY'].includes(field) ? `section:${sectionId}:position` : null);
   const updateTemplateImage = (imageId, value) => setPortfolioTracked((current) => {
     const images = Array.from({ length: Math.max(current.templateImages?.length || 0, imageId + 1) }, (_, index) => current.templateImages?.[index] || '');
     images[imageId] = value;
@@ -179,9 +197,15 @@ export default function Editor() {
   });
   const addCanvasElement = (type, image = '', iconName = 'sparkles') => {
     const index = portfolioRef.current?.canvasElements?.length || 0;
+    const isPhoto = type === 'image';
+    const sectionId = supportsSectionCanvas ? selectedSectionId || portfolioRef.current?.sections?.find((section) => section.type === 'header')?.id || portfolioRef.current?.sections?.[0]?.id : '';
+    const sectionPlacement = sectionId ? { x: isPhoto ? 62 : type === 'icon' ? 78 : type === 'text' ? 8 : 10, y: isPhoto ? 8 : type === 'text' ? 68 : 12, width: isPhoto ? 30 : type === 'text' ? 44 : type === 'icon' ? 14 : 22 } : null;
     const element = {
-      id: `element-${Date.now()}-${index}`, type, x: 9 + (index % 3) * 8, y: 14 + index * 4,
-      width: type === 'text' ? 36 : type === 'icon' ? 16 : 25, height: type === 'text' ? 120 : type === 'icon' ? 96 : 190,
+      id: `element-${Date.now()}-${index}`, type, sectionId, ...(sectionId ? { sectionCanvasVersion: 1 } : {}),
+      x: sectionPlacement?.x ?? (isPhoto ? 62 : 9 + (index % 3) * 8),
+      y: sectionPlacement?.y ?? (isPhoto ? 12 + (index % 3) * 3 : 14 + index * 4),
+      width: sectionPlacement?.width ?? (type === 'text' ? 36 : type === 'icon' ? 16 : isPhoto ? 30 : 25),
+      height: type === 'text' ? 120 : type === 'icon' ? 96 : isPhoto ? 250 : 190,
       text: type === 'text' ? 'Add your text here' : '', image, iconName,
       color: portfolioRef.current?.theme?.accent || '#222222', fontSize: 32,
     };
@@ -189,17 +213,122 @@ export default function Editor() {
     setSelectedCanvasElement(element.id);
     setActivePanel('elements');
   };
-  const updateCanvasElement = (elementId, patch) => setPortfolioTracked((current) => ({
-    ...current,
-    canvasElements: (current.canvasElements || []).map((element) => element.id === elementId ? { ...element, ...patch } : element),
-  }), `element:${elementId}`);
-  const removeCanvasElement = (elementId) => {
+  const updateCanvasElement = useCallback((elementId, patch) => {
+    if (patch.sectionId) setSelectedSectionId(patch.sectionId);
+    setPortfolioTracked((current) => ({
+      ...current,
+      canvasElements: (current.canvasElements || []).map((element) => {
+        if (element.id !== elementId) return element;
+        const movedToSection = patch.sectionId && patch.sectionId !== element.sectionId;
+        const next = { ...element, ...patch };
+        if (next.sectionId && patch.width !== undefined) {
+          next.width = Math.min(Math.max(8, 100 - next.x), patch.width);
+        }
+        if (movedToSection) {
+          next.sectionCanvasVersion = 1;
+          next.x = patch.x ?? (element.type === 'image' ? 62 : element.type === 'icon' ? 78 : 8);
+          next.y = patch.y ?? (element.type === 'image' ? 8 : element.type === 'text' ? 68 : 12);
+          next.width = element.type === 'image' ? 30 : element.type === 'text' ? 44 : element.type === 'icon' ? 14 : 22;
+        }
+        if (next.sectionId) next.x = Math.min(next.x, Math.max(0, 100 - next.width));
+        if (element.type === 'image' && !next.sectionId && patch.x !== undefined && next.x < 52 && next.y < 32) next.y = 32;
+        return next;
+      }),
+    }), `element:${elementId}`);
+  }, [setPortfolioTracked]);
+  const removeCanvasElement = useCallback((elementId) => {
     setPortfolioTracked((current) => ({ ...current, canvasElements: (current.canvasElements || []).filter((element) => element.id !== elementId) }));
     setSelectedCanvasElement(null);
+  }, [setPortfolioTracked]);
+  const getCanvasElementBounds = useCallback((element) => {
+    if (element?.sectionId) {
+      const section = [...document.querySelectorAll('[data-section-id]')].find((node) => node.dataset.sectionId === element.sectionId);
+      if (section) return section.getBoundingClientRect();
+    }
+    return editorCanvasRef.current?.querySelector('.portfolio-composition')?.getBoundingClientRect() || null;
+  }, []);
+  const duplicateCanvasElement = useCallback((elementId) => {
+    const source = portfolioRef.current?.canvasElements?.find((element) => element.id === elementId);
+    if (!source || (portfolioRef.current.canvasElements || []).length >= 100) return;
+    const bounds = getCanvasElementBounds(source);
+    const maxX = Math.max(0, Math.min(source.sectionId ? 100 - source.width : 96, 100 - source.width));
+    const maxY = bounds ? Math.max(0, 100 - (source.height / bounds.height) * 100) : 99;
+    const copy = { ...source, id: `element-${Date.now()}-${portfolioRef.current.canvasElements.length}`, x: Math.max(0, Math.min(maxX, source.x + 3)), y: Math.max(0, Math.min(maxY, source.y + 3)) };
+    setPortfolioTracked((current) => ({ ...current, canvasElements: [...(current.canvasElements || []), copy] }));
+    setSelectedCanvasElement(copy.id);
+  }, [getCanvasElementBounds, setPortfolioTracked]);
+  const moveCanvasElementLayer = (elementId, offset) => setPortfolioTracked((current) => {
+    const elements = [...(current.canvasElements || [])];
+    const from = elements.findIndex((element) => element.id === elementId);
+    const to = from + offset;
+    if (from < 0 || to < 0 || to >= elements.length) return current;
+    const [element] = elements.splice(from, 1);
+    elements.splice(to, 0, element);
+    return { ...current, canvasElements: elements };
+  });
+  const alignCanvasElement = (element, axis, position) => {
+    const bounds = getCanvasElementBounds(element);
+    if (axis === 'horizontal') {
+      const maxX = Math.max(0, Math.min(element.sectionId ? 100 - element.width : 96, 100 - element.width));
+      const x = position === 'left' ? 0 : position === 'center' ? maxX / 2 : maxX;
+      updateCanvasElement(element.id, { x: Math.max(0, x) });
+      return;
+    }
+    const elementHeight = bounds ? (element.height / bounds.height) * 100 : 10;
+    const maxY = Math.max(0, 100 - elementHeight);
+    const y = position === 'top' ? 0 : position === 'middle' ? maxY / 2 : maxY;
+    updateCanvasElement(element.id, { y });
   };
-  const selectCanvasElement = (elementId) => {
+
+  useEffect(() => {
+    if (isPreview) return undefined;
+    const handleCanvasShortcuts = (event) => {
+      const target = event.target instanceof HTMLElement ? event.target : null;
+      if (target?.closest('input, textarea, select, [contenteditable="true"]')) return;
+      const key = event.key.toLowerCase();
+      const selected = portfolioRef.current?.canvasElements?.find((element) => element.id === selectedCanvasElement);
+      if (!selected) return;
+      if ((event.ctrlKey || event.metaKey) && !event.altKey && key === 'd') {
+        event.preventDefault();
+        duplicateCanvasElement(selected.id);
+        return;
+      }
+      if (key === 'delete' || key === 'backspace') {
+        event.preventDefault();
+        removeCanvasElement(selected.id);
+        return;
+      }
+      if (!['arrowleft', 'arrowright', 'arrowup', 'arrowdown'].includes(key)) return;
+      event.preventDefault();
+      const step = event.shiftKey ? 5 : 1;
+      const bounds = getCanvasElementBounds(selected);
+      const maxX = Math.max(0, Math.min(selected.sectionId ? 100 - selected.width : 96, 100 - selected.width));
+      const maxY = bounds ? Math.max(0, 100 - (selected.height / bounds.height) * 100) : 99;
+      const x = Math.max(0, Math.min(maxX, selected.x + (key === 'arrowleft' ? -step : key === 'arrowright' ? step : 0)));
+      const y = Math.max(0, Math.min(maxY, selected.y + (key === 'arrowup' ? -step : key === 'arrowdown' ? step : 0)));
+      updateCanvasElement(selected.id, { x, y });
+    };
+    window.addEventListener('keydown', handleCanvasShortcuts);
+    return () => window.removeEventListener('keydown', handleCanvasShortcuts);
+  }, [duplicateCanvasElement, getCanvasElementBounds, isPreview, removeCanvasElement, selectedCanvasElement, updateCanvasElement]);
+  const selectCanvasElement = (elementId, elementRect) => {
     setSelectedCanvasElement(elementId);
-    if (elementId) setActivePanel('elements');
+    if (elementId) {
+      setActivePanel('elements');
+      const element = portfolioRef.current?.canvasElements?.find((item) => item.id === elementId);
+      if (supportsSectionCanvas && element && !element.sectionId && elementRect) {
+        const centerY = elementRect.top + elementRect.height / 2;
+        const sections = [...(document.querySelectorAll('[data-section-id]') || [])]
+          .map((node) => ({ id: node.dataset.sectionId, rect: node.getBoundingClientRect() }))
+          .filter((section) => portfolioRef.current?.sections.some((item) => item.id === section.id));
+        const target = sections.find((section) => centerY >= section.rect.top && centerY <= section.rect.bottom)
+          || sections.sort((a, b) => Math.abs((a.rect.top + a.rect.bottom) / 2 - centerY) - Math.abs((b.rect.top + b.rect.bottom) / 2 - centerY))[0];
+        if (target) {
+          setSelectedSectionId(target.id);
+          updateCanvasElement(elementId, { sectionId: target.id });
+        }
+      } else if (element?.sectionId) setSelectedSectionId(element.sectionId);
+    }
   };
   const uploadImage = async (file, onUploaded) => {
     if (!file) return;
@@ -266,7 +395,7 @@ export default function Editor() {
       return { ...current, sections: [...current.sections, initialSection(type, current.sections.length)] };
     });
   };
-  const removeSection = (sectionId) => setPortfolioTracked((current) => ({ ...current, sections: current.sections.filter((section) => section.id !== sectionId) }));
+  const removeSection = (sectionId) => setPortfolioTracked((current) => ({ ...current, sections: current.sections.filter((section) => section.id !== sectionId), canvasElements: (current.canvasElements || []).filter((element) => element.sectionId !== sectionId) }));
   const moveSectionByOffset = (sectionId, offset) => setPortfolioTracked((current) => {
     const sections = [...current.sections];
     const from = sections.findIndex((section) => section.id === sectionId);
@@ -340,7 +469,7 @@ export default function Editor() {
               ...(!isIPortfolio && portfolio.templateId !== 'grunge-portfolio' ? [['theme', 'Theme', '◐']] : []),
             ].map(([key, label, icon]) => <button type="button" key={key} className={activePanel === key ? 'is-active' : ''} aria-pressed={activePanel === key} onClick={() => setActivePanel(key)}><span aria-hidden="true">{icon}</span>{label}</button>)}
           </nav>
-          {isIPortfolio ? <><div className="editor-panel" data-editor-panel="sections"><h2>Edit iPortfolio</h2><p>Click text in the page to edit it. Click a photo to select it, then replace it below. Changes autosave; the original theme and layout stay intact.</p><p className="editor-link-hint">Paste a full URL into page text to make it clickable in preview and on the published page.</p><p>Uploaded template images may total up to 5 MB.</p><p>Use Preview site to review the page without editing controls.</p>{selectedTemplateImage !== null && <><label>Replace selected image<input type="file" accept="image/png,image/jpeg,image/webp,image/gif" onChange={(event) => uploadImage(event.target.files?.[0], (url) => updateTemplateImage(selectedTemplateImage, url))} /></label>{portfolio.templateImages?.[selectedTemplateImage] && <button className="editor-button" onClick={() => updateTemplateImage(selectedTemplateImage, '')}>Restore original image</button>}</>}</div><CanvasElementControls {...{ portfolio, selectedCanvasElement, addCanvasElement, uploadImage, updateCanvasElement, removeCanvasElement }} /></> : <>
+          {isIPortfolio ? <><div className="editor-panel" data-editor-panel="sections"><h2>Edit iPortfolio</h2><p>Click text in the page to edit it. Click a photo to select it, then replace it below. Changes autosave; the original theme and layout stay intact.</p><p className="editor-link-hint">Paste a full URL into page text to make it clickable in preview and on the published page.</p><p>Uploaded template images may total up to 5 MB.</p><p>Use Preview site to review the page without editing controls.</p>{selectedTemplateImage !== null && <><label>Replace selected image<input type="file" accept="image/png,image/jpeg,image/webp,image/gif" onChange={(event) => uploadImage(event.target.files?.[0], (url) => updateTemplateImage(selectedTemplateImage, url))} /></label>{portfolio.templateImages?.[selectedTemplateImage] && <button className="editor-button" onClick={() => updateTemplateImage(selectedTemplateImage, '')}>Restore original image</button>}</>}</div><CanvasElementControls {...{ portfolio, selectedCanvasElement, selectedSectionId, setSelectedSectionId, supportsSectionCanvas, addCanvasElement, uploadImage, updateCanvasElement, updateSection, removeCanvasElement, duplicateCanvasElement, moveCanvasElementLayer, alignCanvasElement }} /></> : <>
           {isResume && <div className="editor-panel editor-resume-fields" data-editor-panel="sections"><h2>Edit resume content</h2><p>Open a section to edit its heading and details. Changes autosave and update the page preview.</p>{portfolio.sections.map((section) => {
             const label = SECTION_LIBRARY[section.type]?.label || section.type;
             return <details className="editor-resume-field" key={`fields-${section.id}`}>
@@ -396,9 +525,10 @@ export default function Editor() {
             </div>
             <p className="editor-photo-note">PNG, JPG, WebP, or GIF · Up to 5 MB per image</p>
           </div>}
-          <CanvasElementControls {...{ portfolio, selectedCanvasElement, addCanvasElement, uploadImage, updateCanvasElement, removeCanvasElement }} />
+          <CanvasElementControls {...{ portfolio, selectedCanvasElement, selectedSectionId, setSelectedSectionId, supportsSectionCanvas, addCanvasElement, uploadImage, updateCanvasElement, updateSection, removeCanvasElement, duplicateCanvasElement, moveCanvasElementLayer, alignCanvasElement }} />
           {portfolio.templateId === 'grunge-portfolio' ? <div className="editor-panel" data-editor-panel="theme"><h2>Grunge styling</h2><p>The original charcoal paper background, monochrome palette, and texture are kept intact. Edit the sections and replace the sample images below.</p></div> : <div className="editor-panel" data-editor-panel="theme"><h2>Theme</h2><label>Accent colour<div className="editor-swatch-row">{COLORS.map((color) => <button key={color} aria-label={`Set accent ${color}`} className={`editor-swatch ${portfolio.theme?.accent === color ? 'selected' : ''}`} style={{ background: color }} onClick={() => changeTheme('accent', color)} />)}</div></label><ColorWheel label="Custom accent" value={portfolio.theme?.accent || '#e6e51e'} onChange={(value) => changeTheme('accent', value)} />
             <label>Page background<div className="editor-swatch-row">{BACKGROUNDS.map((color) => <button key={color} aria-label={`Set background ${color}`} className={`editor-swatch ${portfolio.theme?.background === color ? 'selected' : ''}`} style={{ background: color }} onClick={() => changeTheme('background', color)} />)}</div></label><ColorWheel label="Custom background" value={portfolio.theme?.background || '#ffffff'} onChange={(value) => changeTheme('background', value)} />
+            <div className="editor-theme-control"><strong>Section color</strong><div className="editor-swatch-row"><button type="button" aria-label="Use transparent section color" aria-pressed={!portfolio.theme?.section || portfolio.theme.section === 'transparent'} className={`editor-swatch editor-swatch--transparent ${!portfolio.theme?.section || portfolio.theme.section === 'transparent' ? 'selected' : ''}`} onClick={() => changeTheme('section', 'transparent')}>×</button>{['#ffffff', '#f7f5ee', '#f3f6ff', '#fff1e8', '#eaf5ef'].map((color) => <button type="button" key={color} aria-label={`Set section color ${color}`} aria-pressed={portfolio.theme?.section === color} className={`editor-swatch ${portfolio.theme?.section === color ? 'selected' : ''}`} style={{ background: color }} onClick={() => changeTheme('section', color)} />)}<label className="editor-native-color" title="Choose custom section color">Custom<input type="color" aria-label="Custom section color" value={portfolio.theme?.section && portfolio.theme.section !== 'transparent' ? portfolio.theme.section : '#ffffff'} onChange={(event) => changeTheme('section', event.target.value)} /></label></div></div>
             <div className="editor-font-library"><strong>Font style library</strong><p>Choose a typeface to apply across your portfolio.</p><div className="editor-font-library__grid">{FONTS.map((font) => <button type="button" key={font} className={portfolio.theme?.font === font ? 'is-active' : ''} onClick={() => changeTheme('font', font)} aria-pressed={portfolio.theme?.font === font} style={{ fontFamily: `'${font}', sans-serif` }}><span>Aa</span><small>{font}</small></button>)}</div></div>
           </div>}
           </>}
@@ -413,10 +543,14 @@ export default function Editor() {
 
 }
 
-function CanvasElementControls({ portfolio, selectedCanvasElement, addCanvasElement, uploadImage, updateCanvasElement, removeCanvasElement }) {
+function CanvasElementControls({ portfolio, selectedCanvasElement, selectedSectionId, setSelectedSectionId, supportsSectionCanvas, addCanvasElement, uploadImage, updateCanvasElement, updateSection, removeCanvasElement, duplicateCanvasElement, moveCanvasElementLayer, alignCanvasElement }) {
   const element = (portfolio.canvasElements || []).find((item) => item.id === selectedCanvasElement);
+  const editingSectionId = element?.sectionId || selectedSectionId;
+  const editingSection = portfolio.sections.find((section) => section.id === editingSectionId);
   return <div className="editor-panel editor-elements-panel" data-editor-panel="elements">
-    <h2>Elements</h2><p>Add free placement items to your page, then drag the ✥ handle to position them.</p>
+    <h2>Elements</h2><p>Choose a section, then add items. Photos stay inside that section and the text makes room.</p>
+    {supportsSectionCanvas && <label className="editor-section-target">Place in section<select value={editingSectionId || ''} onChange={(event) => { const sectionId = event.target.value; setSelectedSectionId(sectionId); if (element) updateCanvasElement(element.id, { sectionId }); }} aria-label="Place element in section">{portfolio.sections.map((section) => <option key={section.id} value={section.id}>{SECTION_LIBRARY[section.type]?.label || section.type}</option>)}</select></label>}
+    {supportsSectionCanvas && editingSection && <div className="editor-section-text-position"><strong>Move section text</strong><p>Drag the ✥ handle beside section text to move it inside this section.</p><label>Left / right<input type="range" min="-600" max="600" step="1" value={editingSection.contentOffsetX || 0} onChange={(event) => updateSection(editingSection.id, 'contentOffsetX', Number(event.target.value))} /></label><label>Up / down<input type="range" min="-600" max="600" step="1" value={editingSection.contentOffsetY || 0} onChange={(event) => updateSection(editingSection.id, 'contentOffsetY', Number(event.target.value))} /></label></div>}
     <div className="editor-element-adders">
       <button type="button" onClick={() => addCanvasElement('text')}><span aria-hidden="true">T</span> Add text</button>
       <label className="editor-element-upload"><span aria-hidden="true">▧</span> Add photo<input type="file" accept="image/png,image/jpeg,image/webp,image/gif" onChange={(event) => { const file = event.target.files?.[0]; if (file) uploadImage(file, (url) => addCanvasElement('image', url)); event.target.value = ''; }} /></label>
@@ -426,12 +560,29 @@ function CanvasElementControls({ portfolio, selectedCanvasElement, addCanvasElem
     </div>
     <div className="editor-icon-library"><div className="editor-icon-library__heading"><strong>{element?.type === 'icon' ? 'Change icon' : 'SVG icons'}</strong><a href="https://www.svgrepo.com/vectors/sparkles/" target="_blank" rel="noreferrer">Browse SVG Repo ↗</a></div><div className="editor-icon-library__grid">{PORTFOLIO_ICONS.map((icon) => <button type="button" key={icon.id} title={icon.label} aria-label={`${element?.type === 'icon' ? 'Use' : 'Add'} ${icon.label} icon`} className={element?.type === 'icon' && element.iconName === icon.id ? 'is-active' : ''} onClick={() => element?.type === 'icon' ? updateCanvasElement(element.id, { iconName: icon.id }) : addCanvasElement('icon', '', icon.id)}><PortfolioIcon name={icon.id} /><span>{icon.label}</span></button>)}</div></div>
     {element && <div className="editor-element-properties">
-      <div className="editor-element-properties__heading"><strong>Edit {element.type}</strong><button type="button" aria-label="Delete selected element" onClick={() => removeCanvasElement(element.id)}>Delete</button></div>
+      <div className="editor-element-properties__heading"><strong>{element.type === 'image' ? 'Edit image' : `Edit ${element.type}`}</strong><span>{element.type === 'image' ? 'Drag the photo to move it. Use its corner handle to resize.' : 'Drag the item to move it. Use its corner handle to resize.'}</span></div>
+      <div className="editor-element-align" aria-label="Align selected element">
+        <span>Align</span>
+        <div><button type="button" aria-label="Align left" title="Align left" onClick={() => alignCanvasElement(element, 'horizontal', 'left')}>⇤</button><button type="button" aria-label="Align horizontal center" title="Center horizontally" onClick={() => alignCanvasElement(element, 'horizontal', 'center')}>↔</button><button type="button" aria-label="Align right" title="Align right" onClick={() => alignCanvasElement(element, 'horizontal', 'right')}>⇥</button></div>
+        <div><button type="button" aria-label="Align top" title="Align top" onClick={() => alignCanvasElement(element, 'vertical', 'top')}>⇡</button><button type="button" aria-label="Align vertical middle" title="Center vertically" onClick={() => alignCanvasElement(element, 'vertical', 'middle')}>↕</button><button type="button" aria-label="Align bottom" title="Align bottom" onClick={() => alignCanvasElement(element, 'vertical', 'bottom')}>⇣</button></div>
+      </div>
+      <p className="editor-element-shortcuts">Arrow keys nudge · Shift + arrows move faster · Ctrl/Cmd + D duplicates · Delete removes</p>
       {element.type === 'text' && <label>Text<textarea value={element.text} rows={3} onChange={(event) => updateCanvasElement(element.id, { text: event.target.value })} /></label>}
-      {element.type === 'image' && <label>Replace photo<input type="file" accept="image/png,image/jpeg,image/webp,image/gif" onChange={(event) => { const file = event.target.files?.[0]; if (file) uploadImage(file, (url) => updateCanvasElement(element.id, { image: url })); event.target.value = ''; }} /></label>}
+      {element.type === 'image' && <>
+        <label className="editor-image-replace">Replace image<input type="file" accept="image/png,image/jpeg,image/webp,image/gif" onChange={(event) => { const file = event.target.files?.[0]; if (file) uploadImage(file, (url) => updateCanvasElement(element.id, { image: url })); event.target.value = ''; }} /></label>
+        <div className="editor-image-fit" role="group" aria-label="Image crop mode"><span>Image crop</span><div><button type="button" className={(element.imageFit || 'cover') === 'cover' ? 'is-active' : ''} aria-pressed={(element.imageFit || 'cover') === 'cover'} onClick={() => updateCanvasElement(element.id, { imageFit: 'cover' })}>Fill</button><button type="button" className={element.imageFit === 'contain' ? 'is-active' : ''} aria-pressed={element.imageFit === 'contain'} onClick={() => updateCanvasElement(element.id, { imageFit: 'contain' })}>Fit</button></div></div>
+      </>}
+      <div className="editor-element-action-grid">
+        {(portfolio.canvasElements || []).length > 1 && <>
+          <button type="button" aria-label="Send element backward" title="Send backward one layer" disabled={(portfolio.canvasElements || []).findIndex((item) => item.id === element.id) === 0} onClick={() => moveCanvasElementLayer(element.id, -1)}><span aria-hidden="true">↓</span> Backward</button>
+          <button type="button" aria-label="Bring element forward" title="Bring forward one layer" disabled={(portfolio.canvasElements || []).findIndex((item) => item.id === element.id) === (portfolio.canvasElements || []).length - 1} onClick={() => moveCanvasElementLayer(element.id, 1)}><span aria-hidden="true">↑</span> Forward</button>
+        </>}
+        <button type="button" aria-label="Duplicate selected element" disabled={(portfolio.canvasElements || []).length >= 100} onClick={() => duplicateCanvasElement(element.id)}><span aria-hidden="true">⧉</span> Duplicate</button>
+        <button type="button" className="is-danger" aria-label="Delete selected element" onClick={() => removeCanvasElement(element.id)}><span aria-hidden="true">×</span> Delete</button>
+      </div>
       {element.type !== 'image' && <ColorWheel label="Element color" value={element.color} onChange={(value) => updateCanvasElement(element.id, { color: value })} />}
       {element.type === 'text' && <label>Text size<input type="range" min="14" max="72" value={element.fontSize} onChange={(event) => updateCanvasElement(element.id, { fontSize: Number(event.target.value) })} /></label>}
-      {(element.type === 'image' || element.type === 'icon' || ['rectangle', 'circle', 'line'].includes(element.type)) && <label>Width<input type="range" min="8" max="90" value={element.width} onChange={(event) => updateCanvasElement(element.id, { width: Number(event.target.value) })} /></label>}
+      {(element.type === 'image' || element.type === 'icon' || ['rectangle', 'circle', 'line'].includes(element.type)) && <label>Width<input type="range" min="8" max={element.sectionId ? Math.max(8, 100 - element.x) : 90} value={element.width} onChange={(event) => updateCanvasElement(element.id, { width: Number(event.target.value) })} /></label>}
       {element.type !== 'text' && element.type !== 'line' && <label>Height<input type="range" min="30" max="720" value={element.height} onChange={(event) => updateCanvasElement(element.id, { height: Number(event.target.value) })} /></label>}
     </div>}
   </div>;
@@ -482,6 +633,7 @@ function ColorWheel({ label, value, onChange }) {
     <div className="editor-color-control__body">
       <button type="button" ref={wheelRef} className="editor-color-wheel" aria-label={`${label} color wheel`} title="Choose hue and saturation" onPointerDown={(event) => { event.currentTarget.setPointerCapture(event.pointerId); pick(event); }} onPointerMove={(event) => { if (event.buttons) pick(event); }} onKeyDown={(event) => { if (event.key.startsWith('Arrow')) { event.preventDefault(); const shift = event.shiftKey ? 12 : 3; const hue = (hsv.h + (event.key === 'ArrowRight' || event.key === 'ArrowUp' ? shift : -shift) + 360) % 360; onChange(hsvToHex(hue, hsv.s, hsv.v)); } }} style={{ '--wheel-swatch': value, '--wheel-x': `${markerX}%`, '--wheel-y': `${markerY}%` }} />
       <div className="editor-color-control__values">
+        <label>Picker<input type="color" aria-label={`${label} picker`} value={`#${[rgb.r, rgb.g, rgb.b].map((part) => part.toString(16).padStart(2, '0')).join('')}`} onChange={(event) => { setHexDraft(event.target.value); onChange(event.target.value); }} /></label>
         <label>Brightness<input aria-label={`${label} brightness`} type="range" min="10" max="100" value={Math.round(hsv.v * 100)} onChange={(event) => onChange(hsvToHex(hsv.h, hsv.s, Number(event.target.value) / 100))} /></label>
         <div className="editor-rgb-inputs">{['r', 'g', 'b'].map((channel) => <label key={channel}>{channel.toUpperCase()}<input aria-label={`${label} ${channel.toUpperCase()}`} type="number" min="0" max="255" value={rgb[channel]} onChange={(event) => adjustRgb(channel, event.target.value)} /></label>)}</div>
         <label>Hex<input className="editor-hex-input" value={hexDraft} onChange={(event) => { const next = event.target.value; setHexDraft(next); if (/^#[\da-f]{6}$/i.test(next)) onChange(next); }} maxLength={7} aria-label={`${label} hex value`} /></label>

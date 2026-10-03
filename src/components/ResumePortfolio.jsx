@@ -42,6 +42,11 @@ export default function ResumePortfolio({ portfolio, editable, onUpdate }) {
   const isMinimal = templateId === 'resume-minimalist-cv';
   const isBlue = templateId === 'resume-blue-corporate';
   const pageClass = isBlue ? 'resume-sheet--blue' : isMinimal ? 'resume-sheet--minimal' : 'resume-sheet--monochrome';
+  const themeStyle = {
+    '--portfolio-accent': portfolio.theme?.accent || '#e6e51e',
+    '--portfolio-background': portfolio.theme?.background || '#fff',
+    '--portfolio-section': portfolio.theme?.section && portfolio.theme.section !== 'transparent' ? portfolio.theme.section : undefined,
+  };
 
   const sectionView = (section, variant = '') => (
     <section className={`resume-section ${variant ? `resume-section--${variant}` : ''} resume-section--${section.type}`} key={section.id}>
@@ -70,7 +75,7 @@ export default function ResumePortfolio({ portfolio, editable, onUpdate }) {
   if (isMinimal) {
     const sidebarTypes = new Set(['contact', 'skills', 'languages', 'awards']);
     return (
-      <article className={`resume-sheet ${pageClass}`}>
+      <article className={`resume-sheet ${pageClass}`} style={themeStyle}>
         <aside className="resume-sidebar">
           {header?.image && <img className="resume-profile-image" src={header.image} alt="Resume profile" />}
           {sections.filter((section) => sidebarTypes.has(section.type)).map((section) => sectionView(section, 'sidebar'))}
@@ -88,7 +93,7 @@ export default function ResumePortfolio({ portfolio, editable, onUpdate }) {
 
   if (isBlue) {
     return (
-      <article className={`resume-sheet ${pageClass}`}>
+      <article className={`resume-sheet ${pageClass}`} style={themeStyle}>
         <header className="resume-header resume-header--center">
           {editable ? <input className="resume-header__name resume-editable" aria-label="Full name" value={header?.title || ''} onChange={(event) => onUpdate(header.id, 'title', event.target.value)} /> : <h1 className="resume-header__name">{header?.title}</h1>}
         {editable ? <AutoResizeTextarea className="resume-header__role resume-editable" aria-label="Professional title" value={header?.body || ''} onChange={(value) => onUpdate(header.id, 'body', value)} /> : <p className="resume-header__role">{header?.body}</p>}
@@ -100,7 +105,7 @@ export default function ResumePortfolio({ portfolio, editable, onUpdate }) {
   }
 
   return (
-    <article className={`resume-sheet ${pageClass}`}>
+    <article className={`resume-sheet ${pageClass}`} style={themeStyle}>
       <header className="resume-header resume-header--center">
         {editable ? <input className="resume-header__name resume-editable" aria-label="Full name" value={header?.title || ''} onChange={(event) => onUpdate(header.id, 'title', event.target.value)} /> : <h1 className="resume-header__name">{header?.title}</h1>}
         {editable ? <AutoResizeTextarea className="resume-header__role resume-editable" aria-label="Professional title" value={header?.body || ''} onChange={(value) => onUpdate(header.id, 'body', value)} /> : <p className="resume-header__role">{header?.body}</p>}

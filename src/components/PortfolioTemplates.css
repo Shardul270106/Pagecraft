@@ -1,0 +1,507 @@
+/* Template output only. Each visual treatment is scoped to the rendered portfolio class. */
+.portfolio-page .template-nav {
+  position: relative;
+  z-index: 6;
+  display: flex;
+  min-height: 76px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 22px;
+  border-bottom: 1px solid color-mix(in srgb, currentColor 14%, transparent);
+}
+.portfolio-page .template-nav__brand { display: inline-flex; min-width: 0; align-items: center; gap: 10px; font-size: 12px; font-weight: 600; }
+.portfolio-page .template-nav__brand > span { display: grid; width: 30px; height: 30px; flex: 0 0 auto; place-items: center; border: 1px solid currentColor; border-radius: 50%; font-size: 11px; }
+.portfolio-page .template-nav__brand b { max-width: 170px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.portfolio-page .template-nav__links { display: flex; align-items: center; justify-content: center; gap: clamp(13px, 2.5vw, 30px); }
+.portfolio-page .template-nav__links a,.portfolio-page .template-nav__cta { opacity: .76; font-size: 11px; font-weight: 500; transition: opacity .2s ease, color .2s ease, background .2s ease, transform .2s ease; }
+.portfolio-page .template-nav__links a:hover,.portfolio-page .template-nav__links a:focus-visible,.portfolio-page .template-nav__cta:hover,.portfolio-page .template-nav__cta:focus-visible { opacity: 1; }
+.portfolio-page .template-nav__cta { display: inline-flex; min-height: 38px; align-items: center; gap: 12px; padding: 0 14px; border: 1px solid color-mix(in srgb, currentColor 35%, transparent); border-radius: 4px; white-space: nowrap; }
+.portfolio-page .template-nav__cta:hover { transform: translateY(-2px); }
+.portfolio-page .template-hero__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 22px; margin-top: 27px; }
+.portfolio-page .template-hero__primary,.portfolio-page .template-hero__secondary { display: inline-flex; min-height: 44px; align-items: center; gap: 16px; font-size: 11px; font-weight: 600; transition: transform .2s ease, opacity .2s ease, background .2s ease; }
+.portfolio-page .template-hero__primary:hover,.portfolio-page .template-hero__secondary:hover { transform: translateY(-2px); }
+.portfolio-page .template-hero__primary { padding: 0 16px; border-radius: 4px; background: #20231f; color: #fff; }
+.portfolio-page .template-hero__secondary { opacity: .8; }
+.portfolio-page .template-hero-art { position: relative; display: flex; min-height: 330px; flex-direction: column; justify-content: space-between; gap: 16px; overflow: hidden; padding: 23px; border-radius: 4px; background: #e8e8df; }
+.portfolio-page .template-hero-art__kicker,.portfolio-page .template-hero-art__folio { position: relative; z-index: 1; color: #707369; font: 600 8px/1.4 ui-monospace, Consolas, monospace; letter-spacing: .1em; }
+.portfolio-page .template-hero-art strong { position: relative; z-index: 1; display: grid; align-self: start; color: #242822; font: 500 clamp(23px, 3vw, 39px)/1.05 var(--portfolio-font, sans-serif); letter-spacing: -.055em; }
+.portfolio-page .template-hero-art strong em { color: #747b6f; font-style: normal; }
+.portfolio-page .template-hero-art__folio { align-self: end; }
+.portfolio-page .template-hero-art__shapes { position: absolute; inset: 0; overflow: hidden; }
+.portfolio-page .template-hero-art__shapes i,.portfolio-page .template-hero-art__shapes b,.portfolio-page .template-hero-art__shapes span { position: absolute; display: block; }
+.portfolio-page .template-hero-art__shapes i { right: 13%; bottom: -20%; width: 65%; aspect-ratio: 1; border: 1px solid color-mix(in srgb, var(--portfolio-accent, #e6e51e) 70%, transparent); border-radius: 50%; }
+.portfolio-page .template-hero-art__shapes b { right: 28%; bottom: 13%; width: 30%; aspect-ratio: 1; border-radius: 50%; background: color-mix(in srgb, var(--portfolio-accent, #e6e51e) 65%, transparent); }
+.portfolio-page .template-hero-art__shapes span { right: 8%; bottom: 12%; width: 35%; height: 2px; background: #252923; transform: rotate(-42deg); transform-origin: right center; }
+.portfolio-page .template-code-card { position: relative; z-index: 1; display: grid; gap: 15px; margin-top: auto; padding: 14px 15px 13px; border: 1px solid #ffffff20; border-radius: 8px; background: #1c2624; color: #e4ece5; box-shadow: 0 18px 38px #08110f40; }
+.portfolio-page .template-code-card > span { display: flex; gap: 5px; }
+.portfolio-page .template-code-card > span i { width: 5px; height: 5px; border-radius: 50%; background: #f2c987; }
+.portfolio-page .template-code-card > span i:nth-child(2) { background: #84c9a9; }
+.portfolio-page .template-code-card > span i:nth-child(3) { background: #9bb5e8; }
+.portfolio-page .template-code-card code { color: #e2e8df; font: 500 10px/1.9 ui-monospace, Consolas, monospace; }
+.portfolio-page .template-code-card code b { margin-right: 8px; color: #6e837b; font-weight: 400; }
+.portfolio-page .template-code-card code i { color: #a6d7c4; font-style: normal; }
+.portfolio-page .template-code-card small { display: flex; align-items: center; gap: 7px; color: #9eaca4; font: 600 7px ui-monospace, Consolas, monospace; letter-spacing: .1em; }
+.portfolio-page .template-code-card small i { width: 5px; height: 5px; border-radius: 50%; background: #a6d7c4; }
+.portfolio-page .template-photo-stack { position: absolute; inset: 70px 22px 40px; }
+.portfolio-page .template-photo-stack i,.portfolio-page .template-photo-stack b { position: absolute; top: 12%; width: 57%; height: 74%; border: 7px solid #f0eee8; background: linear-gradient(165deg,#a9b8a6 0 32%,#dad0b8 32% 53%,#777c67 53%); box-shadow: 0 18px 44px #0003; transform: rotate(-8deg); }
+.portfolio-page .template-photo-stack b { top: 2%; left: 34%; background: linear-gradient(153deg,#d8c9a7 0 33%,#7a897a 33% 57%,#c1b7a2 57%); transform: rotate(7deg); }
+.portfolio-page .template-photo-stack span { position: absolute; z-index: 1; right: 9px; bottom: 11px; color: #fbfaf6; font: 600 7px ui-monospace, Consolas, monospace; letter-spacing: .12em; }
+.portfolio-page .portfolio-skill-list { display: flex; flex-wrap: wrap; gap: 8px; margin: 15px 0 0; padding: 0; list-style: none; }
+.portfolio-page .portfolio-skill-list li { padding: 7px 11px; border: 1px solid color-mix(in srgb, currentColor 16%, transparent); border-radius: 4px; color: inherit; font-size: 11px; line-height: 1.3; }
+.portfolio-page .portfolio-timeline { display: grid; gap: 0; margin-top: 6px; }
+.portfolio-page .portfolio-timeline__item { position: relative; display: grid; grid-template-columns: 32px minmax(0,1fr); gap: 15px; padding: 14px 0 19px; border-bottom: 1px solid color-mix(in srgb, currentColor 13%, transparent); }
+.portfolio-page .portfolio-timeline__marker { display: grid; width: 26px; height: 26px; place-items: center; border: 1px solid color-mix(in srgb, currentColor 24%, transparent); border-radius: 50%; font: 600 8px ui-monospace, Consolas, monospace; opacity: .72; }
+.portfolio-page .portfolio-timeline__item h3,.portfolio-page .portfolio-visual-card__copy h3 { margin: 0; color: inherit; font: 600 14px/1.35 var(--portfolio-font, sans-serif); letter-spacing: -.025em; }
+.portfolio-page .portfolio-timeline__item p { margin-top: 5px; color: inherit; font-size: 12px; line-height: 1.7; opacity: .72; white-space: pre-wrap; }
+.portfolio-page .portfolio-steps { display: grid; gap: 9px; margin-top: 10px; }
+.portfolio-page .portfolio-steps article { display: grid; grid-template-columns: 30px minmax(0,1fr); gap: 14px; padding: 13px 15px; border: 1px solid color-mix(in srgb, currentColor 12%, transparent); border-radius: 4px; background: color-mix(in srgb, var(--portfolio-background, #fff) 80%, var(--portfolio-accent, #e6e51e) 8%); }
+.portfolio-page .portfolio-steps article > span { padding-top: 2px; font: 600 9px ui-monospace, Consolas, monospace; opacity: .6; }
+.portfolio-page .portfolio-steps article p { margin: 0; color: inherit; font-size: 12px; line-height: 1.7; white-space: pre-wrap; }
+.portfolio-page .portfolio-testimonial { margin: 4px 0 0; padding: 0 0 0 17px; border-left: 2px solid var(--portfolio-accent, #e6e51e); }
+.portfolio-page .portfolio-testimonial p { color: inherit; font: 500 clamp(15px, 2vw, 21px)/1.65 var(--portfolio-font, sans-serif); letter-spacing: -.02em; }
+.portfolio-page .portfolio-visual-list { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 18px; margin-top: 20px; }
+.portfolio-page .portfolio-visual-card { min-width: 0; overflow: hidden; border: 1px solid color-mix(in srgb, currentColor 12%, transparent); border-radius: 5px; background: color-mix(in srgb, var(--portfolio-background, #fff) 89%, currentColor 11%); transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease; }
+.portfolio-page .portfolio-visual-card:hover { transform: translateY(-4px); border-color: color-mix(in srgb, var(--portfolio-accent, #e6e51e) 60%, currentColor 10%); box-shadow: 0 18px 35px #10161019; }
+.portfolio-page .portfolio-visual-card__art { position: relative; display: grid; min-height: 175px; place-items: center; overflow: hidden; background: linear-gradient(135deg,#e6e8dc,#cdd7ca); }
+.portfolio-page .portfolio-visual-card__art > span { position: relative; z-index: 1; color: #485247; font: 500 clamp(38px, 7vw, 82px)/1 var(--portfolio-font, sans-serif); letter-spacing: -.1em; }
+.portfolio-page .portfolio-visual-card__art > i,.portfolio-page .portfolio-visual-card__art > b { position: absolute; width: 72%; aspect-ratio: 1; border: 1px solid #75856d54; border-radius: 50%; }
+.portfolio-page .portfolio-visual-card__art > b { width: 42%; background: color-mix(in srgb, var(--portfolio-accent, #e6e51e) 45%, transparent); border: 0; transform: translate(40%, -27%); }
+.portfolio-page .portfolio-visual-card__art img { width: 100%; height: 100%; position: absolute; inset: 0; object-fit: cover; }
+.portfolio-page .portfolio-visual-card__copy { padding: 16px 17px 18px; }
+.portfolio-page .portfolio-visual-card__index { display: block; margin-bottom: 8px; color: inherit; font: 600 8px ui-monospace, Consolas, monospace; letter-spacing: .1em; opacity: .58; }
+.portfolio-page .portfolio-visual-card__copy h3 { font-size: 15px; }
+.portfolio-page .portfolio-visual-card__copy p { margin: 7px 0 0; color: inherit; font-size: 11px; line-height: 1.7; opacity: .72; white-space: pre-wrap; }
+.portfolio-page .portfolio-visual-list--gallery .portfolio-visual-card:first-child { grid-column: span 2; }
+.portfolio-page .portfolio-visual-list--gallery .portfolio-visual-card:first-child .portfolio-visual-card__art { min-height: 310px; }
+.portfolio-page .portfolio-page__section--projects .portfolio-visual-list,.portfolio-page .portfolio-page__section--projects-work .portfolio-visual-list,.portfolio-page .portfolio-page__section--gallery .portfolio-visual-list { margin-top: 20px; }
+.portfolio-page .portfolio-page__section--projects .portfolio-section-copy,.portfolio-page .portfolio-page__section--projects-work .portfolio-section-copy,.portfolio-page .portfolio-page__section--gallery .portfolio-section-copy { width: 100%; }
+.portfolio-page.layout-folio .folio-section--projects .portfolio-visual-list,.portfolio-page.layout-folio .folio-section--projects-work .portfolio-visual-list { grid-column: 1 / -1; }
+.portfolio-page--developer-portfolio { width: min(100%, 1080px); min-height: 0; padding: 0 clamp(25px, 6vw, 72px) 34px; border: 1px solid #26312e; border-radius: 8px; color: #e9eee9; background: #111817; box-shadow: 0 28px 80px #0d17152b; }
+.portfolio-page--developer-portfolio .portfolio-page__hero--canvas,.portfolio-page--creative-portfolio .portfolio-page__hero--canvas,.portfolio-page--ux-case-study .portfolio-page__hero--canvas,.portfolio-page--photographer-portfolio .portfolio-page__hero--canvas,.portfolio-page--editorial-studio-portfolio .portfolio-page__hero--canvas,.portfolio-page--midnight-creative-portfolio .portfolio-page__hero--canvas,.portfolio-page--product-designer-portfolio .portfolio-page__hero--canvas { display: grid; grid-template-columns: minmax(0, 1.12fr) minmax(235px, .78fr); align-items: center; gap: clamp(25px, 5vw, 58px); min-height: 465px; padding: 58px 0; }
+.portfolio-page--developer-portfolio .portfolio-page__hero--canvas .portfolio-section-copy,.portfolio-page--creative-portfolio .portfolio-page__hero--canvas .portfolio-section-copy,.portfolio-page--ux-case-study .portfolio-page__hero--canvas .portfolio-section-copy,.portfolio-page--photographer-portfolio .portfolio-page__hero--canvas .portfolio-section-copy,.portfolio-page--editorial-studio-portfolio .portfolio-page__hero--canvas .portfolio-section-copy,.portfolio-page--midnight-creative-portfolio .portfolio-page__hero--canvas .portfolio-section-copy,.portfolio-page--product-designer-portfolio .portfolio-page__hero--canvas .portfolio-section-copy { width: 100%; }
+.portfolio-page--developer-portfolio .portfolio-page__eyebrow,.portfolio-page--creative-portfolio .portfolio-page__eyebrow,.portfolio-page--ux-case-study .portfolio-page__eyebrow,.portfolio-page--photographer-portfolio .portfolio-page__eyebrow,.portfolio-page--editorial-studio-portfolio .portfolio-page__eyebrow,.portfolio-page--midnight-creative-portfolio .portfolio-page__eyebrow,.portfolio-page--product-designer-portfolio .portfolio-page__eyebrow { display: block; margin: 15px 0 0; padding: 0; background: transparent; color: var(--portfolio-accent); font-size: 9px; font-weight: 650; letter-spacing: .12em; }
+.portfolio-page--developer-portfolio .portfolio-page__hero h1,.portfolio-page--developer-portfolio .portfolio-page__hero-title,.portfolio-page--creative-portfolio .portfolio-page__hero h1,.portfolio-page--creative-portfolio .portfolio-page__hero-title,.portfolio-page--ux-case-study .portfolio-page__hero h1,.portfolio-page--ux-case-study .portfolio-page__hero-title,.portfolio-page--photographer-portfolio .portfolio-page__hero h1,.portfolio-page--photographer-portfolio .portfolio-page__hero-title,.portfolio-page--editorial-studio-portfolio .portfolio-page__hero h1,.portfolio-page--editorial-studio-portfolio .portfolio-page__hero-title,.portfolio-page--midnight-creative-portfolio .portfolio-page__hero h1,.portfolio-page--midnight-creative-portfolio .portfolio-page__hero-title,.portfolio-page--product-designer-portfolio .portfolio-page__hero h1,.portfolio-page--product-designer-portfolio .portfolio-page__hero-title { max-width: 700px; margin: 20px 0 15px; font: 500 clamp(44px, 6.7vw, 80px)/.98 var(--portfolio-font, sans-serif); letter-spacing: -.075em; text-wrap: balance; }
+.portfolio-page--developer-portfolio .portfolio-page__hero p,.portfolio-page--developer-portfolio .portfolio-page__hero-body,.portfolio-page--creative-portfolio .portfolio-page__hero p,.portfolio-page--creative-portfolio .portfolio-page__hero-body,.portfolio-page--ux-case-study .portfolio-page__hero p,.portfolio-page--ux-case-study .portfolio-page__hero-body,.portfolio-page--photographer-portfolio .portfolio-page__hero p,.portfolio-page--photographer-portfolio .portfolio-page__hero-body,.portfolio-page--editorial-studio-portfolio .portfolio-page__hero p,.portfolio-page--editorial-studio-portfolio .portfolio-page__hero-body,.portfolio-page--midnight-creative-portfolio .portfolio-page__hero p,.portfolio-page--midnight-creative-portfolio .portfolio-page__hero-body,.portfolio-page--product-designer-portfolio .portfolio-page__hero p,.portfolio-page--product-designer-portfolio .portfolio-page__hero-body { max-width: 500px; color: inherit; font-size: clamp(14px, 1.45vw, 17px); line-height: 1.75; opacity: .78; }
+.portfolio-page--developer-portfolio .template-hero-art { min-height: 350px; background: radial-gradient(ellipse at 70% 20%,#405650 0,transparent 45%),#17211f; }
+.portfolio-page--developer-portfolio .template-hero-art strong { color: #edf2ed; font: 500 29px/1.05 ui-monospace, Consolas, monospace; }
+.portfolio-page--developer-portfolio .template-hero-art strong em { color: #a6d7c4; }
+.portfolio-page--developer-portfolio .template-hero-art__kicker,.portfolio-page--developer-portfolio .template-hero-art__folio { color: #9caaa2; }
+.portfolio-page--developer-portfolio .portfolio-page__section--canvas { min-height: 310px; padding: 39px 0; border-color: #ffffff20; background: transparent; }
+.portfolio-page--developer-portfolio .portfolio-page__section h2,.portfolio-page--developer-portfolio .portfolio-page__section input { color: #eff3ee; font: 500 clamp(21px, 2.6vw, 29px)/1.2 var(--portfolio-font, sans-serif); letter-spacing: -.045em; }
+.portfolio-page--developer-portfolio .portfolio-page__section p,.portfolio-page--developer-portfolio .portfolio-page__section textarea,.portfolio-page--developer-portfolio .portfolio-timeline__item p { color: #b8c5be; }
+.portfolio-page--developer-portfolio .portfolio-skill-list li { border-color: #ffffff24; color: #d5e1da; background: #ffffff08; }
+.portfolio-page--developer-portfolio .portfolio-visual-card { border-color: #ffffff1c; background: #1b2421; }
+.portfolio-page--developer-portfolio .portfolio-visual-card__art { background: linear-gradient(145deg,#263b35,#18221f); }
+.portfolio-page--developer-portfolio .portfolio-visual-card__art > span { color: #b2d3c1; }
+.portfolio-page--developer-portfolio .portfolio-visual-card__art > i { border-color: #a6d7c450; }
+.portfolio-page--developer-portfolio .portfolio-visual-card__copy p { color: #b8c5be; }
+.portfolio-page--developer-portfolio .template-hero__primary { background: #a6d7c4; color: #12201a; }
+.portfolio-page--developer-portfolio .template-nav__cta:hover { background: #a6d7c4; color: #12201a; }
+.portfolio-page--developer-portfolio .portfolio-page__footer { color: #93a199; }
+.portfolio-page--creative-portfolio { width: min(100%, 1080px); padding: 0 clamp(25px, 6vw, 70px) 40px; border: 1px solid #ead9d0; border-radius: 2px; color: #302623; background: #f8eee9; }
+.portfolio-page--creative-portfolio .portfolio-page__hero--canvas { min-height: 520px; }
+.portfolio-page--creative-portfolio .portfolio-page__hero h1,.portfolio-page--creative-portfolio .portfolio-page__hero-title { max-width: 680px; font: 500 clamp(54px, 8vw, 92px)/.92 'DM Sans', sans-serif; }
+.portfolio-page--creative-portfolio .template-hero-art { min-height: 350px; background: #f4d9cc; }
+.portfolio-page--creative-portfolio .template-hero-art__shapes i { right: -18%; bottom: -15%; width: 92%; border: 1px solid #d7684b88; }
+.portfolio-page--creative-portfolio .template-hero-art__shapes b { right: 16%; bottom: 23%; width: 43%; background: #ee8d70; }
+.portfolio-page--creative-portfolio .template-hero-art__shapes span { right: 13%; bottom: 28%; width: 55%; height: 12%; background: #e9ac56; transform: rotate(-31deg); mix-blend-mode: multiply; }
+.portfolio-page--creative-portfolio .portfolio-page__section--canvas { min-height: 310px; padding: 42px 0; border-color: #d9c7bd; background: transparent; }
+.portfolio-page--creative-portfolio .portfolio-page__section { display: grid; grid-template-columns: minmax(150px,.55fr) minmax(0,1.45fr); gap: 40px; }
+.portfolio-page--creative-portfolio .portfolio-page__section--projects-work { display: block; }
+.portfolio-page--creative-portfolio .portfolio-page__section h2,.portfolio-page--creative-portfolio .portfolio-page__section input { font-size: 24px; letter-spacing: -.04em; }
+.portfolio-page--creative-portfolio .portfolio-visual-card__art { background: linear-gradient(145deg,#f5bd8b,#f27e65 58%,#d65d50); }
+.portfolio-page--creative-portfolio .portfolio-visual-card:nth-child(2) .portfolio-visual-card__art { background: linear-gradient(135deg,#f4dfb8,#ddae78 53%,#8d9a7c); }
+.portfolio-page--creative-portfolio .portfolio-visual-card:nth-child(3n) .portfolio-visual-card__art { background: linear-gradient(145deg,#333a37,#78877a 60%,#d1c4a4); }
+.portfolio-page--creative-portfolio .portfolio-visual-card__art > span { color: #fff8f1; mix-blend-mode: overlay; }
+.portfolio-page--creative-portfolio .portfolio-page__section--contact { margin-top: 28px; padding: 32px; background: #f2ddd4; }
+.portfolio-page--ux-case-study { width: min(100%, 1000px); padding: 0 clamp(25px, 6vw, 72px) 40px; color: #26322e; background: #f3f5f0; }
+.portfolio-page--ux-case-study .template-hero-art { min-height: 335px; background: #e3e8de; }
+.portfolio-page--ux-case-study .template-hero-art__shapes i { right: -4%; bottom: -33%; width: 105%; border-radius: 46% 46% 0 0; border-color: #536f5d66; }
+.portfolio-page--ux-case-study .template-hero-art__shapes b { right: 21%; bottom: 18%; width: 33%; aspect-ratio: 1.3; border-radius: 40% 4px 40% 4px; background: #96b6a0; }
+.portfolio-page--ux-case-study .template-hero-art__shapes span { right: 17%; bottom: 31%; width: 47%; background: #778c79; }
+.portfolio-page--ux-case-study .portfolio-page__section--canvas { min-height: 310px; padding: 42px 0; border-color: #d4dcd4; background: transparent; }
+.portfolio-page--ux-case-study .portfolio-page__section { display: grid; grid-template-columns: minmax(150px,.65fr) minmax(0,1.35fr); gap: 38px; }
+.portfolio-page--ux-case-study .portfolio-page__section--process,.portfolio-page--ux-case-study .portfolio-page__section--outcome,.portfolio-page--ux-case-study .portfolio-page__section--projects-work { display: block; }
+.portfolio-page--ux-case-study .portfolio-page__section--process .portfolio-steps,.portfolio-page--ux-case-study .portfolio-page__section--outcome .portfolio-steps { grid-template-columns: repeat(3,minmax(0,1fr)); align-items: stretch; }
+.portfolio-page--ux-case-study .portfolio-steps article { align-content: start; grid-template-columns: 1fr; gap: 24px; min-height: 150px; padding: 18px; border-color: #d8e1d8; background: #fbfcf8; }
+.portfolio-page--ux-case-study .portfolio-steps article > span { display: grid; width: 28px; height: 28px; place-items: center; border-radius: 50%; background: #dce8df; color: #415c4b; opacity: 1; }
+.portfolio-page--ux-case-study .portfolio-page__section--outcome .portfolio-steps article { background: #e1ebe2; }
+.portfolio-page--ux-case-study .portfolio-visual-card__art { background: linear-gradient(140deg,#d4e1d8,#9eb5a4 52%,#778c7b); }
+.portfolio-page--photographer-portfolio { width: min(100%, 1200px); padding: 0 clamp(20px, 5vw, 58px) 35px; color: #f0efe9; background: #161918; box-shadow: 0 26px 80px #0004; }
+.portfolio-page--photographer-portfolio .portfolio-page__hero--canvas { grid-template-columns: minmax(0, .9fr) minmax(280px, 1.1fr); min-height: 540px; padding: 54px 0 66px; }
+.portfolio-page--photographer-portfolio .portfolio-page__hero h1,.portfolio-page--photographer-portfolio .portfolio-page__hero-title { font: 400 clamp(54px, 8vw, 98px)/.9 'Playfair Display', Georgia, serif; letter-spacing: -.06em; }
+.portfolio-page--photographer-portfolio .portfolio-page__hero p,.portfolio-page--photographer-portfolio .portfolio-page__hero-body { max-width: 420px; color: #c5c6bd; }
+.portfolio-page--photographer-portfolio .template-hero-art { min-height: 395px; background: #252b28; }
+.portfolio-page--photographer-portfolio .template-photo-stack { inset: 60px 25px 32px; }
+.portfolio-page--photographer-portfolio .template-photo-stack i,.portfolio-page--photographer-portfolio .template-photo-stack b { border-width: 8px; }
+.portfolio-page--photographer-portfolio .template-nav__brand > span { border-radius: 2px; }
+.portfolio-page--photographer-portfolio .template-nav__cta { border-color: #e6e51e88; color: #edeb77; }
+.portfolio-page--photographer-portfolio .template-nav__cta:hover,.portfolio-page--photographer-portfolio .template-hero__primary { background: #e6e51e; color: #20211b; }
+.portfolio-page--photographer-portfolio .portfolio-page__section--canvas { min-height: 280px; padding: 38px 0; border-color: #ffffff1d; background: transparent; }
+.portfolio-page--photographer-portfolio .portfolio-page__section { display: grid; grid-template-columns: minmax(130px,.5fr) minmax(0,1.5fr); gap: 38px; }
+.portfolio-page--photographer-portfolio .portfolio-page__section--gallery { display: block; padding-top: 52px; }
+.portfolio-page--photographer-portfolio .portfolio-page__section--gallery h2,.portfolio-page--photographer-portfolio .portfolio-page__section--gallery input { margin-bottom: 24px; font: 400 clamp(32px,5vw,55px)/1 'Playfair Display', Georgia, serif; }
+.portfolio-page--photographer-portfolio .portfolio-visual-list--gallery { grid-template-columns: 1.25fr .75fr; gap: 14px; }
+.portfolio-page--photographer-portfolio .portfolio-visual-list--gallery .portfolio-visual-card:first-child { grid-row: span 2; grid-column: auto; }
+.portfolio-page--photographer-portfolio .portfolio-visual-list--gallery .portfolio-visual-card:first-child .portfolio-visual-card__art { min-height: 420px; }
+.portfolio-page--photographer-portfolio .portfolio-visual-list--gallery .portfolio-visual-card:not(:first-child) .portfolio-visual-card__art { min-height: 195px; }
+.portfolio-page--photographer-portfolio .portfolio-visual-card { border-color: #ffffff1e; background: #202523; }
+.portfolio-page--photographer-portfolio .portfolio-visual-card__copy p { color: #bfc3bb; }
+.portfolio-page--photographer-portfolio .portfolio-page__section--contact { margin-top: 22px; padding: 28px; border: 1px solid #ffffff25; background: #1c211e; }
+.portfolio-page--editorial-studio-portfolio .template-nav { border-color: #2d29221f; }
+.portfolio-page--editorial-studio-portfolio .template-hero-art { min-height: 350px; border-radius: 50% 50% 4px 4px; background: #ebe3d4; }
+.portfolio-page--editorial-studio-portfolio .template-hero-art strong { align-self: center; max-width: 240px; font: 500 31px/.99 'Playfair Display', Georgia, serif; text-align: center; }
+.portfolio-page--editorial-studio-portfolio .template-hero-art strong em { color: #8b5743; }
+.portfolio-page--editorial-studio-portfolio .template-hero-art__shapes i { right: 3%; bottom: -40%; width: 90%; border-color: #b1836680; }
+.portfolio-page--editorial-studio-portfolio .template-hero-art__shapes b { right: 35%; bottom: 17%; width: 28%; background: #bd8062; }
+.portfolio-page--editorial-studio-portfolio .portfolio-page__section--canvas { min-height: 310px; padding: 42px 0; border-color: #e0d8cc; background: transparent; }
+.portfolio-page--editorial-studio-portfolio .portfolio-page__section { display: grid; grid-template-columns: minmax(150px,.55fr) minmax(0,1.45fr); gap: 40px; }
+.portfolio-page--editorial-studio-portfolio .portfolio-page__section--projects { display: block; }
+.portfolio-page--editorial-studio-portfolio .portfolio-page__section--projects .portfolio-visual-list { grid-template-columns: 1.2fr .8fr; }
+.portfolio-page--editorial-studio-portfolio .portfolio-visual-card__art { min-height: 215px; background: linear-gradient(145deg,#d8b390,#c47b5f 50%,#64726a); }
+.portfolio-page--editorial-studio-portfolio .portfolio-visual-card:nth-child(2) .portfolio-visual-card__art { background: linear-gradient(145deg,#e6d6bd,#89937c 55%,#c3a475); }
+.portfolio-page--editorial-studio-portfolio .portfolio-page__section--contact { margin-top: 32px; padding: 34px; border: 0; background: var(--portfolio-section,#e9dfd0); }
+.portfolio-page--midnight-creative-portfolio { border: 1px solid #ffffff19; border-radius: 8px; }
+.portfolio-page--midnight-creative-portfolio .template-nav { border-color: #ffffff22; }
+.portfolio-page--midnight-creative-portfolio .template-hero-art { min-height: 350px; background: radial-gradient(ellipse at 63% 46%,#52736a 0,#25302b 38%,#171a17 72%); }
+.portfolio-page--midnight-creative-portfolio .template-hero-art__shapes i { right: 8%; bottom: -10%; width: 75%; border-color: #b7f5d466; }
+.portfolio-page--midnight-creative-portfolio .template-hero-art__shapes b { right: 23%; bottom: 22%; width: 43%; background: #b7f5d47a; filter: blur(5px); }
+.portfolio-page--midnight-creative-portfolio .template-hero-art__shapes span { right: 30%; bottom: 12%; width: 45%; height: 1px; background: #e5efe6; }
+.portfolio-page--midnight-creative-portfolio .portfolio-page__section--canvas { min-height: 310px; padding: 42px 0; border-color: #ffffff25; background: transparent; }
+.portfolio-page--midnight-creative-portfolio .portfolio-page__section { display: grid; grid-template-columns: minmax(150px,.55fr) minmax(0,1.45fr); gap: 38px; }
+.portfolio-page--midnight-creative-portfolio .portfolio-page__section--projects { display: block; }
+.portfolio-page--midnight-creative-portfolio .portfolio-visual-card { border-color: #ffffff23; background: #191e1a; }
+.portfolio-page--midnight-creative-portfolio .portfolio-visual-card__art { background: radial-gradient(circle at 65% 35%,#b7f5d4b0,transparent 23%),linear-gradient(135deg,#2c483e,#151a17 68%); }
+.portfolio-page--midnight-creative-portfolio .portfolio-visual-card__art > span { color: #eff8ef; }
+.portfolio-page--midnight-creative-portfolio .portfolio-visual-card__copy p,.portfolio-page--midnight-creative-portfolio .portfolio-page__section p { color: #c0c5be; }
+.portfolio-page--product-designer-portfolio { width: min(100%, 1000px); padding: 0 clamp(25px, 6vw, 66px) 38px; border: 1px solid #dfe4ef; border-radius: 10px; background: #f4f6fb; }
+.portfolio-page--product-designer-portfolio .template-hero-art { min-height: 350px; background: #e7ebf6; }
+.portfolio-page--product-designer-portfolio .template-hero-art__shapes i { right: -8%; bottom: -34%; width: 92%; border-radius: 30px 30px 0 0; border-color: #6075ba60; }
+.portfolio-page--product-designer-portfolio .template-hero-art__shapes b { right: 20%; bottom: 16%; width: 52%; aspect-ratio: 1.35; border: 7px solid #f7f8fb; border-radius: 11px; background: linear-gradient(90deg,#8292c4 0 30%,#ced5e6 30%); box-shadow: 0 15px 35px #2436632b; }
+.portfolio-page--product-designer-portfolio .template-hero-art__shapes span { right: 30%; bottom: 29%; width: 32%; height: 3px; background: #fff; transform: none; }
+.portfolio-page--product-designer-portfolio .portfolio-page__section--canvas { min-height: 300px; padding: 38px 0; border-color: #dce2ed; background: transparent; }
+.portfolio-page--product-designer-portfolio .portfolio-page__section { display: grid; grid-template-columns: minmax(145px,.55fr) minmax(0,1.45fr); gap: 35px; }
+.portfolio-page--product-designer-portfolio .portfolio-page__section--projects,.portfolio-page--product-designer-portfolio .portfolio-page__section--process,.portfolio-page--product-designer-portfolio .portfolio-page__section--outcome { display: block; }
+.portfolio-page--product-designer-portfolio .portfolio-page__section--outcome { margin: 15px 0; padding: 26px; border: 1px solid #d9e0f1; border-radius: 10px; background: #e8edf8; }
+.portfolio-page--product-designer-portfolio .portfolio-steps--outcome { grid-template-columns: repeat(2,minmax(0,1fr)); }
+.portfolio-page--product-designer-portfolio .portfolio-visual-list { grid-template-columns: repeat(3,minmax(0,1fr)); }
+.portfolio-page--product-designer-portfolio .portfolio-visual-card__art { min-height: 145px; background: linear-gradient(140deg,#cfd8ec,#8799c5 54%,#536694); }
+.portfolio-page--product-designer-portfolio .portfolio-page__section--contact { margin-top: 24px; padding: 26px 30px; border: 0; border-radius: 8px; background: #e4e9f4; }
+.portfolio-page--architect-portfolio { border: 1px solid #e3dccf; }
+.portfolio-page--architect-portfolio .template-nav { border-color: #2b29221f; }
+.portfolio-page--architect-portfolio .portfolio-page__hero--canvas { grid-template-columns: minmax(0,1fr) minmax(240px,.8fr); min-height: 440px; }
+.portfolio-page--architect-portfolio .portfolio-page__hero h1,.portfolio-page--architect-portfolio .portfolio-page__hero-title { font: 500 clamp(40px,5.6vw,65px)/.98 'Playfair Display', Georgia, serif; letter-spacing: -.055em; }
+.portfolio-page--architect-portfolio .portfolio-page__section--canvas { min-height: 300px; padding: 40px 0; border-color: #ddd5c8; background: transparent; }
+.portfolio-page--architect-portfolio .portfolio-page__section { display: grid; grid-template-columns: minmax(150px,.55fr) minmax(0,1.45fr); gap: 40px; }
+.portfolio-page--architect-portfolio .portfolio-page__section--gallery,.portfolio-page--architect-portfolio .portfolio-page__section--projects { display: block; }
+.portfolio-page--architect-portfolio .portfolio-page__section--gallery .portfolio-visual-list { grid-template-columns: 1.15fr .85fr; }
+.portfolio-page--architect-portfolio .portfolio-visual-card__art { min-height: 235px; border-radius: 0; background: linear-gradient(140deg,#d6d1c4,#b8b19f 45%,#7a8173); }
+.portfolio-page--architect-portfolio .portfolio-visual-card:nth-child(2) .portfolio-visual-card__art { background: linear-gradient(140deg,#c6bda9,#8e9688 50%,#e0dbd1); }
+.portfolio-page--architect-portfolio .portfolio-visual-card { border-radius: 0; box-shadow: none; }
+.portfolio-page--architect-portfolio .portfolio-page__section--contact { margin-top: 22px; padding: 28px; border: 1px solid #d8d0c3; background: #f2eee6; }
+.portfolio-page--professional-portfolio .professional-hero__availability i,.portfolio-page--professional-portfolio .professional-hero-art__orbit { background: var(--portfolio-accent, #e6e51e); box-shadow: 0 0 0 7px color-mix(in srgb, var(--portfolio-accent, #e6e51e) 20%, transparent); }
+.portfolio-page--professional-portfolio .professional-hero__availability,.portfolio-page--professional-portfolio .portfolio-page__eyebrow { color: #747019; }
+.portfolio-page--professional-portfolio .professional-hero-art { background: #efeed4; }
+.portfolio-page--professional-portfolio .portfolio-visual-list { grid-template-columns: repeat(3,minmax(0,1fr)); padding-left: 50px; }
+.portfolio-page--professional-portfolio .portfolio-visual-card__art { min-height: 145px; background: linear-gradient(145deg,#f2eea9,#c1c387 58%,#68765c); }
+.portfolio-page--professional-portfolio .portfolio-visual-card__copy h3 { font-size: 13px; }
+.portfolio-page--professional-portfolio .portfolio-page__section--contact { background: #eeedcf; }
+.portfolio-page--professional-portfolio .portfolio-page__section--projects .portfolio-visual-card__copy p { padding: 0; font-size: 11px; }
+.portfolio-page--student-resume .portfolio-page__hero--canvas { min-height: 0; padding: 42px 0 30px; }
+.resume-sheet--student { width: min(100%, 980px); min-height: 0; padding: clamp(30px, 6vw, 66px); border: 1px solid #e8e5da; border-top: 5px solid var(--portfolio-accent, #d5c900); border-radius: 5px; color: #26302b; background: var(--portfolio-background, #fbfaf5); box-shadow: 0 24px 64px #2c342515; font-family: var(--portfolio-font, 'Source Sans 3'), sans-serif; }
+.resume-student__masthead { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; gap: 24px; padding: 0 0 28px; border-bottom: 1px solid #dad9cf; }
+.resume-student__eyebrow { display: block; margin-bottom: 14px; color: #77744c; font: 600 9px ui-monospace, Consolas, monospace; letter-spacing: .13em; }
+.resume-sheet--student .resume-header__name { color: #202822; font: 600 clamp(36px,5vw,58px)/1.02 var(--portfolio-font, 'Source Sans 3'), sans-serif; letter-spacing: -.065em; }
+.resume-sheet--student .resume-header__role { margin-top: 8px; color: #5d675f; font-size: 16px; }
+.resume-student__portrait,.resume-student__monogram { display: grid; width: 92px; height: 92px; place-items: center; border: 1px solid #d9d8cb; border-radius: 50%; background: #eeedcf; color: #787533; object-fit: cover; font: 500 39px var(--portfolio-font, sans-serif); }
+.resume-student__grid { display: grid; grid-template-columns: minmax(165px,.62fr) minmax(0,1.38fr); gap: clamp(28px,5vw,58px); padding-top: 30px; }
+.resume-student__sidebar { min-width: 0; padding: 20px; border-radius: 4px; background: #f1f0e7; }
+.resume-student__sidebar .resume-section { margin-bottom: 28px; background: transparent; }
+.resume-student__sidebar .resume-section:last-child { margin-bottom: 0; }
+.resume-student__sidebar .resume-section__title,.resume-student__main .resume-section__title { margin-bottom: 12px; padding-bottom: 7px; border-bottom: 1px solid #d6d5c9; color: #62694d; font: 600 10px ui-monospace, Consolas, monospace; letter-spacing: .08em; text-transform: uppercase; }
+.resume-student__sidebar .resume-section__body { color: #4f5a52; font-size: 11px; line-height: 1.8; overflow-wrap: anywhere; }
+.resume-student__sidebar .resume-skills { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 0; padding: 0; list-style: none; }
+.resume-student__sidebar .resume-skills li { padding: 5px 8px; border: 1px solid #d9d8cb; border-radius: 3px; font-size: 10px; }
+.resume-student__main .resume-section { margin-bottom: 30px; background: transparent; }
+.resume-student__main .resume-section:last-child { margin-bottom: 0; }
+.resume-student__main .resume-section__title { color: #26302b; font: 600 20px/1.2 var(--portfolio-font, 'Source Sans 3'), sans-serif; letter-spacing: -.035em; text-transform: none; }
+.resume-student__main .resume-section__body { color: #59635b; font-size: 12px; line-height: 1.75; }
+.resume-student__main .resume-items { margin-top: 0; gap: 12px; }
+.resume-student__main .resume-item { grid-template-columns: minmax(102px,.38fr) minmax(0,1fr); gap: 13px; padding: 13px 0; border-bottom: 1px solid #e6e4dc; font-size: 11px; }
+.resume-student__main .resume-item__meta strong { color: #77744c; font: 600 10px ui-monospace, Consolas, monospace; }
+.resume-student__main .resume-item__meta span { color: #70776f; font-size: 10px; }
+.resume-student__main .resume-item__detail strong { color: #303b34; font-size: 12px; }
+.resume-student__main .resume-item__detail p { color: #626b64; line-height: 1.65; }
+.resume-student__projects { display: grid; gap: 11px; }
+.resume-student__projects article { display: grid; grid-template-columns: 27px minmax(0,1fr); gap: 12px; padding: 14px; border: 1px solid #e3e1d8; border-radius: 4px; background: #fffefa; }
+.resume-student__projects article > span { color: #8b895f; font: 600 9px ui-monospace, Consolas, monospace; }
+.resume-student__projects h3 { margin: 0; color: #313b34; font: 600 13px var(--portfolio-font, sans-serif); }
+.resume-student__projects p { margin-top: 5px; color: #667067; font-size: 11px; line-height: 1.6; }
+.resume-student__footer { display: flex; justify-content: space-between; gap: 14px; margin-top: 26px; padding-top: 13px; border-top: 1px solid #dad9cf; color: #7b8077; font: 600 8px ui-monospace, Consolas, monospace; letter-spacing: .08em; text-transform: uppercase; }
+.resume-sheet--blue { border-top: 5px solid var(--portfolio-accent, #d8e3ec); border-radius: 3px; box-shadow: 0 20px 55px #202f4014; }
+.resume-sheet--blue .resume-header__name { font-family: var(--portfolio-font, 'DM Sans'), sans-serif; letter-spacing: -.055em; }
+.resume-sheet--blue .resume-section__title { border-left: 3px solid var(--portfolio-accent, #d8e3ec); letter-spacing: .06em; }
+.resume-sheet--monochrome { border-width: 1px; box-shadow: 0 18px 50px #17202c12; }
+.resume-sheet--monochrome .resume-header__name { font-family: var(--portfolio-font, 'DM Sans'), sans-serif; letter-spacing: -.045em; }
+.resume-sheet--minimal { border-radius: 3px; box-shadow: 0 22px 58px #17202c20; }
+.resume-sheet--minimal .resume-sidebar { background: color-mix(in srgb, var(--portfolio-accent,#323d50) 78%, #202b3b); }
+.resume-sheet--minimal .resume-main .resume-section__title { font-family: var(--portfolio-font, 'DM Sans'), sans-serif; letter-spacing: -.025em; }
+@media (max-width: 760px) {
+  .portfolio-page--developer-portfolio,.portfolio-page--creative-portfolio,.portfolio-page--ux-case-study,.portfolio-page--photographer-portfolio,.portfolio-page--editorial-studio-portfolio,.portfolio-page--midnight-creative-portfolio,.portfolio-page--product-designer-portfolio,.portfolio-page--architect-portfolio { padding-right: 22px; padding-left: 22px; }
+  .portfolio-page--developer-portfolio .portfolio-page__hero--canvas,.portfolio-page--creative-portfolio .portfolio-page__hero--canvas,.portfolio-page--ux-case-study .portfolio-page__hero--canvas,.portfolio-page--photographer-portfolio .portfolio-page__hero--canvas,.portfolio-page--editorial-studio-portfolio .portfolio-page__hero--canvas,.portfolio-page--midnight-creative-portfolio .portfolio-page__hero--canvas,.portfolio-page--product-designer-portfolio .portfolio-page__hero--canvas,.portfolio-page--architect-portfolio .portfolio-page__hero--canvas { grid-template-columns: 1fr; gap: 28px; min-height: 0; padding: 46px 0 36px; }
+  .portfolio-page--developer-portfolio .template-hero-art,.portfolio-page--creative-portfolio .template-hero-art,.portfolio-page--ux-case-study .template-hero-art,.portfolio-page--photographer-portfolio .template-hero-art,.portfolio-page--editorial-studio-portfolio .template-hero-art,.portfolio-page--midnight-creative-portfolio .template-hero-art,.portfolio-page--product-designer-portfolio .template-hero-art { width: min(100%, 400px); min-height: 280px; justify-self: center; }
+  .portfolio-page--photographer-portfolio .template-hero-art { min-height: 330px; }
+  .portfolio-page--developer-portfolio .portfolio-page__section,.portfolio-page--creative-portfolio .portfolio-page__section,.portfolio-page--ux-case-study .portfolio-page__section,.portfolio-page--photographer-portfolio .portfolio-page__section,.portfolio-page--editorial-studio-portfolio .portfolio-page__section,.portfolio-page--midnight-creative-portfolio .portfolio-page__section,.portfolio-page--product-designer-portfolio .portfolio-page__section,.portfolio-page--architect-portfolio .portfolio-page__section { grid-template-columns: 1fr; gap: 10px; min-height: 0; padding: 31px 0; }
+  .portfolio-page--ux-case-study .portfolio-page__section--process .portfolio-steps,.portfolio-page--ux-case-study .portfolio-page__section--outcome .portfolio-steps,.portfolio-page--product-designer-portfolio .portfolio-steps--outcome { grid-template-columns: 1fr; }
+  .portfolio-page--professional-portfolio .portfolio-visual-list { padding-left: 0; }
+  .portfolio-page .portfolio-visual-list { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }
+  .portfolio-page .portfolio-visual-list--gallery .portfolio-visual-card:first-child { grid-column: span 2; }
+  .portfolio-page--photographer-portfolio .portfolio-visual-list--gallery { grid-template-columns: 1fr 1fr; }
+  .portfolio-page--photographer-portfolio .portfolio-visual-list--gallery .portfolio-visual-card:first-child { grid-row: span 1; }
+  .portfolio-page--photographer-portfolio .portfolio-visual-list--gallery .portfolio-visual-card:first-child .portfolio-visual-card__art { min-height: 250px; }
+  .portfolio-page--photographer-portfolio .portfolio-visual-list--gallery .portfolio-visual-card:not(:first-child) .portfolio-visual-card__art { min-height: 150px; }
+  .resume-sheet--student { padding: 30px 22px; }
+  .resume-student__grid { grid-template-columns: 1fr; gap: 23px; }
+  .resume-student__sidebar { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 20px; padding: 16px; }
+  .resume-student__sidebar .resume-section { margin: 0; }
+}
+@media (max-width: 520px) {
+  .portfolio-page .template-nav { min-height: 64px; gap: 9px; }
+  .portfolio-page .template-nav__brand { gap: 7px; font-size: 10px; }
+  .portfolio-page .template-nav__brand > span { width: 26px; height: 26px; }
+  .portfolio-page .template-nav__brand b { max-width: 85px; }
+  .portfolio-page .template-nav__links { margin-left: auto; gap: 12px; overflow: hidden; }
+  .portfolio-page .template-nav__links a { font-size: 9px; white-space: nowrap; }
+  .portfolio-page .template-nav__links a:nth-child(n+3) { display: none; }
+  .portfolio-page .template-nav__cta { min-height: 32px; gap: 5px; padding: 0 8px; font-size: 9px; }
+  .portfolio-page .portfolio-visual-list { grid-template-columns: 1fr; }
+  .portfolio-page .portfolio-visual-list--gallery .portfolio-visual-card:first-child { grid-column: auto; }
+  .portfolio-page--photographer-portfolio .portfolio-visual-list--gallery { grid-template-columns: 1fr; }
+  .portfolio-page--photographer-portfolio .portfolio-visual-list--gallery .portfolio-visual-card:first-child .portfolio-visual-card__art { min-height: 280px; }
+  .portfolio-page .portfolio-visual-card__art { min-height: 195px; }
+  .portfolio-page--ux-case-study .portfolio-steps article { min-height: 0; }
+  .resume-student__masthead { grid-template-columns: minmax(0,1fr) auto; gap: 12px; }
+  .resume-student__portrait,.resume-student__monogram { width: 65px; height: 65px; font-size: 29px; }
+  .resume-student__sidebar { grid-template-columns: 1fr; }
+  .resume-student__main .resume-item { grid-template-columns: 1fr; gap: 5px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .portfolio-page .template-nav__links a,.portfolio-page .template-nav__cta,.portfolio-page .template-hero__primary,.portfolio-page .template-hero__secondary,.portfolio-page .portfolio-visual-card { transition-duration: .01ms; }
+}
+/* Keep the rendered site inside its preview/published canvas at every size. */
+.portfolio-page,.resume-sheet { box-sizing: border-box; }
+.portfolio-page nav a,.portfolio-page .template-hero__actions a,.portfolio-page .professional-hero__actions a,.portfolio-page .folio-hero__actions a { text-decoration: none; }
+.portfolio-page .template-nav a { color: inherit; }
+.portfolio-page--developer-portfolio .portfolio-page__hero h1,.portfolio-page--developer-portfolio .portfolio-page__hero-title { color: #e9eee9; }
+.portfolio-page--developer-portfolio .portfolio-page__hero p,.portfolio-page--developer-portfolio .portfolio-page__hero-body { color: #b8c5be; }
+.portfolio-page--photographer-portfolio .portfolio-page__hero h1,.portfolio-page--photographer-portfolio .portfolio-page__hero-title,.portfolio-page--photographer-portfolio .portfolio-page__section h2,.portfolio-page--photographer-portfolio .portfolio-page__section input { color: #f0efe9; }
+.portfolio-page--photographer-portfolio .portfolio-page__section p,.portfolio-page--photographer-portfolio .portfolio-page__section textarea { color: #c5c6bd; }
+.portfolio-page--architect-portfolio .portfolio-page__architect-art { position: relative; min-width: 0; min-height: 300px; overflow: hidden; background: linear-gradient(155deg,#e7e1d5 0 38%,#c6b9a3 38% 66%,#899084 66%); }
+.portfolio-page--architect-portfolio .portfolio-page__architect-art span,.portfolio-page--architect-portfolio .portfolio-page__architect-art i,.portfolio-page--architect-portfolio .portfolio-page__architect-art b { position: absolute; display: block; }
+.portfolio-page--architect-portfolio .portfolio-page__architect-art span { right: -8%; bottom: -28%; width: 76%; aspect-ratio: 1; border-radius: 50%; background: #b28b64; opacity: .56; }
+.portfolio-page--architect-portfolio .portfolio-page__architect-art i { top: 15%; left: 12%; width: 58%; height: 55%; border: 1px solid #6f695b80; background: linear-gradient(135deg,#f0ece3,#b7ad9d); transform: rotate(8deg); }
+.portfolio-page--architect-portfolio .portfolio-page__architect-art b { inset: 23% 12% 10% 30%; border: 7px solid #f4f0e8; background: linear-gradient(155deg,#d3ccbf 0 42%,#8c9485 42% 69%,#d8d0c1 69%); box-shadow: 0 16px 32px #423d322b; transform: rotate(-4deg); }
+.portfolio-page--midnight-creative-portfolio .template-hero-art strong { color: #edf5ed; }
+.portfolio-page--midnight-creative-portfolio .template-hero-art strong em { color: #b7f5d4; }
+.portfolio-page--midnight-creative-portfolio .template-hero__primary { background: #b7f5d4; color: #16221c; }
+.portfolio-page--midnight-creative-portfolio .template-hero__secondary { color: #e5efe6; }
+.editor-preview-frame.is-mobile .portfolio-page--professional-portfolio { width: 100%; padding: 0 20px 25px; }
+.editor-preview-frame.is-mobile .professional-nav { min-height: 62px; gap: 9px; }
+.editor-preview-frame.is-mobile .professional-nav__brand { gap: 7px; font-size: 10px; }
+.editor-preview-frame.is-mobile .professional-nav__brand > span { width: 26px; height: 26px; }
+.editor-preview-frame.is-mobile .professional-nav__brand b { max-width: 72px; }
+.editor-preview-frame.is-mobile .professional-nav__links { gap: 12px; margin-left: auto; }
+.editor-preview-frame.is-mobile .professional-nav__links a:nth-child(n+2) { display: none; }
+.editor-preview-frame.is-mobile .professional-nav__links a,.editor-preview-frame.is-mobile .professional-nav__cta { font-size: 9px; }
+.editor-preview-frame.is-mobile .professional-nav__cta { min-height: 32px; gap: 6px; padding: 0 8px; }
+.editor-preview-frame.is-mobile .portfolio-page--professional-portfolio .portfolio-page__hero--canvas { grid-template-columns: 1fr; gap: 25px; min-height: 0; padding: 42px 0 34px; }
+.editor-preview-frame.is-mobile .portfolio-page--professional-portfolio .portfolio-section-copy { width: 100%; max-width: none; }
+.editor-preview-frame.is-mobile .portfolio-page--professional-portfolio .portfolio-page__hero h1,.editor-preview-frame.is-mobile .portfolio-page--professional-portfolio .portfolio-page__hero-title { font-size: 48px; }
+.editor-preview-frame.is-mobile .professional-hero-art { width: min(100%,300px); min-height: 235px; justify-self: center; }
+.editor-preview-frame.is-mobile .portfolio-page--professional-portfolio .portfolio-page__section { grid-template-columns: 1fr; gap: 10px; padding: 30px 0; }
+.editor-preview-frame.is-mobile .portfolio-page--professional-portfolio .portfolio-visual-list { grid-template-columns: 1fr; padding-left: 0; }
+.editor-preview-frame.is-mobile .portfolio-page--professional-portfolio .portfolio-page__section--projects p { padding-left: 0; }
+.editor-preview-frame.is-mobile .portfolio-page--developer-portfolio,.editor-preview-frame.is-mobile .portfolio-page--creative-portfolio,.editor-preview-frame.is-mobile .portfolio-page--ux-case-study,.editor-preview-frame.is-mobile .portfolio-page--photographer-portfolio,.editor-preview-frame.is-mobile .portfolio-page--editorial-studio-portfolio,.editor-preview-frame.is-mobile .portfolio-page--midnight-creative-portfolio,.editor-preview-frame.is-mobile .portfolio-page--product-designer-portfolio,.editor-preview-frame.is-mobile .portfolio-page--architect-portfolio { width: 100%; padding: 0 20px 30px; }
+.editor-preview-frame.is-mobile .portfolio-page--developer-portfolio .portfolio-page__hero--canvas,.editor-preview-frame.is-mobile .portfolio-page--creative-portfolio .portfolio-page__hero--canvas,.editor-preview-frame.is-mobile .portfolio-page--ux-case-study .portfolio-page__hero--canvas,.editor-preview-frame.is-mobile .portfolio-page--photographer-portfolio .portfolio-page__hero--canvas,.editor-preview-frame.is-mobile .portfolio-page--editorial-studio-portfolio .portfolio-page__hero--canvas,.editor-preview-frame.is-mobile .portfolio-page--midnight-creative-portfolio .portfolio-page__hero--canvas,.editor-preview-frame.is-mobile .portfolio-page--product-designer-portfolio .portfolio-page__hero--canvas,.editor-preview-frame.is-mobile .portfolio-page--architect-portfolio .portfolio-page__hero--canvas { grid-template-columns: 1fr; gap: 23px; min-height: 0; padding: 40px 0 32px; }
+.editor-preview-frame.is-mobile .portfolio-page--developer-portfolio .portfolio-section-copy,.editor-preview-frame.is-mobile .portfolio-page--creative-portfolio .portfolio-section-copy,.editor-preview-frame.is-mobile .portfolio-page--ux-case-study .portfolio-section-copy,.editor-preview-frame.is-mobile .portfolio-page--photographer-portfolio .portfolio-section-copy,.editor-preview-frame.is-mobile .portfolio-page--editorial-studio-portfolio .portfolio-section-copy,.editor-preview-frame.is-mobile .portfolio-page--midnight-creative-portfolio .portfolio-section-copy,.editor-preview-frame.is-mobile .portfolio-page--product-designer-portfolio .portfolio-section-copy,.editor-preview-frame.is-mobile .portfolio-page--architect-portfolio .portfolio-section-copy { width: 100%; max-width: none; }
+.editor-preview-frame.is-mobile .portfolio-page--developer-portfolio .portfolio-page__hero h1,.editor-preview-frame.is-mobile .portfolio-page--developer-portfolio .portfolio-page__hero-title { font-size: 44px; }
+.editor-preview-frame.is-mobile .portfolio-page--creative-portfolio .portfolio-page__hero h1,.editor-preview-frame.is-mobile .portfolio-page--creative-portfolio .portfolio-page__hero-title { font-size: 52px; }
+.editor-preview-frame.is-mobile .portfolio-page--ux-case-study .portfolio-page__hero h1,.editor-preview-frame.is-mobile .portfolio-page--ux-case-study .portfolio-page__hero-title { font-size: 42px; }
+.editor-preview-frame.is-mobile .portfolio-page--photographer-portfolio .portfolio-page__hero h1,.editor-preview-frame.is-mobile .portfolio-page--photographer-portfolio .portfolio-page__hero-title { font-size: 52px; }
+.editor-preview-frame.is-mobile .portfolio-page--editorial-studio-portfolio .portfolio-page__hero h1,.editor-preview-frame.is-mobile .portfolio-page--editorial-studio-portfolio .portfolio-page__hero-title { font-size: 52px; }
+.editor-preview-frame.is-mobile .portfolio-page--midnight-creative-portfolio .portfolio-page__hero h1,.editor-preview-frame.is-mobile .portfolio-page--midnight-creative-portfolio .portfolio-page__hero-title { font-size: 48px; }
+.editor-preview-frame.is-mobile .portfolio-page--product-designer-portfolio .portfolio-page__hero h1,.editor-preview-frame.is-mobile .portfolio-page--product-designer-portfolio .portfolio-page__hero-title { font-size: 44px; }
+.editor-preview-frame.is-mobile .portfolio-page--architect-portfolio .portfolio-page__hero h1,.editor-preview-frame.is-mobile .portfolio-page--architect-portfolio .portfolio-page__hero-title { font-size: 42px; }
+.editor-preview-frame.is-mobile .portfolio-page--developer-portfolio .portfolio-page__section,.editor-preview-frame.is-mobile .portfolio-page--creative-portfolio .portfolio-page__section,.editor-preview-frame.is-mobile .portfolio-page--ux-case-study .portfolio-page__section,.editor-preview-frame.is-mobile .portfolio-page--photographer-portfolio .portfolio-page__section,.editor-preview-frame.is-mobile .portfolio-page--editorial-studio-portfolio .portfolio-page__section,.editor-preview-frame.is-mobile .portfolio-page--midnight-creative-portfolio .portfolio-page__section,.editor-preview-frame.is-mobile .portfolio-page--product-designer-portfolio .portfolio-page__section,.editor-preview-frame.is-mobile .portfolio-page--architect-portfolio .portfolio-page__section { grid-template-columns: 1fr; gap: 10px; min-height: 0; padding: 30px 0; }
+.editor-preview-frame.is-mobile .portfolio-page--developer-portfolio .template-hero-art,.editor-preview-frame.is-mobile .portfolio-page--creative-portfolio .template-hero-art,.editor-preview-frame.is-mobile .portfolio-page--ux-case-study .template-hero-art,.editor-preview-frame.is-mobile .portfolio-page--photographer-portfolio .template-hero-art,.editor-preview-frame.is-mobile .portfolio-page--editorial-studio-portfolio .template-hero-art,.editor-preview-frame.is-mobile .portfolio-page--midnight-creative-portfolio .template-hero-art,.editor-preview-frame.is-mobile .portfolio-page--product-designer-portfolio .template-hero-art { width: min(100%, 360px); min-height: 255px; justify-self: center; }
+.editor-preview-frame.is-mobile .portfolio-page--photographer-portfolio .template-hero-art { min-height: 300px; }
+.editor-preview-frame.is-mobile .portfolio-page--architect-portfolio .portfolio-page__architect-art { width: min(100%,360px); min-height: 250px; justify-self: center; }
+.editor-preview-frame.is-mobile .portfolio-page .template-nav { min-height: 58px; gap: 7px; }
+.editor-preview-frame.is-mobile .portfolio-page .template-nav__brand { gap: 6px; font-size: 9px; }
+.editor-preview-frame.is-mobile .portfolio-page .template-nav__brand > span { width: 24px; height: 24px; }
+.editor-preview-frame.is-mobile .portfolio-page .template-nav__brand b { max-width: 75px; }
+.editor-preview-frame.is-mobile .portfolio-page .template-nav__links { margin-left: auto; gap: 10px; }
+.editor-preview-frame.is-mobile .portfolio-page .template-nav__links a { font-size: 9px; white-space: nowrap; }
+.editor-preview-frame.is-mobile .portfolio-page .template-nav__links a:nth-child(n+2) { display: none; }
+.editor-preview-frame.is-mobile .portfolio-page .template-nav__cta { min-height: 30px; gap: 5px; padding: 0 7px; font-size: 9px; }
+.editor-preview-frame.is-mobile .portfolio-page .portfolio-visual-list { grid-template-columns: 1fr; }
+.editor-preview-frame.is-mobile .portfolio-page .portfolio-visual-list--gallery .portfolio-visual-card:first-child { grid-column: auto; }
+.editor-preview-frame.is-mobile .portfolio-page--ux-case-study .portfolio-steps,.editor-preview-frame.is-mobile .portfolio-page--product-designer-portfolio .portfolio-steps { grid-template-columns: 1fr; }
+.editor-preview-frame.is-mobile .resume-sheet--student { width: 100%; padding: 28px 20px; }
+.editor-preview-frame.is-mobile .resume-student__masthead { grid-template-columns: minmax(0,1fr) auto; gap: 12px; }
+.editor-preview-frame.is-mobile .resume-student__portrait,.editor-preview-frame.is-mobile .resume-student__monogram { width: 62px; height: 62px; font-size: 28px; }
+.editor-preview-frame.is-mobile .resume-student__grid { grid-template-columns: 1fr; gap: 22px; }
+.editor-preview-frame.is-mobile .resume-student__sidebar { grid-template-columns: 1fr; gap: 15px; padding: 15px; }
+.editor-preview-frame.is-mobile .resume-student__main .resume-item { grid-template-columns: 1fr; gap: 5px; }
+.editor-preview-frame.is-mobile .resume-sheet--minimal { grid-template-columns: 1fr; }
+.editor-preview-frame.is-mobile .resume-sheet--monochrome { width: 100%; min-height: 0; padding: 28px 20px; }
+.editor-preview-frame.is-mobile .resume-sheet--monochrome .resume-header__name { font-size: 31px; }
+.editor-preview-frame.is-mobile .resume-sheet--monochrome .resume-section--skills .resume-skills,.editor-preview-frame.is-mobile .resume-section--references .resume-section__body { grid-template-columns: repeat(2,minmax(0,1fr)); }
+
+/* Give every portfolio template a consistent, canvas-like text field. */
+.portfolio-page .portfolio-page__hero--canvas .portfolio-section-copy > textarea,
+.portfolio-page .portfolio-page__section--canvas .portfolio-section-copy > textarea,
+.grunge-hero textarea,
+.grunge-section textarea {
+  box-sizing: border-box;
+  width: min(92%, 620px);
+  min-width: 0;
+  max-width: 100%;
+  min-height: 132px;
+  margin: 8px 0 0;
+  padding: 14px;
+  border: 1px solid #dedfd7;
+  border-radius: 10px;
+  background: #fff;
+  color: #555d54;
+  font: 400 16px/1.6 var(--portfolio-font, Inter), sans-serif;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  resize: both;
+  overflow: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #c4c7bf transparent;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.portfolio-page .portfolio-page__hero--canvas .portfolio-section-copy > textarea::-webkit-scrollbar,
+.portfolio-page .portfolio-page__section--canvas .portfolio-section-copy > textarea::-webkit-scrollbar,
+.grunge-hero textarea::-webkit-scrollbar,
+.grunge-section textarea::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.portfolio-page .portfolio-page__hero--canvas .portfolio-section-copy > textarea::-webkit-scrollbar-thumb,
+.portfolio-page .portfolio-page__section--canvas .portfolio-section-copy > textarea::-webkit-scrollbar-thumb,
+.grunge-hero textarea::-webkit-scrollbar-thumb,
+.grunge-section textarea::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background: #c4c7bf;
+  background-clip: padding-box;
+}
+
+.resume-sheet textarea.resume-editable {
+  box-sizing: border-box;
+  padding: 8px 10px;
+  border: 1px solid #dedfd7;
+  border-radius: 8px;
+  background: transparent;
+  max-width: 100%;
+  resize: both;
+  overflow: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #c4c7bf transparent;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.resume-sheet textarea.resume-editable:hover {
+  border-color: #c6c9be;
+}
+
+.resume-sheet textarea.resume-editable:focus {
+  border-color: #929b85;
+  outline: none;
+  box-shadow: 0 0 0 3px rgb(105 120 91 / 16%);
+}
+
+.resume-sheet textarea.resume-editable:focus-visible {
+  outline: 2px solid #69745f;
+  outline-offset: 2px;
+}
+
+.portfolio-page .portfolio-page__hero--canvas .portfolio-section-copy > textarea:hover,
+.portfolio-page .portfolio-page__section--canvas .portfolio-section-copy > textarea:hover,
+.grunge-hero textarea:hover,
+.grunge-section textarea:hover {
+  border-color: #c6c9be;
+}
+
+.portfolio-page .portfolio-page__hero--canvas .portfolio-section-copy > textarea:focus,
+.portfolio-page .portfolio-page__section--canvas .portfolio-section-copy > textarea:focus,
+.grunge-hero textarea:focus,
+.grunge-section textarea:focus {
+  border-color: #929b85;
+  outline: none;
+  box-shadow: 0 0 0 3px rgb(105 120 91 / 16%);
+}
+
+.portfolio-page .portfolio-page__hero--canvas .portfolio-section-copy > textarea:focus-visible,
+.portfolio-page .portfolio-page__section--canvas .portfolio-section-copy > textarea:focus-visible,
+.grunge-hero textarea:focus-visible,
+.grunge-section textarea:focus-visible {
+  outline: 2px solid #69745f;
+  outline-offset: 2px;
+}
+
+/* Template grids reserve a second column for media. Let text-only sections use it. */
+.portfolio-page .portfolio-page__section--canvas:not(.portfolio-page__section--with-media):not(.portfolio-page__section--has-visual-list) > .portfolio-section-copy {
+  grid-column: 1 / -1;
+  width: min(88%, 900px);
+  max-width: none;
+  margin-inline: auto;
+}
+
+.portfolio-page .portfolio-page__section--canvas.portfolio-page__section--with-media {
+  grid-template-columns: minmax(0, 1fr) minmax(145px, 32%);
+}
+
+.portfolio-page .portfolio-page__section--canvas.portfolio-page__section--with-media > .portfolio-section-copy {
+  grid-column: 1;
+  grid-row: 1;
+  width: 88%;
+  max-width: none;
+  margin-inline: auto;
+}
+
+.portfolio-page .portfolio-page__hero--canvas.portfolio-page__hero--with-media > .portfolio-section-copy {
+  grid-column: 1;
+  grid-row: 1;
+  width: 100%;
+  max-width: none;
+}
+
+@media (max-width: 700px) {
+  .portfolio-page .portfolio-page__section--canvas.portfolio-page__section--with-media {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .portfolio-page .portfolio-page__section--canvas.portfolio-page__section--with-media > .portfolio-section-copy,
+  .portfolio-page .portfolio-page__section--canvas.portfolio-page__section--with-media > .portfolio-section-media {
+    grid-column: 1;
+  }
+
+  .portfolio-page .portfolio-page__section--canvas.portfolio-page__section--with-media > .portfolio-section-media {
+    grid-row: 2;
+  }
+}
+
+.editor-preview-frame.is-mobile .portfolio-page .portfolio-page__section--canvas.portfolio-page__section--with-media {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.editor-preview-frame.is-mobile .portfolio-page .portfolio-page__section--canvas.portfolio-page__section--with-media > .portfolio-section-media {
+  grid-column: 1;
+  grid-row: 2;
+}

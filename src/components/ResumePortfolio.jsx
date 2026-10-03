@@ -1,8 +1,9 @@
 import { useLayoutEffect, useRef } from 'react';
 import { SECTION_LIBRARY } from '../data/templates';
 import LinkifiedText from './LinkifiedText';
+import { getPortfolioFontStack } from '../lib/portfolioFont';
 
-const RESUME_LAYOUTS = new Set(['resume-blue-corporate', 'resume-black-white-a4', 'resume-minimalist-cv']);
+const RESUME_LAYOUTS = new Set(['student-resume', 'resume-blue-corporate', 'resume-black-white-a4', 'resume-minimalist-cv']);
 
 export function isResumeTemplate(templateId) {
   return RESUME_LAYOUTS.has(templateId);
@@ -39,20 +40,24 @@ export default function ResumePortfolio({ portfolio, editable, onUpdate }) {
   const templateId = portfolio.templateId;
   const header = sections.find((section) => section.type === 'header');
   const contact = sections.find((section) => section.type === 'contact');
+  const isStudent = templateId === 'student-resume';
   const isMinimal = templateId === 'resume-minimalist-cv';
   const isBlue = templateId === 'resume-blue-corporate';
-  const pageClass = isBlue ? 'resume-sheet--blue' : isMinimal ? 'resume-sheet--minimal' : 'resume-sheet--monochrome';
+  const pageClass = isStudent ? 'resume-sheet--student' : isBlue ? 'resume-sheet--blue' : isMinimal ? 'resume-sheet--minimal' : 'resume-sheet--monochrome';
   const themeStyle = {
     '--portfolio-accent': portfolio.theme?.accent || '#e6e51e',
     '--portfolio-background': portfolio.theme?.background || '#fff',
     '--portfolio-section': portfolio.theme?.section && portfolio.theme.section !== 'transparent' ? portfolio.theme.section : undefined,
+    '--portfolio-font': getPortfolioFontStack(portfolio.theme?.font || 'Arial'),
   };
 
   const sectionView = (section, variant = '') => (
     <section className={`resume-section ${variant ? `resume-section--${variant}` : ''} resume-section--${section.type}`} key={section.id}>
       {editable ? <input className="resume-section__title resume-editable" aria-label={`${section.title} heading`} value={section.title || ''} onChange={(event) => onUpdate(section.id, 'title', event.target.value)} /> : <h2 className="resume-section__title">{section.title || SECTION_LIBRARY[section.type]?.label || section.type}</h2>}
       {section.type === 'skills' && variant !== 'sidebar' && !editable ? (
-        <ul className="resume-skills">{(section.body || '').split('\n').filter(Boolean).map((skill, index) => <li key={`${skill}-${index}`}><LinkifiedText>{skill}</LinkifiedText></li>)}</ul>
+        <ul className="resume-skills">{(section.body || '').split('\n').filter(Boolean).map((skill, index) => <li key={`${section.id}-${index}`}><LinkifiedText>{skill}</LinkifiedText></li>)}</ul>
+      ) : section.type === 'projects' && variant === 'student' && !editable ? (
+        <div className="resume-student__projects">{(section.body || '').split(/\n\s*\n/).filter(Boolean).map((entry, index) => { const [title, ...detail] = entry.split('\n'); return <article key={`${section.id}-${index}`}><span>{String(index + 1).padStart(2, '0')}</span><div><h3><LinkifiedText>{title}</LinkifiedText></h3>{detail.length > 0 && <p><LinkifiedText>{detail.join('\n')}</LinkifiedText></p>}</div></article>; })}</div>
       ) : ['experience', 'education'].includes(section.type) && !editable ? (
         <div className="resume-items">{(section.body || '').split('\n\n').filter(Boolean).map((entry, index) => {
           const lines = entry.split('\n');
@@ -72,6 +77,31 @@ export default function ResumePortfolio({ portfolio, editable, onUpdate }) {
     </section>
   );
 
+  if (isStudent) {
+    const sidebarTypes = new Set(['contact', 'skills']);
+    return (
+      <article className={`resume-sheet ${pageClass}`} style={themeStyle}>
+        <header className="resume-student__masthead">
+          <div>
+            <span className="resume-student__eyebrow">EARLY CAREER / SELECTED WORK</span>
+            {editable ? <input className="resume-header__name resume-editable" aria-label="Full name" value={header?.title || ''} onChange={(event) => onUpdate(header?.id, 'title', event.target.value)} /> : <h1 className="resume-header__name">{header?.title || 'Your name'}</h1>}
+            {editable ? <AutoResizeTextarea className="resume-header__role resume-editable" aria-label="Professional title" value={header?.body || ''} onChange={(value) => onUpdate(header?.id, 'body', value)} /> : <p className="resume-header__role">{header?.body || 'Student · Emerging professional'}</p>}
+          </div>
+          {header?.image ? <img className="resume-student__portrait" src={header.image} alt={`${header?.title || 'Student'} portrait`} /> : <span className="resume-student__monogram" aria-hidden="true">{(header?.title || 'Y').trim().charAt(0).toUpperCase()}</span>}
+        </header>
+        <div className="resume-student__grid">
+          <aside className="resume-student__sidebar" aria-label="Contact and skills">
+            {sections.filter((section) => sidebarTypes.has(section.type)).map((section) => sectionView(section, section.type === 'skills' ? '' : 'student'))}
+          </aside>
+          <main className="resume-student__main">
+            {sections.filter((section) => !sidebarTypes.has(section.type) && !['header', 'contact'].includes(section.type)).map((section) => sectionView(section, 'student'))}
+          </main>
+        </div>
+        <footer className="resume-student__footer"><span>{header?.title || portfolio.title}</span><span>Designed with Pagecraft</span></footer>
+      </article>
+    );
+  }
+
   if (isMinimal) {
     const sidebarTypes = new Set(['contact', 'skills', 'languages', 'awards']);
     return (
@@ -82,8 +112,8 @@ export default function ResumePortfolio({ portfolio, editable, onUpdate }) {
         </aside>
         <main className="resume-main">
           <header className="resume-header resume-header--minimal">
-            {editable ? <input className="resume-header__name resume-editable" aria-label="Full name" value={header?.title || ''} onChange={(event) => onUpdate(header.id, 'title', event.target.value)} /> : <h1 className="resume-header__name">{header?.title}</h1>}
-            {editable ? <AutoResizeTextarea className="resume-header__role resume-editable" aria-label="Professional title" value={header?.body || ''} onChange={(value) => onUpdate(header.id, 'body', value)} /> : <p className="resume-header__role">{header?.body}</p>}
+            {editable ? <input className="resume-header__name resume-editable" aria-label="Full name" value={header?.title || ''} onChange={(event) => onUpdate(header?.id, 'title', event.target.value)} /> : <h1 className="resume-header__name">{header?.title}</h1>}
+            {editable ? <AutoResizeTextarea className="resume-header__role resume-editable" aria-label="Professional title" value={header?.body || ''} onChange={(value) => onUpdate(header?.id, 'body', value)} /> : <p className="resume-header__role">{header?.body}</p>}
           </header>
           {sections.filter((section) => !sidebarTypes.has(section.type) && section.type !== 'header').map((section) => sectionView(section, 'main'))}
         </main>
@@ -95,8 +125,8 @@ export default function ResumePortfolio({ portfolio, editable, onUpdate }) {
     return (
       <article className={`resume-sheet ${pageClass}`} style={themeStyle}>
         <header className="resume-header resume-header--center">
-          {editable ? <input className="resume-header__name resume-editable" aria-label="Full name" value={header?.title || ''} onChange={(event) => onUpdate(header.id, 'title', event.target.value)} /> : <h1 className="resume-header__name">{header?.title}</h1>}
-        {editable ? <AutoResizeTextarea className="resume-header__role resume-editable" aria-label="Professional title" value={header?.body || ''} onChange={(value) => onUpdate(header.id, 'body', value)} /> : <p className="resume-header__role">{header?.body}</p>}
+          {editable ? <input className="resume-header__name resume-editable" aria-label="Full name" value={header?.title || ''} onChange={(event) => onUpdate(header?.id, 'title', event.target.value)} /> : <h1 className="resume-header__name">{header?.title}</h1>}
+        {editable ? <AutoResizeTextarea className="resume-header__role resume-editable" aria-label="Professional title" value={header?.body || ''} onChange={(value) => onUpdate(header?.id, 'body', value)} /> : <p className="resume-header__role">{header?.body}</p>}
         </header>
         {contact && <div className="resume-contact resume-contact--blue">{editable ? <AutoResizeTextarea className="resume-editable" aria-label="Contact details" value={contact.body} onChange={(value) => onUpdate(contact.id, 'body', value)} /> : <LinkifiedText>{contact.body}</LinkifiedText>}</div>}
         {sections.filter((section) => !['header', 'contact'].includes(section.type)).map((section) => sectionView(section, 'blue'))}
@@ -107,8 +137,8 @@ export default function ResumePortfolio({ portfolio, editable, onUpdate }) {
   return (
     <article className={`resume-sheet ${pageClass}`} style={themeStyle}>
       <header className="resume-header resume-header--center">
-        {editable ? <input className="resume-header__name resume-editable" aria-label="Full name" value={header?.title || ''} onChange={(event) => onUpdate(header.id, 'title', event.target.value)} /> : <h1 className="resume-header__name">{header?.title}</h1>}
-        {editable ? <AutoResizeTextarea className="resume-header__role resume-editable" aria-label="Professional title" value={header?.body || ''} onChange={(value) => onUpdate(header.id, 'body', value)} /> : <p className="resume-header__role">{header?.body}</p>}
+        {editable ? <input className="resume-header__name resume-editable" aria-label="Full name" value={header?.title || ''} onChange={(event) => onUpdate(header?.id, 'title', event.target.value)} /> : <h1 className="resume-header__name">{header?.title}</h1>}
+        {editable ? <AutoResizeTextarea className="resume-header__role resume-editable" aria-label="Professional title" value={header?.body || ''} onChange={(value) => onUpdate(header?.id, 'body', value)} /> : <p className="resume-header__role">{header?.body}</p>}
       </header>
       {contact && <div className="resume-contact resume-contact--monochrome">{editable ? <AutoResizeTextarea className="resume-editable" aria-label="Contact details" value={contact.body} onChange={(value) => onUpdate(contact.id, 'body', value)} /> : <LinkifiedText>{contact.body}</LinkifiedText>}</div>}
       {sections.filter((section) => !['header', 'contact'].includes(section.type)).map((section) => sectionView(section, 'monochrome'))}

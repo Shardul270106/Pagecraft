@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { API_URL } from '../lib/api';
 import { PortfolioView } from '../components/PortfolioView';
 import './Editor.css';
+import '../components/PortfolioTemplates.css';
 
 export default function PublicPortfolio() {
   const { slug } = useParams();

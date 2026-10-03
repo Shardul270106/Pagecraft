@@ -5,6 +5,7 @@ import { SECTION_LIBRARY } from '../data/templates';
 import { PortfolioView } from '../components/PortfolioView';
 import PortfolioIcon, { PORTFOLIO_ICONS } from '../components/PortfolioIcon';
 import './Editor.css';
+import '../components/PortfolioTemplates.css';
 
 const COLORS = ['#e6e51e', '#466cf3', '#ff8562', '#ff6b2b', '#baf3d6', '#f1e3c6', '#f34646', '#f4f4f4'];
 const BACKGROUNDS = ['#ffffff', '#f7f5ee', '#f3f6ff', '#fff8f2'];
@@ -219,7 +220,7 @@ export default function Editor() {
       ...current,
       canvasElements: (current.canvasElements || []).map((element) => {
         if (element.id !== elementId) return element;
-        const movedToSection = patch.sectionId && patch.sectionId !== element.sectionId;
+        const movedToSection = Boolean(patch.sectionId && patch.sectionId !== element.sectionId);
         const next = { ...element, ...patch };
         if (next.sectionId && patch.width !== undefined) {
           next.width = Math.min(Math.max(8, 100 - next.x), patch.width);
@@ -230,8 +231,7 @@ export default function Editor() {
           next.y = patch.y ?? (element.type === 'image' ? 8 : element.type === 'text' ? 68 : 12);
           next.width = element.type === 'image' ? 30 : element.type === 'text' ? 44 : element.type === 'icon' ? 14 : 22;
         }
-        if (next.sectionId) next.x = Math.min(next.x, Math.max(0, 100 - next.width));
-        if (element.type === 'image' && !next.sectionId && patch.x !== undefined && next.x < 52 && next.y < 32) next.y = 32;
+        next.x = Math.min(next.x, Math.max(0, 100 - next.width));
         return next;
       }),
     }), `element:${elementId}`);
@@ -582,8 +582,8 @@ function CanvasElementControls({ portfolio, selectedCanvasElement, selectedSecti
       </div>
       {element.type !== 'image' && <ColorWheel label="Element color" value={element.color} onChange={(value) => updateCanvasElement(element.id, { color: value })} />}
       {element.type === 'text' && <label>Text size<input type="range" min="14" max="72" value={element.fontSize} onChange={(event) => updateCanvasElement(element.id, { fontSize: Number(event.target.value) })} /></label>}
-      {(element.type === 'image' || element.type === 'icon' || ['rectangle', 'circle', 'line'].includes(element.type)) && <label>Width<input type="range" min="8" max={element.sectionId ? Math.max(8, 100 - element.x) : 90} value={element.width} onChange={(event) => updateCanvasElement(element.id, { width: Number(event.target.value) })} /></label>}
-      {element.type !== 'text' && element.type !== 'line' && <label>Height<input type="range" min="30" max="720" value={element.height} onChange={(event) => updateCanvasElement(element.id, { height: Number(event.target.value) })} /></label>}
+      {(element.type === 'text' || element.type === 'image' || element.type === 'icon' || ['rectangle', 'circle', 'line'].includes(element.type)) && <label>Width<input type="range" min="8" max={Math.max(8, Math.min(100 - element.x, element.sectionId ? 100 - element.x : 96 - element.x))} value={element.width} onChange={(event) => updateCanvasElement(element.id, { width: Number(event.target.value) })} /></label>}
+      {element.type !== 'line' && <label>Height<input type="range" min="30" max="720" value={element.height} onChange={(event) => updateCanvasElement(element.id, { height: Number(event.target.value) })} /></label>}
     </div>}
   </div>;
 }

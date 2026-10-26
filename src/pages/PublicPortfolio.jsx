@@ -10,17 +10,21 @@ export default function PublicPortfolio() {
   const [portfolio, setPortfolio] = useState(null);
   const [error, setError] = useState('');
   const [attempt, setAttempt] = useState(0);
-  const requestedPageRef = useRef('');
+  const requestCacheRef = useRef({ key: '', promise: null });
 
   useEffect(() => {
     const requestKey = `${slug}:${attempt}`;
-    if (requestedPageRef.current === requestKey) return undefined;
-    requestedPageRef.current = requestKey;
     let current = true;
     setPortfolio(null);
     setError('');
-    fetch(`${API_URL}/api/portfolios/public/${slug}`)
-      .then(async (response) => { const result = await response.json(); if (!response.ok) throw new Error(result.message || 'Portfolio not found.'); return result; })
+    if (requestCacheRef.current.key !== requestKey) {
+      requestCacheRef.current = {
+        key: requestKey,
+        promise: fetch(`${API_URL}/api/portfolios/public/${slug}`)
+          .then(async (response) => { const result = await response.json(); if (!response.ok) throw new Error(result.message || 'Portfolio not found.'); return result; }),
+      };
+    }
+    requestCacheRef.current.promise
       .then((result) => { if (current) setPortfolio(result); })
       .catch((reason) => { if (current) setError(reason.message); });
     return () => { current = false; };

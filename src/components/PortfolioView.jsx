@@ -285,15 +285,20 @@ function PortfolioVisualList({ section, templateId }) {
   while (entries.length < count) entries.push(`Selected project ${String(entries.length + 1).padStart(2, '0')}`);
   if (!entries.length) return null;
   const isGallery = section.type === 'gallery';
+  const hasPhotos = photos.some(Boolean) || Boolean(section.image);
+  if (!hasPhotos) return <div className={`portfolio-text-project-list portfolio-text-project-list--${templateId}`}>
+    {entries.map((entry, index) => {
+      const project = getProjectContent(entry);
+      return <article key={`${section.id}-text-${index}`}><span>{String(index + 1).padStart(2, '0')}</span><div><h3><LinkifiedText>{project.title}</LinkifiedText></h3>{project.detail && <p><LinkifiedText>{project.detail}</LinkifiedText></p>}</div></article>;
+    })}
+  </div>;
   return <div className={`portfolio-visual-list ${isGallery ? 'portfolio-visual-list--gallery' : ''} portfolio-visual-list--${templateId}`}>
     {entries.map((entry, index) => {
       const project = getProjectContent(entry);
       const photo = photos[index] || (index === 0 ? section.image : '');
       const crop = photos[index] ? section.galleryImageSettings?.[index] || {} : { zoom: section.imageZoom, x: section.imagePositionX, y: section.imagePositionY };
-      return <article className="portfolio-visual-card" key={`${section.id}-${index}`}>
-        <div className="portfolio-visual-card__art" aria-hidden="true">
-          {photo ? <img src={photo} alt="" style={{ objectPosition: `${crop.x ?? 50}% ${crop.y ?? 50}%`, transform: `scale(${Math.min(250, Math.max(100, Number(crop.zoom) || 100)) / 100})` }} /> : <><span>{String(index + 1).padStart(2, '0')}</span><i /><b /></>}
-        </div>
+      return <article className={`portfolio-visual-card ${photo ? 'has-photo' : 'text-only'}`} key={`${section.id}-${index}`}>
+        {photo && <div className="portfolio-visual-card__art" aria-hidden="true"><img src={photo} alt="" style={{ objectPosition: `${crop.x ?? 50}% ${crop.y ?? 50}%`, transform: `scale(${Math.min(250, Math.max(100, Number(crop.zoom) || 100)) / 100})` }} /></div>}
         <div className="portfolio-visual-card__copy"><span className="portfolio-visual-card__index">{isGallery ? 'FRAME' : 'PROJECT'} / {String(index + 1).padStart(2, '0')}</span><h3><LinkifiedText>{project.title}</LinkifiedText></h3>{project.detail && <p><LinkifiedText>{project.detail}</LinkifiedText></p>}</div>
       </article>;
     })}

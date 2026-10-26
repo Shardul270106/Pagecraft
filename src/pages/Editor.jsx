@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { api } from '../lib/api';
 import { SECTION_LIBRARY } from '../data/templates';
 import { PortfolioView } from '../components/PortfolioView';
@@ -41,6 +41,7 @@ const normalizeSectionCanvas = (portfolio) => {
 
 export default function Editor() {
   const { id } = useParams();
+  const location = useLocation();
   const navigate = useNavigate();
   const isNewDraft = id === 'new' || id.startsWith('draft-');
   const draftStorageKey = id === 'new' ? 'pagecraft:unsaved-draft' : `pagecraft:unsaved-draft:${id}`;
@@ -57,7 +58,7 @@ export default function Editor() {
   const [dragId, setDragId] = useState(null);
   const [newSection, setNewSection] = useState('about');
   const [publicUrl, setPublicUrl] = useState('');
-  const [isPreview, setIsPreview] = useState(false);
+  const isPreview = Boolean(location.state?.pagecraftEditorPreview);
   const [previewDevice, setPreviewDevice] = useState('desktop');
   const [selectedTemplateImage, setSelectedTemplateImage] = useState(null);
   const [selectedTemplateImageSource, setSelectedTemplateImageSource] = useState('');
@@ -65,6 +66,15 @@ export default function Editor() {
   const [selectedSectionId, setSelectedSectionId] = useState('');
   const [activePanel, setActivePanel] = useState('sections');
   const [canvasZoom, setCanvasZoom] = useState(100);
+  const previewAddress = `${location.pathname}${location.search}${location.hash}`;
+  const enterPreview = () => navigate(previewAddress, {
+    state: { ...(location.state || {}), pagecraftEditorPreview: true },
+  });
+  const exitPreview = () => {
+    const restState = { ...(location.state || {}) };
+    delete restState.pagecraftEditorPreview;
+    navigate(previewAddress, { replace: true, state: restState });
+  };
   const zoomCanvasByWheel = useCallback((deltaY) => {
     setCanvasZoom((zoom) => Math.max(30, Math.min(180, zoom + (deltaY < 0 ? 5 : -5))));
   }, []);
@@ -461,7 +471,7 @@ export default function Editor() {
   if (isPreview) return (
     <main ref={editorRootRef} className={`editor-preview-mode ${portfolio.templateId === 'grunge-portfolio' ? 'editor-preview-mode--grunge' : ''} ${isIPortfolio ? 'editor-preview-mode--iportfolio' : ''}`}>
       <header className="editor-preview-toolbar">
-        <button className="editor-button" onClick={() => setIsPreview(false)}>← Back to editor</button>
+        <button className="editor-button" onClick={exitPreview}>← Back to editor</button>
         <div className="editor-preview-label"><strong>Website preview</strong><span>{portfolio.published ? 'Published page · showing current edits' : 'Draft preview · only visible to you'}</span></div>
         <div className="editor-preview-controls" role="group" aria-label="Preview size">
           <button className={previewDevice === 'desktop' ? 'is-active' : ''} aria-pressed={previewDevice === 'desktop'} onClick={() => setPreviewDevice('desktop')}>Desktop</button>
@@ -482,7 +492,7 @@ export default function Editor() {
       <header className="editor-topbar">
         <Link to="/home" className="editor-brand">Page<span>craft</span></Link>
         <div className="editor-document-title"><input aria-label="Portfolio name" value={portfolio.title} onChange={(event) => changeField('title', event.target.value)} /><span role="status" aria-live="polite">{saving ? 'Saving changes…' : message || 'All changes saved'}</span></div>
-        <div className="editor-actions"><button type="button" className="editor-button editor-history-button" onClick={undo} disabled={!canUndo} title="Undo (Ctrl/Cmd+Z)" aria-label="Undo">↶ <span className="editor-history-label">Undo</span></button><button type="button" className="editor-button editor-history-button" onClick={redo} disabled={!canRedo} title="Redo (Ctrl/Cmd+Shift+Z)" aria-label="Redo">↷ <span className="editor-history-label">Redo</span></button><button type="button" className="editor-button" onClick={() => setIsPreview(true)}>Preview site</button><button type="button" className="editor-button" onClick={exportPdf}>Export PDF</button><button type="button" className="editor-button editor-button--dark" onClick={publish} disabled={saving}>{portfolio.published ? 'Unpublish' : 'Publish'}</button></div>
+        <div className="editor-actions"><button type="button" className="editor-button editor-history-button" onClick={undo} disabled={!canUndo} title="Undo (Ctrl/Cmd+Z)" aria-label="Undo">↶ <span className="editor-history-label">Undo</span></button><button type="button" className="editor-button editor-history-button" onClick={redo} disabled={!canRedo} title="Redo (Ctrl/Cmd+Shift+Z)" aria-label="Redo">↷ <span className="editor-history-label">Redo</span></button><button type="button" className="editor-button" onClick={enterPreview}>Preview site</button><button type="button" className="editor-button" onClick={exportPdf}>Export PDF</button><button type="button" className="editor-button editor-button--dark" onClick={publish} disabled={saving}>{portfolio.published ? 'Unpublish' : 'Publish'}</button></div>
       </header>
       <div className="editor-workspace">
         <aside className="editor-sidebar" data-active-panel={activePanel}>

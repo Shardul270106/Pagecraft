@@ -5,7 +5,6 @@ import LinkifiedText, { getLinkifiedParts } from './LinkifiedText';
 import grungeWallpaper from '../assets/grunge/bg.jpg';
 import grungeSymbol from '../assets/grunge/symbolWhite.svg';
 import grungeBarcode from '../assets/grunge/barcode.svg';
-import pagecraftCursor from '../assets/pagecraft-cursor.svg';
 import PortfolioIcon from './PortfolioIcon';
 import ProjectPhotoFrames from './ProjectPhotoFrames';
 import { getPortfolioFontStack } from '../lib/portfolioFont';
@@ -819,13 +818,6 @@ function IPortfolioFrame({ portfolio, editable, theme = {}, onContentChange, onI
         currentState.onZoomWheel?.(event.deltaY);
       };
       doc.addEventListener('wheel', doc.__pagecraftWheelZoom, { capture: true, passive: false });
-      let cursorStyle = doc.getElementById('pagecraft-custom-cursor-style');
-      if (!cursorStyle) {
-        cursorStyle = doc.createElement('style');
-        cursorStyle.id = 'pagecraft-custom-cursor-style';
-        doc.head.appendChild(cursorStyle);
-      }
-      cursorStyle.textContent = `body,body *{cursor:url("${pagecraftCursor}") 5 5,auto!important}input[type="text"],input[type="search"],input[type="email"],input[type="url"],input[type="tel"],input[type="password"],input[type="number"],textarea,[contenteditable="true"]{cursor:text!important}`;
       doc.onkeydown = current.editable ? (event) => {
         if (!(event.ctrlKey || event.metaKey) || event.altKey) return;
         const key = event.key.toLowerCase();

@@ -9,6 +9,7 @@ export default function AuthModal({
   initialTab = 'login',
   onSubmit,
   onGoogleClick,
+  onForgotPassword,
   isLoading,
   apiError,
   selectedTemplateName,
@@ -16,6 +17,7 @@ export default function AuthModal({
   const [tab, setTab] = useState(initialTab);
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
+  const [resetMessage, setResetMessage] = useState('');
   const dialogRef = useRef(null);
   const returnFocusRef = useRef(null);
 
@@ -24,6 +26,7 @@ export default function AuthModal({
       setTab(initialTab);
       setErrors({});
       setShowPassword(false);
+      setResetMessage('');
     }
   }, [isOpen, initialTab]);
 
@@ -101,6 +104,20 @@ export default function AuthModal({
         email: data.email.trim().toLowerCase(),
       });
     }
+  }
+
+  async function handleForgotPassword() {
+    const emailInput = dialogRef.current?.querySelector('input[name="email"]');
+    const email = emailInput?.value.trim().toLowerCase() || '';
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setErrors((current) => ({ ...current, email: 'Enter a valid email address first.' }));
+      emailInput?.focus();
+      return;
+    }
+    setErrors((current) => ({ ...current, email: '' }));
+    setResetMessage('');
+    const result = await onForgotPassword?.(email);
+    if (result?.ok) setResetMessage(result.message);
   }
 
   return createPortal((
@@ -405,14 +422,17 @@ export default function AuthModal({
             {/* FORGOT PASSWORD */}
              
             {!isSignup && (
-            <a  
-                href="#"
+            <button
+                type="button"
                 className="auth-modal__forgot"
-                onClick={(e) => e.preventDefault()}
+                onClick={handleForgotPassword}
+                disabled={isLoading}
               >
                 Forgot password?
-              </a>
+              </button>
             )}
+
+            {resetMessage && <p className="auth-modal__reset-message" role="status">{resetMessage}</p>}
 
             {/* SUBMIT */}
 

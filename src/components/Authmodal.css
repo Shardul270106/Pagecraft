@@ -587,6 +587,19 @@
   font-weight: var(--font-weight-medium);
 
   color: var(--color-signal-blue);
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.auth-modal__forgot:disabled { cursor: wait; opacity: .65; }
+
+.auth-modal__reset-message {
+  margin: -2px 0 0;
+  color: #176c44;
+  font-size: 12.5px;
+  line-height: 1.45;
 }
 
 

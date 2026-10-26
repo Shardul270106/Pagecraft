@@ -9,6 +9,8 @@ import Footer from './components/Footer';
 import Home from './pages/Home';
 import Editor from './pages/Editor';
 import PublicPortfolio from './pages/PublicPortfolio';
+import NotFound from './pages/NotFound';
+import ResetPassword from './pages/ResetPassword';
 import { Navigate } from 'react-router-dom';
 import './LandingPage.css';
 
@@ -76,6 +78,8 @@ export default function App() {
         <Route path="/home" element={<RequireAuth><Home /></RequireAuth>} />
         <Route path="/editor/:id" element={<RequireAuth><Editor /></RequireAuth>} />
         <Route path="/p/:slug" element={<PublicPortfolio />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </div>
   );

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import './Navbar.css';
-import AuthModal from './AuthModal';
+import AuthModal from './Authmodal.jsx';
 import { useNavigate } from 'react-router-dom';
 import { TEMPLATES } from '../data/templates';
 
@@ -157,6 +157,30 @@ export default function Navbar({ authRequest, selectedTemplateId, onOpenAuth, on
     }
   }
 
+  async function handleForgotPassword(email) {
+    setIsLoading(true);
+    setApiError('');
+    try {
+      const res = await fetch(`${API_URL}/api/auth/forgot-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      const result = await res.json();
+      if (!res.ok) {
+        setApiError(result.message || 'Could not send a reset link. Please try again.');
+        return { ok: false };
+      }
+      return { ok: true, message: result.message };
+    } catch (err) {
+      console.error('Password reset request error:', err);
+      setApiError('Could not reach the server. Please try again.');
+      return { ok: false };
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
   return (
     <header className="navbar-wrap">
       <div className="container">
@@ -209,6 +233,7 @@ export default function Navbar({ authRequest, selectedTemplateId, onOpenAuth, on
         initialTab={authTab}
         onSubmit={handleAuthSubmit}
         onGoogleClick={handleGoogleClick}
+        onForgotPassword={handleForgotPassword}
         isLoading={isLoading}
         apiError={apiError}
         selectedTemplateName={selectedTemplateName}

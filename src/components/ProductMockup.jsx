@@ -134,47 +134,49 @@ class SplineErrorBoundary extends React.Component {
 export default function ProductMockup() {
   const sceneRef = useRef(null);
 
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== "undefined" && window.matchMedia("(max-width: 720px)").matches,
+  );
   const [webGLAvailable, setWebGLAvailable] = useState(null);
   const [showSpline, setShowSpline] = useState(false);
   const [failed, setFailed] = useState(false);
 
-  /* -------------------------------------------------------
-     Check WebGL once when component mounts
-     ------------------------------------------------------- */
+  /* Keep the mobile landing preview independent of WebGL. */
   useEffect(() => {
+    const mediaQuery = window.matchMedia("(max-width: 720px)");
+    const updateIsMobile = (event) => setIsMobile(event.matches);
+    mediaQuery.addEventListener("change", updateIsMobile);
+    return () => mediaQuery.removeEventListener("change", updateIsMobile);
+  }, []);
+
+  useEffect(() => {
+    if (isMobile) {
+      setFailed(false);
+      setWebGLAvailable(null);
+      setShowSpline(false);
+      return undefined;
+    }
+
     let mounted = true;
+    const available = checkWebGL();
+    setWebGLAvailable(available);
+    setFailed(false);
 
-    const initialize = async () => {
-      const available = checkWebGL();
+    if (!available) {
+      setFailed(true);
+      return () => { mounted = false; };
+    }
 
-      if (!mounted) return;
-
-      setWebGLAvailable(available);
-
-      if (!available) {
-        setFailed(true);
-        return;
-      }
-
-      /*
-       * Small delay prevents Spline from fighting with
-       * other page resources during the initial render.
-       */
-      const timer = setTimeout(() => {
-        if (mounted) {
-          setShowSpline(true);
-        }
-      }, 300);
-
-      return () => clearTimeout(timer);
-    };
-
-    initialize();
+    /* Let the page settle before initializing the 3D scene. */
+    const timer = setTimeout(() => {
+      if (mounted) setShowSpline(true);
+    }, 300);
 
     return () => {
       mounted = false;
+      clearTimeout(timer);
     };
-  }, []);
+  }, [isMobile]);
 
   /* -------------------------------------------------------
      Retry
@@ -216,6 +218,24 @@ export default function ProductMockup() {
         className="mockup-frame__scene"
         ref={sceneRef}
       >
+        {isMobile ? (
+          <div className="mockup-frame__mobile-preview" role="img" aria-label="Preview of a portfolio website on a phone">
+            <div className="mockup-mobile-browser">
+              <div className="mockup-mobile-browser__top"><span /><span /><span /></div>
+              <div className="mockup-mobile-page">
+                <div className="mockup-mobile-page__nav"><b>PORTFOLIO</b><span>MENU</span></div>
+                <div className="mockup-mobile-page__hero">
+                  <span>DESIGNER · DEVELOPER</span>
+                  <strong>Make your<br />work matter.</strong>
+                  <i />
+                </div>
+                <div className="mockup-mobile-page__work"><b>Selected work</b><div><i /><i /><i /></div></div>
+              </div>
+            </div>
+            <span className="mockup-mobile-caption">A portfolio that fits every screen</span>
+          </div>
+        ) : (
+          <>
         {/* WebGL check */}
         {webGLAvailable === null && <SplineLoading />}
 
@@ -241,9 +261,11 @@ export default function ProductMockup() {
               </Suspense>
             </SplineErrorBoundary>
           )}
+          </>
+        )}
 
         {/* Spline attribution cover */}
-        <div className="mockup-frame__badge-cover" />
+        {!isMobile && <div className="mockup-frame__badge-cover" />}
       </div>
     </section>
   );

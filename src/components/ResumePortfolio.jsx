@@ -2,6 +2,7 @@ import { useLayoutEffect, useRef } from 'react';
 import { SECTION_LIBRARY } from '../data/templates';
 import LinkifiedText from './LinkifiedText';
 import { getPortfolioFontStack } from '../lib/portfolioFont';
+import ProjectPhotoFrames from './ProjectPhotoFrames';
 
 const RESUME_LAYOUTS = new Set(['student-resume', 'resume-blue-corporate', 'resume-black-white-a4', 'resume-minimalist-cv']);
 
@@ -42,7 +43,15 @@ function AutoResizeTextarea({ value, onChange, ...props }) {
   );
 }
 
-export default function ResumePortfolio({ portfolio, editable, onUpdate }) {
+function getProjectEntries(section) {
+  const entries = (section.body || '').split(/\n\s*\n/).filter(Boolean);
+  const lastPhotoIndex = (section.galleryImages || []).reduce((last, photo, index) => photo ? index : last, -1);
+  const count = Math.max(entries.length, lastPhotoIndex + 1, section.image ? 1 : 0);
+  while (entries.length < count) entries.push(`Selected project ${String(entries.length + 1).padStart(2, '0')}`);
+  return entries;
+}
+
+export default function ResumePortfolio({ portfolio, editable, onUpdate, onUploadImage }) {
   const sections = portfolio.sections || [];
   const templateId = portfolio.templateId;
   const header = sections.find((section) => section.type === 'header');
@@ -64,8 +73,8 @@ export default function ResumePortfolio({ portfolio, editable, onUpdate }) {
       {editable ? <input className="resume-section__title resume-editable" style={section.titleFontSize ? { fontSize: `${section.titleFontSize}px` } : undefined} aria-label={`${section.title} heading`} value={section.title || ''} onChange={(event) => onUpdate(section.id, 'title', event.target.value)} /> : <h2 className="resume-section__title" style={section.titleFontSize ? { fontSize: `${section.titleFontSize}px` } : undefined}>{section.title || SECTION_LIBRARY[section.type]?.label || section.type}</h2>}
       {section.type === 'skills' && variant !== 'sidebar' && !editable ? (
         <ul className="resume-skills">{(section.body || '').split('\n').filter(Boolean).map((skill, index) => <li key={`${section.id}-${index}`}><LinkifiedText>{skill}</LinkifiedText></li>)}</ul>
-      ) : section.type === 'projects' && variant === 'student' && !editable ? (
-        <div className="resume-student__projects">{(section.body || '').split(/\n\s*\n/).filter(Boolean).map((entry, index) => { const [title, ...detail] = entry.split('\n'); return <article key={`${section.id}-${index}`}><span>{String(index + 1).padStart(2, '0')}</span><div><h3><LinkifiedText>{title}</LinkifiedText></h3>{detail.length > 0 && <p><LinkifiedText>{detail.join('\n')}</LinkifiedText></p>}</div></article>; })}</div>
+      ) : ['projects', 'projects-work', 'gallery'].includes(section.type) && !editable ? (
+        <div className="resume-projects">{getProjectEntries(section).map((entry, index) => { const [title, ...detail] = entry.split('\n'); const photo = section.galleryImages?.[index] || (!section.galleryImages?.length && index === 0 ? section.image : ''); const crop = section.galleryImageSettings?.[index] || { zoom: section.imageZoom, x: section.imagePositionX, y: section.imagePositionY }; return <article key={`${section.id}-${index}`}><span>{String(index + 1).padStart(2, '0')}</span><div><h3><LinkifiedText>{title}</LinkifiedText></h3>{detail.length > 0 && <p><LinkifiedText>{detail.join('\n')}</LinkifiedText></p>}</div>{photo && <img src={photo} alt={`${title || 'Project'} photo`} style={{ objectPosition: `${crop.x ?? 50}% ${crop.y ?? 50}%`, transform: `scale(${Math.min(250, Math.max(100, Number(crop.zoom) || 100)) / 100})` }} />}</article>; })}</div>
       ) : ['experience', 'education'].includes(section.type) && !editable ? (
         <div className="resume-items">{(section.body || '').split('\n\n').filter(Boolean).map((entry, index) => {
           const lines = entry.split('\n');
@@ -82,6 +91,7 @@ export default function ResumePortfolio({ portfolio, editable, onUpdate }) {
       ) : (
         <div className="resume-section__body">{(section.body || '').split('\n\n').map((entry, index) => <p className="resume-entry" key={`${section.id}-${index}`}><LinkifiedText>{entry}</LinkifiedText></p>)}</div>
       )}
+      {editable && ['projects', 'projects-work', 'gallery'].includes(section.type) && <ProjectPhotoFrames section={section} editable={editable} onUpdate={onUpdate} onUploadImage={onUploadImage} />}
     </section>
   );
 

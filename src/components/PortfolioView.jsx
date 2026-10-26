@@ -7,6 +7,7 @@ import grungeSymbol from '../assets/grunge/symbolWhite.svg';
 import grungeBarcode from '../assets/grunge/barcode.svg';
 import pagecraftCursor from '../assets/pagecraft-cursor.svg';
 import PortfolioIcon from './PortfolioIcon';
+import ProjectPhotoFrames from './ProjectPhotoFrames';
 import { getPortfolioFontStack } from '../lib/portfolioFont';
 
 const FOLIO_LINKS = [
@@ -144,7 +145,7 @@ export function PortfolioView({ portfolio, editable = false, onUpdate, onTemplat
 
   if (isIPortfolio) return <PortfolioComposition {...{ portfolio, editable, selectedCanvasElement, onCanvasElementUpdate, onCanvasElementSelect }}><IPortfolioFrame portfolio={portfolio} editable={editable} theme={theme} onContentChange={onTemplateContentChange} onImageSelect={onTemplateImageSelect} onUndo={onUndo} onRedo={onRedo} onZoomWheel={onCanvasWheelZoom} /></PortfolioComposition>;
   if (isGrunge) return <PortfolioComposition {...{ portfolio, editable, selectedCanvasElement, onCanvasElementUpdate, onCanvasElementSelect }}><GrungePortfolio portfolio={portfolio} sections={sections} header={header} editable={editable} onUpdate={onUpdate} onUploadImage={onUploadImage} sectionHref={sectionHref} /></PortfolioComposition>;
-  if (isResumeTemplate(portfolio?.templateId)) return <PortfolioComposition {...{ portfolio, editable, selectedCanvasElement, onCanvasElementUpdate, onCanvasElementSelect }}><ResumePortfolio portfolio={portfolio} editable={editable} onUpdate={onUpdate} /></PortfolioComposition>;
+  if (isResumeTemplate(portfolio?.templateId)) return <PortfolioComposition {...{ portfolio, editable, selectedCanvasElement, onCanvasElementUpdate, onCanvasElementSelect }}><ResumePortfolio portfolio={portfolio} editable={editable} onUpdate={onUpdate} onUploadImage={onUploadImage} /></PortfolioComposition>;
 
   return <PortfolioComposition {...{ portfolio, editable, selectedCanvasElement, onCanvasElementUpdate, onCanvasElementSelect }}>
     <article className={`portfolio-page layout-${isFolio ? 'folio' : (theme.layout || 'modern')} portfolio-page--${portfolio.templateId || 'professional-portfolio'} ${isFolio ? 'portfolio-page--folio' : ''} ${hasHeroCanvasImage ? 'portfolio-page--image-flow' : ''}`} style={style}>
@@ -175,7 +176,9 @@ export function PortfolioView({ portfolio, editable = false, onUpdate, onTemplat
           const isTemplateGallery = ['model-portfolio', 'scrapbook-portfolio'].includes(portfolio.templateId) && section.type === 'gallery';
           const isImageGallery = isPhotographerGallery || isTemplateGallery;
           const isBlueCreativeProject = isBlueCreative && ['projects', 'projects-work', 'gallery'].includes(section.type);
-          const hasVisualList = !editable && !isImageGallery && !isBlueCreativeProject && ['projects', 'projects-work', 'gallery'].includes(section.type) && splitContentBlocks(section.body).length > 0;
+          const isPhotoCollection = ['projects', 'projects-work', 'gallery'].includes(section.type);
+          const hasProjectContent = splitContentBlocks(section.body).length > 0 || (section.galleryImages || []).some(Boolean) || Boolean(section.image);
+          const hasVisualList = !editable && !isImageGallery && !isBlueCreativeProject && isPhotoCollection && hasProjectContent;
           const copyBounds = getSectionCopyBounds(sectionElements) || (section.image ? { left: 0, width: 68 } : null);
           const contentStyle = { '--section-offset-x': `${section.contentOffsetX || 0}px`, '--section-offset-y': `${section.contentOffsetY || 0}px` };
           if (section.type === 'header') return (
@@ -216,9 +219,10 @@ export function PortfolioView({ portfolio, editable = false, onUpdate, onTemplat
                 {editable ? isBlueCreative ? <BlueCreativeEditableHeading section={section} onUpdate={onUpdate} fallbackLabel={label} /> : <input aria-label={`${label} heading`} style={section.titleFontSize ? { fontSize: `${section.titleFontSize}px` } : undefined} value={section.title || ''} onChange={(event) => onUpdate(section.id, 'title', event.target.value)} /> : <h2 style={section.titleFontSize ? { fontSize: `${section.titleFontSize}px` } : undefined}>{section.title || label}</h2>}
                 {isImageGallery ? null : editable && isBlueCreative ? <BlueCreativeEditableBody section={section} onUpdate={onUpdate} /> : editable ? <textarea ref={resizeTextarea} data-auto-size="true" style={section.bodyFontSize ? { fontSize: `${section.bodyFontSize}px` } : undefined} aria-label={`${label} content`} value={section.body || ''} onChange={(event) => { onUpdate(section.id, 'body', event.target.value); resizeTextarea(event.currentTarget); }} rows={Math.max(3, String(section.body || '').split('\n').length)} /> : <div className={section.bodyFontSize ? 'portfolio-section-body--custom' : undefined} style={section.bodyFontSize ? { '--section-body-size': `${section.bodyFontSize}px` } : undefined}><SectionDisplay section={section} templateId={portfolio.templateId} /></div>}
               </SectionCopy>
-              {section.image && (editable || !['projects', 'projects-work', 'gallery'].includes(section.type) || ['model-portfolio', 'scrapbook-portfolio', 'blue-creative-portfolio'].includes(portfolio.templateId)) && <div className="portfolio-section-media"><img className="portfolio-page__image" src={section.image} alt={`${label} visual`} style={getSectionImageCropStyle(section)} /></div>}
+              {section.image && (!isPhotoCollection || isBlueCreativeProject) && <div className="portfolio-section-media"><img className="portfolio-page__image" src={section.image} alt={`${label} visual`} style={getSectionImageCropStyle(section)} /></div>}
               {isImageGallery && <PhotographerGallery section={section} editable={editable} onUpdate={onUpdate} onUploadImage={onUploadImage} className={portfolio.templateId === 'model-portfolio' ? 'photographer-gallery--model' : portfolio.templateId === 'scrapbook-portfolio' ? 'photographer-gallery--scrapbook' : portfolio.templateId === 'blue-creative-portfolio' ? 'photographer-gallery--blue-creative' : ''} />}
               {isBlueCreativeProject && <PhotographerGallery section={section} editable={editable} onUpdate={onUpdate} onUploadImage={onUploadImage} className={`photographer-gallery--blue-creative photographer-gallery--blue-creative-${section.type}`} />}
+              {editable && isPhotoCollection && !isImageGallery && !isBlueCreativeProject && <ProjectPhotoFrames section={section} editable={editable} onUpdate={onUpdate} onUploadImage={onUploadImage} />}
               {hasVisualList && <PortfolioVisualList section={section} templateId={portfolio.templateId} />}
               {sectionElements.length > 0 && <CanvasElementsLayer elements={sectionElements} editable={editable} selectedId={selectedCanvasElement} onUpdate={onCanvasElementUpdate} onSelect={onCanvasElementSelect} sectionBound />}
               {isBlueCreative && ['about', 'education', 'experience', 'skills', 'projects', 'projects-work', 'gallery'].includes(section.type) && <BlueCreativePageFooter number={section.type === 'about' ? '01.' : section.type === 'education' ? '02.' : section.type === 'experience' ? '03.' : section.type === 'skills' ? '04.' : '05.'} />}
@@ -275,14 +279,20 @@ function SectionDisplay({ section, templateId }) {
 
 function PortfolioVisualList({ section, templateId }) {
   const entries = splitContentBlocks(section.body);
+  const photos = section.galleryImages || [];
+  const lastPhotoIndex = photos.reduce((last, photo, index) => photo ? index : last, -1);
+  const count = Math.max(entries.length, lastPhotoIndex + 1, section.image ? 1 : 0);
+  while (entries.length < count) entries.push(`Selected project ${String(entries.length + 1).padStart(2, '0')}`);
   if (!entries.length) return null;
   const isGallery = section.type === 'gallery';
   return <div className={`portfolio-visual-list ${isGallery ? 'portfolio-visual-list--gallery' : ''} portfolio-visual-list--${templateId}`}>
     {entries.map((entry, index) => {
       const project = getProjectContent(entry);
+      const photo = photos[index] || (index === 0 ? section.image : '');
+      const crop = photos[index] ? section.galleryImageSettings?.[index] || {} : { zoom: section.imageZoom, x: section.imagePositionX, y: section.imagePositionY };
       return <article className="portfolio-visual-card" key={`${section.id}-${index}`}>
         <div className="portfolio-visual-card__art" aria-hidden="true">
-          {index === 0 && section.image ? <img src={section.image} alt="" /> : <><span>{String(index + 1).padStart(2, '0')}</span><i /><b /></>}
+          {photo ? <img src={photo} alt="" style={{ objectPosition: `${crop.x ?? 50}% ${crop.y ?? 50}%`, transform: `scale(${Math.min(250, Math.max(100, Number(crop.zoom) || 100)) / 100})` }} /> : <><span>{String(index + 1).padStart(2, '0')}</span><i /><b /></>}
         </div>
         <div className="portfolio-visual-card__copy"><span className="portfolio-visual-card__index">{isGallery ? 'FRAME' : 'PROJECT'} / {String(index + 1).padStart(2, '0')}</span><h3><LinkifiedText>{project.title}</LinkifiedText></h3>{project.detail && <p><LinkifiedText>{project.detail}</LinkifiedText></p>}</div>
       </article>;
@@ -954,14 +964,17 @@ function GrungePortfolio({ portfolio, sections, header, editable, onUpdate, onUp
         {sections.map((section, index) => {
           if (section.type === 'header') return headerSection(section, index);
           const label = SECTION_LIBRARY[section.type]?.label || section.type;
+          const isPhotoCollection = ['projects', 'projects-work', 'gallery'].includes(section.type);
           return (
             <section className={`grunge-section grunge-section--${section.type}`} id={`grunge-${section.type}-${index}`} key={section.id} style={theme.section && theme.section !== 'transparent' ? { backgroundColor: theme.section } : undefined}>
               <div className="grunge-section__index">{String(index + 1).padStart(2, '0')}<span> / {String(sections.length).padStart(2, '0')}</span></div>
               <div className="grunge-section__content">
                 <span className="grunge-kicker">{label}</span>
                 {editable ? <input className="grunge-display grunge-display--section" style={section.titleFontSize ? { fontSize: `${section.titleFontSize}px` } : undefined} aria-label={`${label} heading`} value={section.title || ''} onChange={(event) => onUpdate(section.id, 'title', event.target.value)} /> : <h2 className="grunge-display grunge-display--section" style={section.titleFontSize ? { fontSize: `${section.titleFontSize}px` } : undefined}>{section.title || label}</h2>}
-                {section.image && <div className="grunge-section__image-frame"><img className="grunge-section__image" src={section.image} alt={`${label} visual`} style={getSectionImageCropStyle(section)} /></div>}
+                {section.image && !isPhotoCollection && <div className="grunge-section__image-frame"><img className="grunge-section__image" src={section.image} alt={`${label} visual`} style={getSectionImageCropStyle(section)} /></div>}
                 {editable ? <textarea ref={resizeTextarea} className="grunge-section__body" style={section.bodyFontSize ? { fontSize: `${section.bodyFontSize}px` } : undefined} aria-label={`${label} content`} value={section.body || ''} onChange={(event) => { onUpdate(section.id, 'body', event.target.value); resizeTextarea(event.currentTarget); }} rows={Math.max(3, String(section.body || '').split('\n').length)} /> : <p className="grunge-section__body" style={section.bodyFontSize ? { fontSize: `${section.bodyFontSize}px` } : undefined}><LinkifiedText>{section.body || ''}</LinkifiedText></p>}
+                {editable && isPhotoCollection && <ProjectPhotoFrames section={section} editable={editable} onUpdate={onUpdate} onUploadImage={onUploadImage} />}
+                {!editable && isPhotoCollection && ((section.galleryImages || []).length ? section.galleryImages : section.image ? [section.image] : []).map((photo, photoIndex) => photo && <img className="grunge-project-photo" key={`${section.id}-photo-${photoIndex}`} src={photo} alt={`${label} photo ${photoIndex + 1}`} style={(section.galleryImages || []).length ? getImageCropStyle(section.galleryImageSettings?.[photoIndex]?.zoom, section.galleryImageSettings?.[photoIndex]?.x, section.galleryImageSettings?.[photoIndex]?.y) : getSectionImageCropStyle(section)} />)}
               </div>
               <div className="grunge-divider" aria-hidden="true"><img className="grunge-divider__symbol" src={grungeSymbol} alt="" /><img className="grunge-divider__barcode" src={grungeBarcode} alt="" /></div>
             </section>

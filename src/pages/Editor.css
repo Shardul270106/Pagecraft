@@ -33,7 +33,6 @@
 .editor-library button span { color: #777; font-size: 14px; }
 .editor-template-note { margin-bottom: 0 !important; }
 .editor-panel > p { line-height: 1.65; }
-.editor-panel > p.editor-link-hint { margin: 10px 0 0; padding: 9px 10px; border-radius: 8px; background: #f4f7fb; color: #596575; }
 .editor-section-item { display: flex; align-items: center; gap: 9px; padding: 9px 8px; border: 1px solid #ededeb; border-radius: 9px; background: #fff; font-size: 12px; cursor: grab; }
 .editor-section-item.is-dragging { opacity: .5; }
 .editor-section-item span:nth-child(2) { flex: 1; }
@@ -745,3 +744,16 @@
   width: 100%;
   max-width: none;
 }
+
+.editor-link-dialog-backdrop { position: fixed; inset: 0; z-index: 12000; display: grid; place-items: center; padding: 20px; background: #171814b8; backdrop-filter: blur(3px); }
+.editor-link-dialog { display: grid; gap: 17px; width: min(460px,100%); padding: 22px; border: 1px solid #e5e4df; border-radius: 16px; background: #fff; box-shadow: 0 24px 80px #0005; color: #20201c; }
+.editor-link-dialog > header { display: flex; align-items: start; justify-content: space-between; gap: 16px; }
+.editor-link-dialog > header h2 { margin: 0; font-size: 19px; }
+.editor-link-dialog > header p { margin: 5px 0 0; color: #74746d; font-size: 12px; line-height: 1.5; }
+.editor-link-dialog__close { display: grid; width: 34px; height: 34px; place-items: center; border: 1px solid #e3e2dc; border-radius: 50%; background: #fff; color: #55554e; font-size: 21px; cursor: pointer; }
+.editor-link-dialog > label { display: grid; gap: 7px; color: #41413b; font-size: 12px; font-weight: 650; }
+.editor-link-dialog > label input { width: 100%; min-height: 42px; padding: 10px 12px; border: 1px solid #dcdcd5; border-radius: 9px; background: #fff; color: #20201c; font: inherit; font-size: 14px; }
+.editor-link-dialog > label input:focus { border-color: #6258e8; outline: 3px solid #6258e822; }
+.editor-link-dialog__error { margin: -8px 0 0; color: #b42318; font-size: 12px; }
+.editor-link-dialog > footer { display: flex; justify-content: end; gap: 9px; margin-top: 1px; }
+@media (max-width: 520px) { .editor-link-dialog { padding: 18px; } }

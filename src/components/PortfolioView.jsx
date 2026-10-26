@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { SECTION_LIBRARY } from '../data/templates';
 import ResumePortfolio, { isResumeTemplate } from './ResumePortfolio';
-import LinkifiedText, { getLinkifiedParts } from './LinkifiedText';
+import LinkifiedText, { getBodyLinksForText, getLinkifiedParts } from './LinkifiedText';
 import grungeWallpaper from '../assets/grunge/bg.jpg';
 import grungeSymbol from '../assets/grunge/symbolWhite.svg';
 import grungeBarcode from '../assets/grunge/barcode.svg';
@@ -198,8 +198,8 @@ export function PortfolioView({ portfolio, editable = false, onUpdate, onTemplat
                   : editable ? <input className="portfolio-page__hero-title" style={titleSizeStyle} aria-label="Your name" value={section.title || ''} onChange={(event) => onUpdate(section.id, 'title', event.target.value)} />
                     : <h1 style={titleSizeStyle}>{section.title || 'Your name'}</h1>}
                 {!isBlueCreative && (editable
-                  ? <textarea ref={resizeTextarea} data-auto-size="true" className="portfolio-page__hero-body" style={bodySizeStyle} aria-label="Your role and introduction" value={section.body || ''} onChange={(event) => { onUpdate(section.id, 'body', event.target.value); resizeTextarea(event.currentTarget); }} rows={3} />
-                  : <p style={bodySizeStyle}><LinkifiedText>{section.body || ''}</LinkifiedText></p>)}
+                  ? <textarea ref={resizeTextarea} data-auto-size="true" data-link-editor="true" data-section-id={section.id} className="portfolio-page__hero-body" style={bodySizeStyle} aria-label="Your role and introduction" value={section.body || ''} onChange={(event) => { onUpdate(section.id, 'body', event.target.value); resizeTextarea(event.currentTarget); }} rows={3} />
+                  : <p style={bodySizeStyle}><LinkifiedText links={section.bodyLinks}>{section.body || ''}</LinkifiedText></p>)}
                 {isProfessional && <div className="professional-hero__actions">{sectionHref('projects') && <a className="professional-button professional-button--dark" href={sectionHref('projects')}>Explore my work <span aria-hidden="true">↓</span></a>}{sectionHref('contact') && <a className="professional-button professional-button--text" href={sectionHref('contact')}>Get in touch <span aria-hidden="true">↗</span></a>}</div>}
                 {!isProfessional && !isFolio && navLinks.length > 0 && <div className="template-hero__actions">{(sectionHref('projects') || sectionHref('projects-work') || sectionHref('gallery')) && <a className="template-hero__primary" href={sectionHref('projects') || sectionHref('projects-work') || sectionHref('gallery')}>{portfolio.templateId === 'photographer-portfolio' ? 'View the collection' : portfolio.templateId === 'ux-case-study' || portfolio.templateId === 'product-designer-portfolio' ? 'Read the case study' : 'Explore selected work'} <span aria-hidden="true">↘</span></a>}{sectionHref('contact') && <a className="template-hero__secondary" href={sectionHref('contact')}>Get in touch <span aria-hidden="true">↗</span></a>}</div>}
                 {isFolio && <div className="folio-hero__actions">
@@ -209,7 +209,7 @@ export function PortfolioView({ portfolio, editable = false, onUpdate, onTemplat
               </SectionCopy>
               {isBlueCreative && (editable
                 ? <BlueCreativeEditableHeroBody section={section} onUpdate={onUpdate} />
-                : <div className="blue-creative-hero-body-display" style={section.bodyFontSize ? { fontSize: `${section.bodyFontSize}px` } : undefined}><p><LinkifiedText>{section.body || ''}</LinkifiedText></p></div>)}
+                : <div className="blue-creative-hero-body-display" style={section.bodyFontSize ? { fontSize: `${section.bodyFontSize}px` } : undefined}><p><LinkifiedText links={section.bodyLinks}>{section.body || ''}</LinkifiedText></p></div>)}
               {section.image && <div className="portfolio-section-media"><img className={`portfolio-page__image ${isFolio ? 'folio-hero__image' : ''}`} src={section.image} alt="Profile or portfolio" style={getSectionImageCropStyle(section)} /></div>}
               {isProfessional && !section.image && !sectionElements.length && <div className="professional-hero-art" aria-hidden="true"><span className="professional-hero-art__orbit" /><span className="professional-hero-art__initial">{(section.title || 'P').trim().charAt(0).toUpperCase()}</span><span className="professional-hero-art__caption">SELECTED WORK<br />2026 — PRESENT</span><i /></div>}
               {!isProfessional && !isFolio && navLinks.length > 0 && !section.image && !sectionElements.length && <TemplateHeroArtwork templateId={portfolio.templateId} />}
@@ -223,7 +223,7 @@ export function PortfolioView({ portfolio, editable = false, onUpdate, onTemplat
               <SectionCopy section={section} editable={editable} onUpdate={onUpdate} moveBounds={copyBounds} style={contentStyle}>
                 {isProfessional && <span className="professional-section__index">{String(index).padStart(2, '0')} <i /> {label}</span>}
                 {editable ? isBlueCreative ? <BlueCreativeEditableHeading section={section} onUpdate={onUpdate} fallbackLabel={label} /> : <input aria-label={`${label} heading`} style={titleSizeStyle} value={section.title || ''} onChange={(event) => onUpdate(section.id, 'title', event.target.value)} /> : isBlueCreative ? <h2><BlueCreativeHeadingText value={section.title || label} /></h2> : <h2 style={titleSizeStyle}>{section.title || label}</h2>}
-                {isImageGallery ? null : editable && isBlueCreative ? <BlueCreativeEditableBody section={section} onUpdate={onUpdate} /> : editable ? <textarea ref={resizeTextarea} data-auto-size="true" style={bodySizeStyle} aria-label={`${label} content`} value={section.body || ''} onChange={(event) => { onUpdate(section.id, 'body', event.target.value); resizeTextarea(event.currentTarget); }} rows={Math.max(3, String(section.body || '').split('\n').length)} /> : <div className={section.bodyFontSize ? 'portfolio-section-body--custom' : undefined} style={section.bodyFontSize ? { '--section-body-size': bodySizeStyle?.fontSize || `${section.bodyFontSize}px` } : undefined}><SectionDisplay section={section} templateId={portfolio.templateId} /></div>}
+                {isImageGallery ? null : editable && isBlueCreative ? <BlueCreativeEditableBody section={section} onUpdate={onUpdate} /> : editable ? <textarea ref={resizeTextarea} data-auto-size="true" data-link-editor="true" data-section-id={section.id} style={bodySizeStyle} aria-label={`${label} content`} value={section.body || ''} onChange={(event) => { onUpdate(section.id, 'body', event.target.value); resizeTextarea(event.currentTarget); }} rows={Math.max(3, String(section.body || '').split('\n').length)} /> : <div className={section.bodyFontSize ? 'portfolio-section-body--custom' : undefined} style={section.bodyFontSize ? { '--section-body-size': bodySizeStyle?.fontSize || `${section.bodyFontSize}px` } : undefined}><SectionDisplay section={section} templateId={portfolio.templateId} /></div>}
               </SectionCopy>
               {section.image && (!isPhotoCollection || isBlueCreativeProject) && <div className="portfolio-section-media"><img className="portfolio-page__image" src={section.image} alt={`${label} visual`} style={getSectionImageCropStyle(section)} /></div>}
               {isImageGallery && <PhotographerGallery section={section} editable={editable} onUpdate={onUpdate} onUploadImage={onUploadImage} className={portfolio.templateId === 'model-portfolio' ? 'photographer-gallery--model' : portfolio.templateId === 'scrapbook-portfolio' ? 'photographer-gallery--scrapbook' : portfolio.templateId === 'blue-creative-portfolio' ? 'photographer-gallery--blue-creative' : ''} />}
@@ -245,14 +245,16 @@ function SectionDisplay({ section, templateId }) {
   const content = section.body || '';
   if (templateId === 'blue-creative-portfolio' && section.type === 'about') {
     const [intro = '', ...rest] = content.split('\n');
-    return <div className="blue-creative-intro-copy"><strong>{intro}</strong><p><LinkifiedText>{rest.join('\n').trim()}</LinkifiedText></p></div>;
+    const copy = rest.join('\n').trim();
+    return <div className="blue-creative-intro-copy"><strong>{intro}</strong><p><LinkifiedText links={getBodyLinksForText(content, copy, section.bodyLinks)}>{copy}</LinkifiedText></p></div>;
   }
   if (templateId === 'blue-creative-portfolio' && ['projects', 'projects-work', 'gallery'].includes(section.type)) {
     const [title = '', ...rest] = content.split('\n');
-    return <div className="blue-creative-project-copy"><strong>{title}</strong><p><LinkifiedText>{rest.join('\n').trim()}</LinkifiedText></p></div>;
+    const copy = rest.join('\n').trim();
+    return <div className="blue-creative-project-copy"><strong>{title}</strong><p><LinkifiedText links={getBodyLinksForText(content, copy, section.bodyLinks)}>{copy}</LinkifiedText></p></div>;
   }
   if (templateId === 'blue-creative-portfolio' && section.type === 'skills') {
-    return <div className="blue-creative-skill-list">{splitContentBlocks(content).map((entry, index) => { const [title = '', ...detail] = entry.split('\n'); return <article key={`${section.id}-skill-${index}`}><h3>{title}</h3><p><LinkifiedText>{detail.join('\n')}</LinkifiedText></p></article>; })}</div>;
+    return <div className="blue-creative-skill-list">{splitContentBlocks(content).map((entry, index) => { const [title = '', ...detail] = entry.split('\n'); const copy = detail.join('\n'); return <article key={`${section.id}-skill-${index}`}><h3>{title}</h3><p><LinkifiedText links={getBodyLinksForText(content, copy, section.bodyLinks)}>{copy}</LinkifiedText></p></article>; })}</div>;
   }
   if (templateId === 'blue-creative-portfolio' && ['education', 'experience'].includes(section.type)) {
     return <div className={`blue-creative-timeline blue-creative-timeline--${section.type}`}>{splitContentBlocks(content).map((entry, index) => {
@@ -261,26 +263,30 @@ function SectionDisplay({ section, templateId }) {
       if (section.type === 'education') {
         const [school = first, year = ''] = first.includes('|') ? first.split('|').map((value) => value.trim()) : [first, second];
         const description = first.includes('|') ? lines.slice(1) : lines.slice(2);
-        return <article key={`${section.id}-item-${index}`}><header><h3>{school}</h3><time>{year}</time></header><p><LinkifiedText>{description.join('\n')}</LinkifiedText></p></article>;
+        const copy = description.join('\n');
+        return <article key={`${section.id}-item-${index}`}><header><h3>{school}</h3><time>{year}</time></header><p><LinkifiedText links={getBodyLinksForText(content, copy, section.bodyLinks)}>{copy}</LinkifiedText></p></article>;
       }
       const [organization = first, role = second, year = third] = first.includes('|') ? first.split('|').map((value) => value.trim()) : [first, second, third];
-      return <article key={`${section.id}-item-${index}`}><header><span className="blue-creative-timeline__organization">{organization}</span><h3>{role}</h3><time>{year}</time></header><p><LinkifiedText>{(first.includes('|') ? lines.slice(1) : detail).join('\n')}</LinkifiedText></p></article>;
+      const copy = (first.includes('|') ? lines.slice(1) : detail).join('\n');
+      return <article key={`${section.id}-item-${index}`}><header><span className="blue-creative-timeline__organization">{organization}</span><h3>{role}</h3><time>{year}</time></header><p><LinkifiedText links={getBodyLinksForText(content, copy, section.bodyLinks)}>{copy}</LinkifiedText></p></article>;
     })}</div>;
   }
   if (['skills', 'technical-skills', 'services', 'languages'].includes(section.type)) {
-    return <ul className={`portfolio-skill-list portfolio-skill-list--${section.type}`}>{getSkillItems(content).map((skill, index) => <li key={`${section.id}-${index}`}><LinkifiedText>{skill}</LinkifiedText></li>)}</ul>;
+    return <ul className={`portfolio-skill-list portfolio-skill-list--${section.type}`}>{getSkillItems(content).map((skill, index) => <li key={`${section.id}-${index}`}><LinkifiedText links={getBodyLinksForText(content, skill, section.bodyLinks)}>{skill}</LinkifiedText></li>)}</ul>;
   }
   if (['experience', 'education'].includes(section.type)) {
     return <div className="portfolio-timeline">{splitContentBlocks(content).map((entry, index) => {
       const lines = entry.split('\n').map((line) => line.trim()).filter(Boolean);
-      return <article className="portfolio-timeline__item" key={`${section.id}-${index}`}><span className="portfolio-timeline__marker" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span><div><h3><LinkifiedText>{lines[0] || 'Experience'}</LinkifiedText></h3>{lines.length > 1 && <p><LinkifiedText>{lines.slice(1).join('\n')}</LinkifiedText></p>}</div></article>;
+      const heading = lines[0] || 'Experience';
+      const detail = lines.slice(1).join('\n');
+      return <article className="portfolio-timeline__item" key={`${section.id}-${index}`}><span className="portfolio-timeline__marker" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span><div><h3><LinkifiedText links={getBodyLinksForText(content, heading, section.bodyLinks)}>{heading}</LinkifiedText></h3>{lines.length > 1 && <p><LinkifiedText links={getBodyLinksForText(content, detail, section.bodyLinks)}>{detail}</LinkifiedText></p>}</div></article>;
     })}</div>;
   }
-  if (section.type === 'testimonials') return <blockquote className="portfolio-testimonial"><p><LinkifiedText>{content}</LinkifiedText></p></blockquote>;
+  if (section.type === 'testimonials') return <blockquote className="portfolio-testimonial"><p><LinkifiedText links={section.bodyLinks}>{content}</LinkifiedText></p></blockquote>;
   if (section.type === 'process' || section.type === 'outcome') {
-    return <div className={`portfolio-steps portfolio-steps--${section.type}`}>{splitContentBlocks(content).map((entry, index) => <article key={`${section.id}-${index}`}><span>{String(index + 1).padStart(2, '0')}</span><p><LinkifiedText>{entry}</LinkifiedText></p></article>)}</div>;
+    return <div className={`portfolio-steps portfolio-steps--${section.type}`}>{splitContentBlocks(content).map((entry, index) => <article key={`${section.id}-${index}`}><span>{String(index + 1).padStart(2, '0')}</span><p><LinkifiedText links={getBodyLinksForText(content, entry, section.bodyLinks)}>{entry}</LinkifiedText></p></article>)}</div>;
   }
-  return <p className={`portfolio-copy portfolio-copy--${section.type}`}><LinkifiedText>{content}</LinkifiedText></p>;
+  return <p className={`portfolio-copy portfolio-copy--${section.type}`}><LinkifiedText links={section.bodyLinks}>{content}</LinkifiedText></p>;
 }
 
 function PortfolioVisualList({ section, templateId }) {
@@ -295,7 +301,7 @@ function PortfolioVisualList({ section, templateId }) {
   if (!hasPhotos) return <div className={`portfolio-text-project-list portfolio-text-project-list--${templateId}`}>
     {entries.map((entry, index) => {
       const project = getProjectContent(entry);
-      return <article key={`${section.id}-text-${index}`}><span>{String(index + 1).padStart(2, '0')}</span><div><h3><LinkifiedText>{project.title}</LinkifiedText></h3>{project.detail && <p><LinkifiedText>{project.detail}</LinkifiedText></p>}</div></article>;
+      return <article key={`${section.id}-text-${index}`}><span>{String(index + 1).padStart(2, '0')}</span><div><h3><LinkifiedText links={getBodyLinksForText(section.body, project.title, section.bodyLinks)}>{project.title}</LinkifiedText></h3>{project.detail && <p><LinkifiedText links={getBodyLinksForText(section.body, project.detail, section.bodyLinks)}>{project.detail}</LinkifiedText></p>}</div></article>;
     })}
   </div>;
   return <div className={`portfolio-visual-list ${isGallery ? 'portfolio-visual-list--gallery' : ''} portfolio-visual-list--${templateId}`}>
@@ -305,7 +311,7 @@ function PortfolioVisualList({ section, templateId }) {
       const crop = photos[index] ? section.galleryImageSettings?.[index] || {} : { zoom: section.imageZoom, x: section.imagePositionX, y: section.imagePositionY };
       return <article className={`portfolio-visual-card ${photo ? 'has-photo' : 'text-only'}`} key={`${section.id}-${index}`}>
         {photo && <div className="portfolio-visual-card__art" aria-hidden="true"><img src={photo} alt="" style={{ objectPosition: `${crop.x ?? 50}% ${crop.y ?? 50}%`, transform: `scale(${Math.min(250, Math.max(100, Number(crop.zoom) || 100)) / 100})` }} /></div>}
-        <div className="portfolio-visual-card__copy"><span className="portfolio-visual-card__index">{isGallery ? 'FRAME' : 'PROJECT'} / {String(index + 1).padStart(2, '0')}</span><h3><LinkifiedText>{project.title}</LinkifiedText></h3>{project.detail && <p><LinkifiedText>{project.detail}</LinkifiedText></p>}</div>
+        <div className="portfolio-visual-card__copy"><span className="portfolio-visual-card__index">{isGallery ? 'FRAME' : 'PROJECT'} / {String(index + 1).padStart(2, '0')}</span><h3><LinkifiedText links={getBodyLinksForText(section.body, project.title, section.bodyLinks)}>{project.title}</LinkifiedText></h3>{project.detail && <p><LinkifiedText links={getBodyLinksForText(section.body, project.detail, section.bodyLinks)}>{project.detail}</LinkifiedText></p>}</div>
       </article>;
     })}
   </div>;
@@ -454,16 +460,24 @@ function BlueCreativeEditableHeroBody({ section, onUpdate }) {
   if (editing) return <textarea
     ref={fieldRef}
     className="portfolio-page__hero-body blue-creative-hero-body-editing"
+    data-link-editor="true"
+    data-section-id={section.id}
     aria-label="Your role and introduction"
     style={section.bodyFontSize ? { fontSize: `${section.bodyFontSize}px` } : undefined}
     value={section.body || ''}
     onChange={(event) => onUpdate(section.id, 'body', event.target.value)}
-    onBlur={() => setEditing(false)}
+    onBlur={(event) => {
+      const ownerDocument = event.currentTarget.ownerDocument;
+      requestAnimationFrame(() => {
+        if (ownerDocument.activeElement?.closest('.editor-link-dialog')) return;
+        setEditing(false);
+      });
+    }}
     onKeyDown={(event) => { if (event.key === 'Escape') event.currentTarget.blur(); }}
     rows={Math.max(1, String(section.body || '').split('\n').length)}
   />;
   return <div className="blue-creative-hero-body-display" style={section.bodyFontSize ? { fontSize: `${section.bodyFontSize}px` } : undefined}>
-    <p><LinkifiedText>{section.body || ''}</LinkifiedText></p>
+    <p><LinkifiedText links={section.bodyLinks}>{section.body || ''}</LinkifiedText></p>
     <button type="button" className="blue-creative-heading-display__edit" aria-label="Edit introduction" title="Edit introduction" onClick={() => setEditing(true)}>✎</button>
   </div>;
 }
@@ -482,13 +496,21 @@ function BlueCreativeEditableBody({ section, onUpdate }) {
     ref={fieldRef}
     className="blue-creative-editor-text"
     data-auto-size="true"
+    data-link-editor="true"
+    data-section-id={section.id}
     aria-label={`${SECTION_LIBRARY[section.type]?.label || section.type} content`}
     value={section.body || ''}
     onChange={(event) => {
       onUpdate(section.id, 'body', event.target.value);
       resizeTextarea(event.currentTarget);
     }}
-    onBlur={() => setEditing(false)}
+    onBlur={(event) => {
+      const ownerDocument = event.currentTarget.ownerDocument;
+      requestAnimationFrame(() => {
+        if (ownerDocument.activeElement?.closest('.editor-link-dialog')) return;
+        setEditing(false);
+      });
+    }}
     onKeyDown={(event) => {
       if (event.key === 'Escape') event.currentTarget.blur();
     }}
@@ -956,7 +978,7 @@ function GrungePortfolio({ portfolio, sections, header, editable, onUpdate, onUp
   const headerSection = (section, index) => (
     <header className="grunge-hero" id="grunge-hero" key={section.id}>
       <div className="grunge-hero__copy">
-        <p className="grunge-hero__intro" style={section.bodyFontSize ? { fontSize: `${section.bodyFontSize}px` } : undefined}>{editable ? <textarea ref={resizeTextarea} aria-label="Introduction" style={section.bodyFontSize ? { fontSize: `${section.bodyFontSize}px` } : undefined} value={section.body || ''} onChange={(event) => { onUpdate(section.id, 'body', event.target.value); resizeTextarea(event.currentTarget); }} rows={4} /> : <LinkifiedText>{section.body || ''}</LinkifiedText>}</p>
+        <p className="grunge-hero__intro" style={section.bodyFontSize ? { fontSize: `${section.bodyFontSize}px` } : undefined}>{editable ? <textarea ref={resizeTextarea} data-link-editor="true" data-section-id={section.id} aria-label="Introduction" style={section.bodyFontSize ? { fontSize: `${section.bodyFontSize}px` } : undefined} value={section.body || ''} onChange={(event) => { onUpdate(section.id, 'body', event.target.value); resizeTextarea(event.currentTarget); }} rows={4} /> : <LinkifiedText links={section.bodyLinks}>{section.body || ''}</LinkifiedText>}</p>
         <span className="grunge-kicker">{String(index + 1).padStart(2, '0')} / Available for work</span>
         {editable ? <input className="grunge-display grunge-display--name" style={section.titleFontSize ? { fontSize: `${section.titleFontSize}px` } : undefined} aria-label="Your name" value={section.title || ''} onChange={(event) => onUpdate(section.id, 'title', event.target.value)} /> : <h1 className="grunge-display grunge-display--name" style={section.titleFontSize ? { fontSize: `${section.titleFontSize}px` } : undefined}>{section.title || 'Your name'}</h1>}
         <div className="grunge-hero__links">{sectionHref('projects') && <a href={sectionHref('projects')}>Explore selected works <span>↓</span></a>}{sectionHref('contact') && <a href={sectionHref('contact')}>Start a project <span>↗</span></a>}</div>
@@ -984,7 +1006,7 @@ function GrungePortfolio({ portfolio, sections, header, editable, onUpdate, onUp
                 <span className="grunge-kicker">{label}</span>
                 {editable ? <input className="grunge-display grunge-display--section" style={section.titleFontSize ? { fontSize: `${section.titleFontSize}px` } : undefined} aria-label={`${label} heading`} value={section.title || ''} onChange={(event) => onUpdate(section.id, 'title', event.target.value)} /> : <h2 className="grunge-display grunge-display--section" style={section.titleFontSize ? { fontSize: `${section.titleFontSize}px` } : undefined}>{section.title || label}</h2>}
                 {section.image && !isPhotoCollection && <div className="grunge-section__image-frame"><img className="grunge-section__image" src={section.image} alt={`${label} visual`} style={getSectionImageCropStyle(section)} /></div>}
-                {editable ? <textarea ref={resizeTextarea} className="grunge-section__body" style={section.bodyFontSize ? { fontSize: `${section.bodyFontSize}px` } : undefined} aria-label={`${label} content`} value={section.body || ''} onChange={(event) => { onUpdate(section.id, 'body', event.target.value); resizeTextarea(event.currentTarget); }} rows={Math.max(3, String(section.body || '').split('\n').length)} /> : <p className="grunge-section__body" style={section.bodyFontSize ? { fontSize: `${section.bodyFontSize}px` } : undefined}><LinkifiedText>{section.body || ''}</LinkifiedText></p>}
+                {editable ? <textarea ref={resizeTextarea} data-link-editor="true" data-section-id={section.id} className="grunge-section__body" style={section.bodyFontSize ? { fontSize: `${section.bodyFontSize}px` } : undefined} aria-label={`${label} content`} value={section.body || ''} onChange={(event) => { onUpdate(section.id, 'body', event.target.value); resizeTextarea(event.currentTarget); }} rows={Math.max(3, String(section.body || '').split('\n').length)} /> : <p className="grunge-section__body" style={section.bodyFontSize ? { fontSize: `${section.bodyFontSize}px` } : undefined}><LinkifiedText links={section.bodyLinks}>{section.body || ''}</LinkifiedText></p>}
                 {editable && isPhotoCollection && <ProjectPhotoFrames section={section} editable={editable} onUpdate={onUpdate} onUploadImage={onUploadImage} />}
                 {!editable && isPhotoCollection && ((section.galleryImages || []).length ? section.galleryImages : section.image ? [section.image] : []).map((photo, photoIndex) => photo && <img className="grunge-project-photo" key={`${section.id}-photo-${photoIndex}`} src={photo} alt={`${label} photo ${photoIndex + 1}`} style={(section.galleryImages || []).length ? getImageCropStyle(section.galleryImageSettings?.[photoIndex]?.zoom, section.galleryImageSettings?.[photoIndex]?.x, section.galleryImageSettings?.[photoIndex]?.y) : getSectionImageCropStyle(section)} />)}
               </div>

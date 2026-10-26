@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { api } from '../lib/api';
 import { SECTION_LIBRARY } from '../data/templates';
 import { PortfolioView } from '../components/PortfolioView';
+import { adjustBodyLinks } from '../components/LinkifiedText';
 import PhotoAdjustDialog from '../components/PhotoAdjustDialog';
 import PortfolioIcon, { PORTFOLIO_ICONS } from '../components/PortfolioIcon';
 import './Editor.css';
@@ -66,6 +67,8 @@ export default function Editor() {
   const [selectedSectionId, setSelectedSectionId] = useState('');
   const [activePanel, setActivePanel] = useState('sections');
   const [canvasZoom, setCanvasZoom] = useState(100);
+  const [linkDialog, setLinkDialog] = useState(null);
+  const linkUrlInputRef = useRef(null);
   const previewAddress = `${location.pathname}${location.search}${location.hash}`;
   const enterPreview = () => navigate(previewAddress, {
     state: { ...(location.state || {}), pagecraftEditorPreview: true },
@@ -81,6 +84,11 @@ export default function Editor() {
   const isIPortfolio = portfolio?.templateId === 'iportfolio-bootstrap';
   const isResume = portfolio?.templateId?.startsWith('resume-');
   const supportsSectionCanvas = Boolean(portfolio && !isIPortfolio && !isResume && portfolio.templateId !== 'grunge-portfolio');
+
+  useEffect(() => {
+    if (!linkDialog) return;
+    requestAnimationFrame(() => linkUrlInputRef.current?.focus());
+  }, [linkDialog?.sectionId]);
 
   useEffect(() => {
     if (!portfolio?.sections?.length) return;
@@ -213,8 +221,91 @@ export default function Editor() {
   const changeTheme = (key, value) => setPortfolioTracked((current) => ({ ...current, theme: { ...current.theme, [key]: value } }));
   const updateSection = (sectionId, field, value) => setPortfolioTracked((current) => ({
     ...current,
-    sections: current.sections.map((section) => section.id === sectionId ? { ...section, [field]: typeof value === 'function' ? value(section[field]) : value } : section),
-  }), ['title', 'body', 'titleFontSize', 'bodyFontSize'].includes(field) ? `section:${sectionId}:${field}` : ['contentOffsetX', 'contentOffsetY'].includes(field) ? `section:${sectionId}:position` : null);
+    sections: current.sections.map((section) => {
+      if (section.id !== sectionId) return section;
+      const nextValue = typeof value === 'function' ? value(section[field]) : value;
+      const updated = { ...section, [field]: nextValue };
+      if (field === 'body' && section.bodyLinks?.length) {
+        updated.bodyLinks = adjustBodyLinks(section.body || '', String(nextValue || ''), section.bodyLinks);
+      }
+      return updated;
+    }),
+  }), ['title', 'body', 'bodyLinks', 'titleFontSize', 'bodyFontSize'].includes(field) ? `section:${sectionId}:${field === 'bodyLinks' ? 'body' : field}` : ['contentOffsetX', 'contentOffsetY'].includes(field) ? `section:${sectionId}:position` : null);
+
+  const openLinkDialog = (event) => {
+    if (!(event.ctrlKey || event.metaKey) || event.key.toLowerCase() !== 'k') return;
+    const target = event.target;
+    if (!target.matches?.('[data-link-editor="true"]')) return;
+    const sectionId = target.dataset.sectionId || target.closest('[data-section-id]')?.dataset.sectionId;
+    if (!sectionId) return;
+    event.preventDefault();
+    event.stopPropagation();
+    let start = target.selectionStart ?? 0;
+    let end = target.selectionEnd ?? start;
+    const section = portfolioRef.current?.sections?.find((item) => item.id === sectionId);
+    let existingLink = section?.bodyLinks?.find((link) => start < link.end && end > link.start);
+    if (start === end) {
+      existingLink = section?.bodyLinks?.find((link) => start >= link.start && start <= link.end);
+      if (existingLink) {
+        start = existingLink.start;
+        end = existingLink.end;
+      }
+    }
+    setLinkDialog({ target, sectionId, start, end, label: target.value.slice(start, end), href: existingLink?.href || '', error: '' });
+  };
+
+  const closeLinkDialog = () => {
+    const { target, start, end } = linkDialog || {};
+    setLinkDialog(null);
+    requestAnimationFrame(() => {
+      if (!target?.isConnected) return;
+      target.focus();
+      target.setSelectionRange?.(start, end);
+    });
+  };
+
+  const applyEditorLink = (event) => {
+    event.preventDefault();
+    if (!linkDialog) return;
+    const rawHref = linkDialog.href.trim();
+    let href = '';
+    try {
+      const candidate = /^(https?:|mailto:|tel:)/i.test(rawHref) ? rawHref : `https://${rawHref}`;
+      const parsed = new URL(candidate);
+      if (!['http:', 'https:', 'mailto:', 'tel:'].includes(parsed.protocol)) throw new Error('Unsupported link type');
+      href = parsed.href;
+    } catch {
+      setLinkDialog((current) => ({ ...current, error: 'Enter a valid web address, email link, or phone link.' }));
+      return;
+    }
+
+    const { target, sectionId, start: originalStart, end: originalEnd } = linkDialog;
+    const currentBody = String(target.value || '');
+    const start = Math.max(0, Math.min(currentBody.length, originalStart));
+    const end = Math.max(start, Math.min(currentBody.length, originalEnd));
+    const selectedLabel = currentBody.slice(start, end);
+    const label = linkDialog.label || selectedLabel;
+    if (!label.trim()) {
+      setLinkDialog((current) => ({ ...current, error: 'Select text or enter the label to display.' }));
+      return;
+    }
+
+    const nextBody = `${currentBody.slice(0, start)}${label}${currentBody.slice(end)}`;
+    const section = portfolio?.sections?.find((item) => item.id === sectionId);
+    const shiftedLinks = adjustBodyLinks(currentBody, nextBody, section?.bodyLinks || []);
+    const nextLinks = [
+      ...shiftedLinks.filter((link) => link.end <= start || link.start >= start + label.length),
+      { start, end: start + label.length, href },
+    ].sort((left, right) => left.start - right.start);
+
+    updateSection(sectionId, 'body', nextBody);
+    updateSection(sectionId, 'bodyLinks', nextLinks);
+    setLinkDialog(null);
+    requestAnimationFrame(() => {
+      target.focus();
+      target.setSelectionRange(start, start + label.length);
+    });
+  };
   const updateTemplateImage = (imageId, value) => setPortfolioTracked((current) => {
     const images = Array.from({ length: Math.max(current.templateImages?.length || 0, imageId + 1) }, (_, index) => current.templateImages?.[index] || '');
     images[imageId] = value;
@@ -488,7 +579,7 @@ export default function Editor() {
   );
 
   return (
-    <main ref={editorRootRef} className="editor-shell">
+    <main ref={editorRootRef} className="editor-shell" onKeyDownCapture={openLinkDialog}>
       <header className="editor-topbar">
         <Link to="/home" className="editor-brand">Page<span>craft</span></Link>
         <div className="editor-document-title"><input aria-label="Portfolio name" value={portfolio.title} onChange={(event) => changeField('title', event.target.value)} /><span role="status" aria-live="polite">{saving ? 'Saving changes…' : message || 'All changes saved'}</span></div>
@@ -504,7 +595,7 @@ export default function Editor() {
             ].map(([key, label, icon]) => <button type="button" key={key} className={activePanel === key ? 'is-active' : ''} aria-pressed={activePanel === key} onClick={() => setActivePanel(key)}><span aria-hidden="true">{icon}</span>{label}</button>)}
           </nav>
           {isIPortfolio ? <>
-            <div className="editor-panel" data-editor-panel="sections"><h2>Edit iPortfolio</h2><p>Click text in the page to edit it. Click a photo to select it, then use the Photos tab to replace and crop it. Changes autosave; the original theme and layout stay intact.</p><p className="editor-link-hint">To show a link by name, enter <code>[@clickbyshardul](https://www.instagram.com/clickbyshardul)</code>. It stays clickable in preview and on the published page.</p><p>Uploaded template images may total up to 5 MB.</p><p>Use Preview site to review the page without editing controls.</p></div>
+            <div className="editor-panel" data-editor-panel="sections"><h2>Edit iPortfolio</h2><p>Click text in the page to edit it. Click a photo to select it, then use the Photos tab to replace and crop it. Changes autosave; the original theme and layout stay intact.</p><p>Uploaded template images may total up to 5 MB.</p><p>Use Preview site to review the page without editing controls.</p></div>
             <div className="editor-panel editor-photo-panel" data-editor-panel="photos">
               <div className="editor-photo-panel__heading"><div><h2>Selected photo</h2><p>Click an image in the page to select it.</p></div></div>
               {selectedTemplateImage === null ? <p className="editor-photo-note">Select a photo on the canvas to replace or crop it.</p> : <div className="editor-photo-item">
@@ -521,10 +612,10 @@ export default function Editor() {
             return <details className="editor-resume-field" key={`fields-${section.id}`}>
               <summary>{section.title || label}</summary>
               <label>{section.type === 'header' ? 'Name' : 'Section heading'}<input value={section.title || ''} onChange={(event) => updateSection(section.id, 'title', event.target.value)} /></label>
-              <label>{section.type === 'header' ? 'Role / subtitle' : section.type === 'contact' ? 'Contact details' : 'Content'}<textarea value={section.body || ''} rows={Math.min(14, Math.max(3, (section.body || '').split('\n').length))} onChange={(event) => updateSection(section.id, 'body', event.target.value)} /></label>
+              <label>{section.type === 'header' ? 'Role / subtitle' : section.type === 'contact' ? 'Contact details' : 'Content'}<textarea data-link-editor="true" data-section-id={section.id} value={section.body || ''} rows={Math.min(14, Math.max(3, (section.body || '').split('\n').length))} onChange={(event) => updateSection(section.id, 'body', event.target.value)} /></label>
             </details>;
           })}</div>}
-          <div className="editor-panel" data-editor-panel="sections"><h2>Sections</h2><p>Drag a block onto the page, or drag blocks below to reorder them.</p><p className="editor-link-hint">Links work in every template. To show a name instead of a URL, use <code>[@clickbyshardul](https://www.instagram.com/clickbyshardul)</code>. Instagram profile links also show as @username automatically.</p>
+          <div className="editor-panel" data-editor-panel="sections"><h2>Sections</h2><p>Drag a block onto the page, or drag blocks below to reorder them.</p>
             <div className="editor-library" aria-label="Section library">{Object.entries(SECTION_LIBRARY).map(([type, section]) => <button key={type} draggable onDragStart={(event) => event.dataTransfer.setData('application/x-pagecraft-section', type)} onClick={() => { setNewSection(type); if (type === 'header' && portfolio.sections.some((item) => item.type === 'header')) { setMessage('This page already has a header section. Drag it in the list to change its position.'); return; } setPortfolioTracked((current) => ({ ...current, sections: [...current.sections, initialSection(type, current.sections.length)] })); }} title={`Drag ${section.label} to the page`}><span>＋</span>{section.label}</button>)}</div>
             <div className="editor-section-list">{portfolio.sections.map((section, index) => (
               <div className={`editor-section-item ${dragId === section.id ? 'is-dragging' : ''}`} key={section.id} draggable onDragStart={() => setDragId(section.id)} onDragOver={(event) => event.preventDefault()} onDrop={() => moveSection(section.id)} onKeyDown={(event) => { if (event.key === 'ArrowUp' || event.key === 'ArrowDown') { event.preventDefault(); moveSectionByOffset(section.id, event.key === 'ArrowUp' ? -1 : 1); } }} tabIndex="0" aria-label={`Reorder ${SECTION_LIBRARY[section.type]?.label || section.type}`}>
@@ -646,6 +737,15 @@ export default function Editor() {
           <div ref={editorCanvasRef} className={`editor-canvas ${portfolio.templateId === 'grunge-portfolio' ? 'editor-canvas--grunge' : ''} ${isIPortfolio ? 'editor-canvas--iportfolio' : ''}`} onDragOver={(event) => event.preventDefault()} onDrop={handleCanvasDrop}><div className="editor-canvas-zoom" style={{ zoom: canvasZoom / 100 }}><PortfolioView portfolio={portfolio} editable selectedCanvasElement={selectedCanvasElement} onCanvasElementSelect={selectCanvasElement} onCanvasElementUpdate={updateCanvasElement} onCanvasWheelZoom={zoomCanvasByWheel} onUndo={undo} onRedo={redo} onUploadImage={uploadImage} onTemplateContentChange={(templateContent) => changeField('templateContent', templateContent)} onTemplateImageSelect={(index, src) => { setSelectedTemplateImage(index); setSelectedTemplateImageSource(src || ''); setActivePanel('photos'); }} onUpdate={updateSection} /></div></div>
         </section>
       </div>
+      {linkDialog && <div className="editor-link-dialog-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) closeLinkDialog(); }}>
+        <form className="editor-link-dialog" role="dialog" aria-modal="true" aria-labelledby="editor-link-dialog-title" onSubmit={applyEditorLink} onKeyDown={(event) => { if (event.key === 'Escape') { event.preventDefault(); closeLinkDialog(); } }}>
+          <header><div><h2 id="editor-link-dialog-title">Add link</h2><p>The selected text stays visible; the URL opens when it’s clicked.</p></div><button type="button" className="editor-link-dialog__close" aria-label="Close link dialog" onClick={closeLinkDialog}>×</button></header>
+          <label>Text to display<input value={linkDialog.label} onChange={(event) => setLinkDialog((current) => ({ ...current, label: event.target.value, error: '' }))} placeholder="@clickbyshardul" /></label>
+          <label>Link to<input ref={linkUrlInputRef} value={linkDialog.href} onChange={(event) => setLinkDialog((current) => ({ ...current, href: event.target.value, error: '' }))} placeholder="https://www.instagram.com/clickbyshardul" /></label>
+          {linkDialog.error && <p className="editor-link-dialog__error" role="alert">{linkDialog.error}</p>}
+          <footer><button type="button" className="editor-button" onClick={closeLinkDialog}>Cancel</button><button type="submit" className="editor-button editor-button--dark">Add link</button></footer>
+        </form>
+      </div>}
       {publicUrl && <div className="editor-publish-toast" role="status">Published: <a href={publicUrl} target="_blank" rel="noreferrer">{publicUrl}</a><button onClick={() => navigator.clipboard?.writeText(publicUrl)}>Copy link</button></div>}
     </main>
   );

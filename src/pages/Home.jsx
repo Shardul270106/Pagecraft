@@ -7,6 +7,14 @@ import grungeWallpaper from '../assets/grunge/bg.jpg';
 import './Home.css';
 
 const FILTERS = ['All', 'Portfolio', 'Resume', 'Case study'];
+const previewSlug = (value) => String(value || '')
+  .trim()
+  .toLowerCase()
+  .normalize('NFKD')
+  .replace(/[\u0300-\u036f]/g, '')
+  .replace(/[^a-z0-9]+/g, '-')
+  .replace(/^-|-$/g, '')
+  .slice(0, 48) || 'your-name';
 
 const TEMPLATE_PREVIEW_COPY = {
   'professional-portfolio': ['Alex Morgan', 'Product designer', 'SELECTED WORK'],
@@ -61,13 +69,38 @@ export default function Home() {
   const [deleting, setDeleting] = useState(false);
   const hasLoaded = useRef(false);
   const autoCreateStarted = useRef(false);
-  const user = JSON.parse(localStorage.getItem('user') || 'null');
+  const [user, setUser] = useState(() => JSON.parse(localStorage.getItem('user') || 'null'));
+  const [profileName, setProfileName] = useState(() => JSON.parse(localStorage.getItem('user') || 'null')?.name || '');
+  const [profileSlug, setProfileSlug] = useState(() => JSON.parse(localStorage.getItem('user') || 'null')?.publicSlug || '');
+  const [profileMessage, setProfileMessage] = useState('');
+  const [profileSaving, setProfileSaving] = useState(false);
 
   const changeNav = (tab) => {
     if (tab === activeNav) return;
     const nextParams = new URLSearchParams(searchParams);
     nextParams.set('tab', tab);
     setSearchParams(nextParams);
+  };
+
+  const saveProfile = async (event) => {
+    event.preventDefault();
+    setProfileSaving(true);
+    setProfileMessage('');
+    try {
+      const result = await api('/api/auth/profile', {
+        method: 'PUT',
+        body: JSON.stringify({ name: profileName, publicSlug: profileSlug }),
+      });
+      setUser(result.user);
+      localStorage.setItem('user', JSON.stringify(result.user));
+      setProfileName(result.user.name);
+      setProfileSlug(result.user.publicSlug || '');
+      setProfileMessage(result.message || 'Profile updated.');
+    } catch (err) {
+      setProfileMessage(err.message);
+    } finally {
+      setProfileSaving(false);
+    }
   };
 
   const load = () => {
@@ -203,7 +236,7 @@ export default function Home() {
             })}</section> : <div className="home__empty"><h2>No portfolios in this type</h2><p>Choose another type to see your recent work.</p><button type="button" onClick={() => setProjectType('all')}>Show all portfolios</button></div>}
           </> : <div className="home__empty"><h2>No portfolios yet</h2><p>Choose a template to create your first page.</p><button type="button" onClick={() => changeNav('templates')}>Browse templates</button></div>}
         </>}
-        {activeNav === 'account' && <><div className="home__header"><div><span className="home__eyebrow">ACCOUNT</span><h1 className="home__title">Your profile</h1><p className="home__subtitle">Account details and session settings.</p></div></div><div className="home__account-card"><div className="home__avatar">{(user?.name || user?.email || 'P').slice(0, 1).toUpperCase()}</div><div><h2>{user?.name || 'Pagecraft user'}</h2><p>{user?.email || ''}</p><p>Signed in with {user?.provider || 'local account'}</p></div><button onClick={() => { clearSession(); navigate('/'); }}>Sign out</button></div></>}
+        {activeNav === 'account' && <><div className="home__header"><div><span className="home__eyebrow">ACCOUNT</span><h1 className="home__title">Your profile</h1><p className="home__subtitle">Set the name and public URL people see on your portfolio links.</p></div></div><div className="home__account-card"><div className="home__avatar">{(user?.name || user?.email || 'P').slice(0, 1).toUpperCase()}</div><form className="home__profile-form" onSubmit={saveProfile}><label>Display name<input required maxLength={100} value={profileName} onChange={(event) => setProfileName(event.target.value)} autoComplete="name" /></label><label>Public URL name<input maxLength={48} value={profileSlug} onChange={(event) => setProfileSlug(event.target.value)} placeholder="Use your display name" autoComplete="off" /><small>Spaces and punctuation become hyphens. Each portfolio gets its own short code, for example <strong>/p/{previewSlug(profileSlug || profileName)}-a3f2</strong>. Leave blank to use your display name.</small></label><p className="home__profile-email">{user?.email} · Signed in with {user?.provider || 'local account'}</p>{profileMessage && <p className="home__profile-message" role="status">{profileMessage}</p>}<div className="home__profile-actions"><button type="submit" disabled={profileSaving}>{profileSaving ? 'Saving…' : 'Save profile'}</button><button type="button" className="home__signout" onClick={() => { clearSession(); navigate('/'); }}>Sign out</button></div></form></div></>}
       </main>
       <ConfirmDialog
         isOpen={Boolean(pendingDelete)}

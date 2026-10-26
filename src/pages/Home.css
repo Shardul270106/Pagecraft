@@ -93,10 +93,19 @@ article[data-template-id="resume-minimalist-cv"] .home__preview-columns span { h
 .home__project-actions .is-danger { color: #a93232; }
 .home__empty,.home__account-card { padding: 32px; border: 1px solid #e6e6e0; border-radius: 18px; background: #fff; }
 .home__empty p { margin: 7px 0 20px; color: #777; }
-.home__account-card { display: flex; align-items: center; gap: 18px; max-width: 660px; }
-.home__account-card > div:nth-child(2) { flex: 1; }
+.home__account-card { display: flex; align-items: flex-start; gap: 18px; max-width: 660px; }
+.home__profile-form { display: grid; gap: 18px; flex: 1; min-width: 0; }
+.home__profile-form label { display: grid; gap: 7px; color: #292929; font-size: 13px; font-weight: 650; }
+.home__profile-form input { width: 100%; min-height: 44px; padding: 10px 12px; border: 1px solid #deded8; border-radius: 10px; background: #fff; color: #171717; font: inherit; font-weight: 450; }
+.home__profile-form input:focus { outline: 3px solid #e6e51e88; border-color: #8b8a22; }
+.home__profile-form small,.home__profile-email,.home__profile-message { color: #777; font-size: 12px; font-weight: 400; line-height: 1.5; }
+.home__profile-form small strong { color: #444; font-weight: 650; }
+.home__profile-actions { display: flex; gap: 10px; align-items: center; }
+.home__profile-actions button { border: 1px solid #171717; border-radius: 999px; padding: 10px 16px; background: #171717; color: #fff; font-weight: 650; }
+.home__profile-actions button:disabled { opacity: .65; cursor: wait; }
+.home__profile-actions .home__signout { border-color: #ddd; background: #fff; color: #333; }
+.home__profile-message { margin: -8px 0 0; }
 .home__account-card p { margin-top: 3px; color: #777; font-size: 13px; }
-.home__account-card button { border: 1px solid #ddd; border-radius: 999px; padding: 10px 16px; background: #fff; }
 .home__avatar { width: 54px; height: 54px; border-radius: 50%; display: grid; place-items: center; background: #e6e51e; font-size: 22px; font-weight: 700; }
 
 /* The chooser previews each template as a miniature page, so users can compare its composition before creating it. */

@@ -1,5 +1,7 @@
 const LINK_PATTERN = /(mailto:[^\s<>"']+|tel:\+?[\d().\s-]+|[\w.%+-]+@[\w.-]+\.[a-z]{2,}|(?:https?:\/\/|www\.)[^\s<>"']+|(?:[\w-]+\.)+[a-z]{2,}(?:\/[^\s<>"']*)?)/gi;
+const LABELLED_LINK_PATTERN = /\[([^\]\n]+)\]\(([^)\s]+)\)/g;
 const TRAILING_PUNCTUATION = /[.,!?;:)\]}]+$/;
+const INSTAGRAM_RESERVED_PATHS = new Set(['accounts', 'direct', 'explore', 'p', 'reel', 'reels', 'stories']);
 const SOCIAL_LABELS = new Map([
   ['linkedin.com', 'LinkedIn'],
   ['github.com', 'GitHub'],
@@ -22,7 +24,13 @@ function parseLink(candidate) {
     const parsed = new URL(href);
     if (!['http:', 'https:'].includes(parsed.protocol)) return null;
     const hostname = parsed.hostname.toLowerCase().replace(/^www\./, '');
-    return { href: parsed.href, label: SOCIAL_LABELS.get(hostname), kind: 'web' };
+    const instagramProfile = hostname === 'instagram.com'
+      ? parsed.pathname.split('/').filter(Boolean)[0]
+      : '';
+    const label = instagramProfile && !INSTAGRAM_RESERVED_PATHS.has(instagramProfile.toLowerCase())
+      ? `@${decodeURIComponent(instagramProfile)}`
+      : SOCIAL_LABELS.get(hostname);
+    return { href: parsed.href, label, kind: 'web' };
   } catch {
     return null;
   }
@@ -31,8 +39,24 @@ function parseLink(candidate) {
 export function getLinkifiedParts(value) {
   const text = String(value ?? '');
   const parts = [];
+  const links = [];
   let cursor = 0;
   let match;
+
+  LABELLED_LINK_PATTERN.lastIndex = 0;
+  while ((match = LABELLED_LINK_PATTERN.exec(text))) {
+    const destination = parseLink(match[2]);
+    if (!destination) continue;
+    links.push({
+      start: match.index,
+      end: match.index + match[0].length,
+      href: destination.href,
+      text: match[1],
+      raw: match[2],
+      kind: destination.kind,
+    });
+  }
+
   LINK_PATTERN.lastIndex = 0;
 
   while ((match = LINK_PATTERN.exec(text))) {
@@ -40,19 +64,33 @@ export function getLinkifiedParts(value) {
     const link = raw.replace(TRAILING_PUNCTUATION, '');
     const punctuation = raw.slice(link.length);
     if (!link) continue;
-    if (match.index > cursor) parts.push({ type: 'text', text: text.slice(cursor, match.index) });
+    const start = match.index;
+    const end = start + link.length;
+    if (links.some((labelledLink) => start < labelledLink.end && end > labelledLink.start)) continue;
 
     const destination = parseLink(link);
     if (destination) {
       const wholeValueIsLink = text.trim() === link;
-      const label = wholeValueIsLink && destination.kind === 'web' && destination.label ? destination.label : link;
-      parts.push({ type: 'link', href: destination.href, text: label, raw: link, kind: destination.kind });
+      const label = destination.kind === 'web' && destination.label?.startsWith('@')
+        ? destination.label
+        : wholeValueIsLink && destination.kind === 'web' && destination.label
+          ? destination.label
+          : link;
+      links.push({ start, end, href: destination.href, text: label, raw: link, kind: destination.kind, punctuation });
     } else {
-      parts.push({ type: 'text', text: link });
+      links.push({ start, end, text: link, raw: link, punctuation });
     }
-    if (punctuation) parts.push({ type: 'text', text: punctuation });
-    cursor = match.index + raw.length;
   }
+
+  links.sort((left, right) => left.start - right.start || right.end - left.end);
+  links.forEach((link) => {
+    if (link.start < cursor) return;
+    if (link.start > cursor) parts.push({ type: 'text', text: text.slice(cursor, link.start) });
+    if (link.href) parts.push({ type: 'link', href: link.href, text: link.text, raw: link.raw, kind: link.kind });
+    else parts.push({ type: 'text', text: link.text });
+    if (link.punctuation) parts.push({ type: 'text', text: link.punctuation });
+    cursor = link.end + (link.punctuation?.length || 0);
+  });
 
   if (cursor < text.length) parts.push({ type: 'text', text: text.slice(cursor) });
   return parts;

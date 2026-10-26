@@ -1,4 +1,5 @@
 import './ProjectPhotoFrames.css';
+import PhotoAdjustDialog from './PhotoAdjustDialog';
 
 export default function ProjectPhotoFrames({ section, editable, onUpdate, onUploadImage }) {
   if (!editable) return null;
@@ -18,10 +19,12 @@ export default function ProjectPhotoFrames({ section, editable, onUpdate, onUplo
   };
   const updateCrop = (index, key, value) => {
     if (!storedPhotos.length && section.image) updatePhotos(photos);
-    const next = [...settings];
-    while (next.length <= index) next.push({ zoom: 100, x: 50, y: 50 });
-    next[index] = { zoom: 100, x: 50, y: 50, ...next[index], [key]: value };
-    updateSettings(next);
+    onUpdate?.(section.id, 'galleryImageSettings', (currentSettings = []) => {
+      const next = [...currentSettings];
+      while (next.length <= index) next.push({ zoom: 100, x: 50, y: 50 });
+      next[index] = { zoom: 100, x: 50, y: 50, ...next[index], [key]: value };
+      return next;
+    });
   };
 
   return <div className="project-photo-frames" aria-label={`${section.title || 'Project'} photos`}>
@@ -44,11 +47,7 @@ export default function ProjectPhotoFrames({ section, editable, onUpdate, onUplo
           }} /></label>
           <button type="button" onClick={() => removePhoto(index)} aria-label={`Remove project photo frame ${index + 1}`}>Remove</button>
         </div>
-        {photo && <div className="project-photo-frames__crop">
-          <label>Zoom <input type="range" min="100" max="250" value={crop.zoom || 100} onChange={(event) => updateCrop(index, 'zoom', Number(event.target.value))} /></label>
-          <label>Horizontal <input type="range" min="0" max="100" value={crop.x ?? 50} onChange={(event) => updateCrop(index, 'x', Number(event.target.value))} /></label>
-          <label>Vertical <input type="range" min="0" max="100" value={crop.y ?? 50} onChange={(event) => updateCrop(index, 'y', Number(event.target.value))} /></label>
-        </div>}
+        {photo && <PhotoAdjustDialog src={photo} zoom={crop.zoom} x={crop.x} y={crop.y} onChange={(key, value) => updateCrop(index, key, value)} />}
       </figure>;
     })}
     <button type="button" className="project-photo-frames__add" onClick={() => {

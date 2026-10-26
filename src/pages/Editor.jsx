@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { api } from '../lib/api';
 import { SECTION_LIBRARY } from '../data/templates';
 import { PortfolioView } from '../components/PortfolioView';
+import PhotoAdjustDialog from '../components/PhotoAdjustDialog';
 import PortfolioIcon, { PORTFOLIO_ICONS } from '../components/PortfolioIcon';
 import './Editor.css';
 import '../components/PortfolioTemplates.css';
@@ -501,7 +501,7 @@ export default function Editor() {
                 <div className={`editor-photo-item__thumb ${(portfolio.templateImages?.[selectedTemplateImage] || selectedTemplateImageSource) ? 'has-image' : ''}`}>{(portfolio.templateImages?.[selectedTemplateImage] || selectedTemplateImageSource) ? <img src={portfolio.templateImages?.[selectedTemplateImage] || selectedTemplateImageSource} alt="Selected iPortfolio image" /> : <span aria-hidden="true">＋</span>}</div>
                 <div className="editor-photo-item__details"><strong>Image {selectedTemplateImage + 1}</strong><span>{portfolio.templateImages?.[selectedTemplateImage] ? 'Custom image' : 'Original template image'}</span></div>
                 <div className="editor-photo-item__actions"><label className="editor-photo-action" htmlFor="iportfolio-image-replace">Replace</label><input id="iportfolio-image-replace" className="editor-photo-input" type="file" accept="image/png,image/jpeg,image/webp,image/gif" onChange={(event) => { const file = event.target.files?.[0]; event.target.value = ''; if (file) uploadImage(file, (url) => { updateTemplateImage(selectedTemplateImage, url); resetTemplateImageSettings(selectedTemplateImage); }); }} />{portfolio.templateImages?.[selectedTemplateImage] && <button type="button" className="editor-photo-remove" onClick={() => { updateTemplateImage(selectedTemplateImage, ''); resetTemplateImageSettings(selectedTemplateImage); }}>Restore</button>}</div>
-                {(portfolio.templateImages?.[selectedTemplateImage] || selectedTemplateImageSource) && <PhotoAdjustControls src={portfolio.templateImages?.[selectedTemplateImage] || selectedTemplateImageSource} zoom={portfolio.templateImageSettings?.[selectedTemplateImage]?.zoom} x={portfolio.templateImageSettings?.[selectedTemplateImage]?.x} y={portfolio.templateImageSettings?.[selectedTemplateImage]?.y} onChange={(field, value) => updateTemplateImageSettings(selectedTemplateImage, field, value)} />}
+                {(portfolio.templateImages?.[selectedTemplateImage] || selectedTemplateImageSource) && <PhotoAdjustDialog src={portfolio.templateImages?.[selectedTemplateImage] || selectedTemplateImageSource} zoom={portfolio.templateImageSettings?.[selectedTemplateImage]?.zoom} x={portfolio.templateImageSettings?.[selectedTemplateImage]?.x} y={portfolio.templateImageSettings?.[selectedTemplateImage]?.y} onChange={(field, value) => updateTemplateImageSettings(selectedTemplateImage, field, value)} />}
               </div>}
             </div>
             <CanvasElementControls {...{ portfolio, selectedCanvasElement, selectedSectionId, setSelectedSectionId, supportsSectionCanvas, addCanvasElement, uploadImage, updateCanvasElement, updateSection, removeCanvasElement, duplicateCanvasElement, moveCanvasElementLayer, alignCanvasElement }} />
@@ -571,7 +571,7 @@ export default function Editor() {
                           }} />
                           <button type="button" className="editor-photo-remove" onClick={removeGalleryPhoto}>Remove</button>
                         </div>
-                        {photo && <PhotoAdjustControls src={photo} zoom={photoCrop.zoom} x={photoCrop.x} y={photoCrop.y} aspect={section.type === 'header' ? '4 / 5' : '4 / 3'} onChange={updateGalleryCrop} />}
+                        {photo && <PhotoAdjustDialog src={photo} zoom={photoCrop.zoom} x={photoCrop.x} y={photoCrop.y} aspect={section.type === 'header' ? '4 / 5' : '4 / 3'} onChange={updateGalleryCrop} />}
                       </div>;
                     })}
                   </div>
@@ -618,7 +618,7 @@ export default function Editor() {
                     />
                     {section.image && <button type="button" className="editor-photo-remove" onClick={() => updateSection(section.id, 'image', '')}>Remove</button>}
                   </div>
-                  {section.image && <PhotoAdjustControls src={section.image} zoom={section.imageZoom} x={section.imagePositionX} y={section.imagePositionY} aspect={section.type === 'header' ? '4 / 5' : '4 / 3'} onChange={(field, value) => updateSection(section.id, field === 'zoom' ? 'imageZoom' : field === 'x' ? 'imagePositionX' : 'imagePositionY', value)} />}
+                  {section.image && <PhotoAdjustDialog src={section.image} zoom={section.imageZoom} x={section.imagePositionX} y={section.imagePositionY} aspect={section.type === 'header' ? '4 / 5' : '4 / 3'} onChange={(field, value) => updateSection(section.id, field === 'zoom' ? 'imageZoom' : field === 'x' ? 'imagePositionX' : 'imagePositionY', value)} />}
                 </div>;
               })}
             </div>
@@ -640,67 +640,6 @@ export default function Editor() {
     </main>
   );
 
-}
-
-function PhotoAdjustControls({ src, zoom = 100, x = 50, y = 50, aspect = '4 / 3', onChange }) {
-  const [draft, setDraft] = useState(null);
-  const dragRef = useRef(null);
-  const openEditor = () => setDraft({ zoom: zoom || 100, x: x ?? 50, y: y ?? 50 });
-  const update = (key, value) => setDraft((current) => current ? { ...current, [key]: value } : current);
-  const beginPan = (event) => {
-    if (event.button !== 0) return;
-    event.preventDefault();
-    event.currentTarget.setPointerCapture(event.pointerId);
-    dragRef.current = { pointerId: event.pointerId, x: event.clientX, y: event.clientY };
-  };
-  const pan = (event) => {
-    const drag = dragRef.current;
-    if (!drag || drag.pointerId !== event.pointerId) return;
-    const bounds = event.currentTarget.getBoundingClientRect();
-    const dx = (event.clientX - drag.x) / Math.max(1, bounds.width) * 100;
-    const dy = (event.clientY - drag.y) / Math.max(1, bounds.height) * 100;
-    dragRef.current = { ...drag, x: event.clientX, y: event.clientY };
-    setDraft((current) => current ? {
-      ...current,
-      x: Math.min(100, Math.max(0, current.x + dx)),
-      y: Math.min(100, Math.max(0, current.y + dy)),
-    } : current);
-  };
-  const close = () => { dragRef.current = null; setDraft(null); };
-  const apply = () => {
-    if (!draft) return;
-    onChange('zoom', draft.zoom);
-    onChange('x', draft.x);
-    onChange('y', draft.y);
-    close();
-  };
-  const style = draft ? getPhotoCropPreviewStyle(draft) : {};
-
-  return <>
-    <button type="button" className="editor-photo-adjust-trigger" onClick={openEditor}>Adjust photo</button>
-    {draft && createPortal(<div className="editor-crop-dialog-backdrop" onPointerDown={(event) => { if (event.target === event.currentTarget) close(); }}>
-      <section className="editor-crop-dialog" role="dialog" aria-modal="true" aria-labelledby="editor-crop-title">
-        <header><div><h2 id="editor-crop-title">Adjust photo</h2><p>Drag the photo to reposition it. Use the slider or scroll to zoom.</p></div><button type="button" aria-label="Close photo editor" onClick={close}>×</button></header>
-        <div className="editor-crop-viewport" style={{ aspectRatio: aspect }} onPointerDown={beginPan} onPointerMove={pan} onPointerUp={() => { dragRef.current = null; }} onPointerCancel={() => { dragRef.current = null; }} onWheel={(event) => { event.preventDefault(); setDraft((current) => current ? { ...current, zoom: Math.min(250, Math.max(100, current.zoom + (event.deltaY < 0 ? 5 : -5))) } : current); }}>
-          <img src={src} alt="Crop preview" draggable="false" style={style} />
-          <span className="editor-crop-viewport__hint">DRAG TO REPOSITION</span>
-        </div>
-        <div className="editor-crop-controls">
-          <label>Zoom <span>{draft.zoom}%</span><input type="range" min="100" max="250" step="1" value={draft.zoom} onChange={(event) => update('zoom', Number(event.target.value))} /></label>
-          <label>Horizontal <span>{Math.round(draft.x)}%</span><input type="range" min="0" max="100" step="1" value={draft.x} onChange={(event) => update('x', Number(event.target.value))} /></label>
-          <label>Vertical <span>{Math.round(draft.y)}%</span><input type="range" min="0" max="100" step="1" value={draft.y} onChange={(event) => update('y', Number(event.target.value))} /></label>
-        </div>
-        <footer><button type="button" className="editor-crop-reset" onClick={() => setDraft({ zoom: 100, x: 50, y: 50 })}>Reset</button><div><button type="button" onClick={close}>Cancel</button><button type="button" className="editor-button--dark" onClick={apply}>Done</button></div></footer>
-      </section>
-    </div>, document.body)}
-  </>;
-}
-
-function getPhotoCropPreviewStyle({ zoom, x, y }) {
-  return {
-    width: '100%', height: '100%', objectFit: 'cover', objectPosition: `${x}% ${y}%`,
-    transform: `scale(${zoom / 100})`, transformOrigin: 'center', pointerEvents: 'none',
-  };
 }
 
 function CanvasElementControls({ portfolio, selectedCanvasElement, selectedSectionId, setSelectedSectionId, supportsSectionCanvas, addCanvasElement, uploadImage, updateCanvasElement, updateSection, removeCanvasElement, duplicateCanvasElement, moveCanvasElementLayer, alignCanvasElement }) {
@@ -730,7 +669,7 @@ function CanvasElementControls({ portfolio, selectedCanvasElement, selectedSecti
       {element.type === 'text' && <label>Text<textarea value={element.text} rows={3} onChange={(event) => updateCanvasElement(element.id, { text: event.target.value })} /></label>}
       {element.type === 'image' && <>
         <label className="editor-image-replace">Replace image<input type="file" accept="image/png,image/jpeg,image/webp,image/gif" onChange={(event) => { const file = event.target.files?.[0]; if (file) uploadImage(file, (url) => updateCanvasElement(element.id, { image: url, imageZoom: 100, imagePositionX: 50, imagePositionY: 50 })); event.target.value = ''; }} /></label>
-        {element.image && <PhotoAdjustControls src={element.image} zoom={element.imageZoom} x={element.imagePositionX} y={element.imagePositionY} onChange={(field, value) => updateCanvasElement(element.id, { [field === 'zoom' ? 'imageZoom' : field === 'x' ? 'imagePositionX' : 'imagePositionY']: value })} />}
+        {element.image && <PhotoAdjustDialog src={element.image} zoom={element.imageZoom} x={element.imagePositionX} y={element.imagePositionY} onChange={(field, value) => updateCanvasElement(element.id, { [field === 'zoom' ? 'imageZoom' : field === 'x' ? 'imagePositionX' : 'imagePositionY']: value })} />}
         <div className="editor-image-fit" role="group" aria-label="Image crop mode"><span>Image crop</span><div><button type="button" className={(element.imageFit || 'cover') === 'cover' ? 'is-active' : ''} aria-pressed={(element.imageFit || 'cover') === 'cover'} onClick={() => updateCanvasElement(element.id, { imageFit: 'cover' })}>Fill</button><button type="button" className={element.imageFit === 'contain' ? 'is-active' : ''} aria-pressed={element.imageFit === 'contain'} onClick={() => updateCanvasElement(element.id, { imageFit: 'contain' })}>Fit</button></div></div>
       </>}
       <div className="editor-element-action-grid">

@@ -360,3 +360,8 @@
 .template-preview__page--scrapbook-portfolio .template-preview__copy strong { color: #b92e25; font-family: 'Trebuchet MS',sans-serif; }
 .template-preview__page--scrapbook-portfolio .template-preview__portrait { border: 5px solid white; border-radius: 0; box-shadow: 2px 4px 8px #543b2c40; transform: rotate(4deg); }
 .template-preview__page--scrapbook-portfolio .template-preview__tiles span { border: 5px solid white; background: linear-gradient(145deg,#b59270,#e8ddca 50%,#bf3025); box-shadow: 2px 3px 6px #543b2c30; }
+.template-preview__page--blue-creative-portfolio { color: #20212a; background: linear-gradient(145deg,#1d2dc4 0 44%,#fff9f1 44%); }
+.template-preview__page--blue-creative-portfolio .template-preview__nav { color: #fff9f1; }
+.template-preview__page--blue-creative-portfolio .template-preview__copy strong { color: #1d2dc4; font-family: 'Montserrat',Arial,sans-serif; }
+.template-preview__page--blue-creative-portfolio .template-preview__portrait { border: 5px solid #1d2dc4; border-radius: 0; background: repeating-linear-gradient(45deg,#1d2dc4 0 10px,#f6c75c 10px 20px); }
+.template-preview__page--blue-creative-portfolio .template-preview__tiles span { border-radius: 0; background: linear-gradient(145deg,#1d2dc4,#f6c75c); }

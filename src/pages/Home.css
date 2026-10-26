@@ -285,3 +285,9 @@ article[data-template-id="resume-minimalist-cv"] .home__preview-columns span { h
 .home__template-preview--scrapbook-portfolio { background: repeating-linear-gradient(0deg,#f8f0e3 0 14px,#d5d9d330 15px,#f8f0e3 17px); }
 .home__template-preview--scrapbook-portfolio .home__mini-copy strong { color: #b92e25; font-family: 'Trebuchet MS',sans-serif; }
 .home__template-preview--scrapbook-portfolio .home__mini-portrait { border: 6px solid white; border-radius: 0; box-shadow: 2px 4px 8px #543b2c40; transform: rotate(4deg); }
+.home__template-preview--blue-creative-portfolio { background: linear-gradient(135deg,#1d2dc4 0 48%,#fff9f1 48%); }
+.home__template-preview--blue-creative-portfolio .home__mini-page { background: #fff9f1; }
+.home__template-preview--blue-creative-portfolio .home__mini-nav { color: #1d2dc4; }
+.home__template-preview--blue-creative-portfolio .home__mini-copy strong { color: #1d2dc4; font-family: 'Montserrat',Arial,sans-serif; }
+.home__template-preview--blue-creative-portfolio .home__mini-portrait { border: 5px solid #1d2dc4; border-radius: 0; background: repeating-linear-gradient(45deg,#1d2dc4 0 8px,#f7c658 8px 16px); }
+.home__template-preview--blue-creative-portfolio .home__mini-tiles i { background: linear-gradient(145deg,#1d2dc4,#f2c35e); }

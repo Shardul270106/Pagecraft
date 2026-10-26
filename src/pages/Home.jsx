@@ -26,6 +26,7 @@ const TEMPLATE_PREVIEW_COPY = {
   'midnight-creative-portfolio': ['Noah Rivera', 'Creative developer', 'AFTER HOURS'],
   'product-designer-portfolio': ['Jordan Lee', 'Product designer', 'WORK, WITH OUTCOMES'],
   'architect-portfolio': ['Avery Morgan', 'Architecture & interiors', 'SPACES IN FOCUS'],
+  'blue-creative-portfolio': ['Oliver Shaw', 'Creative designer', 'PREVIOUS PROJECTS'],
 };
 
 function HomeTemplatePreview({ template }) {
@@ -106,7 +107,7 @@ export default function Home() {
           title: template?.templateId === 'grunge-portfolio' ? grungeCopy[type]?.title || SECTION_LIBRARY[type]?.label || type : template?.defaultContent?.[type]?.title || (type === 'header' ? 'Your name' : SECTION_LIBRARY[type]?.label || type),
           body: template?.templateId === 'grunge-portfolio' ? grungeCopy[type]?.body || `Add your ${SECTION_LIBRARY[type]?.label?.toLowerCase() || type} here.` : template?.defaultContent?.[type]?.body || (type === 'header' ? 'Your role · A short introduction about what you do.' : `Add your ${SECTION_LIBRARY[type]?.label?.toLowerCase() || type} here. Tell visitors what makes your work worth exploring.`),
           image: template?.defaultImages?.[type] || '',
-          galleryImages: type === 'gallery' ? template?.defaultGallery || [] : [],
+          galleryImages: template?.defaultGalleryBySection?.[type] || (type === 'gallery' ? template?.defaultGallery || [] : []),
         })),
       };
       const draftId = `draft-${globalThis.crypto?.randomUUID?.() || Date.now()}`;

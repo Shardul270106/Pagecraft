@@ -28,6 +28,7 @@ const TEMPLATE_NAV_LINKS = {
   'midnight-creative-portfolio': [['projects', 'Experiments'], ['skills', 'Practice'], ['about', 'About']],
   'product-designer-portfolio': [['projects', 'Work'], ['process', 'Approach'], ['outcome', 'Impact']],
   'architect-portfolio': [['gallery', 'Spaces'], ['projects', 'Projects'], ['about', 'Practice']],
+  'blue-creative-portfolio': [['about', 'Introduction'], ['education', 'Education'], ['experience', 'Experience'], ['skills', 'Expertise'], ['projects', 'Projects'], ['gallery', 'Gallery']],
 };
 
 const TEMPLATE_ART_COPY = {
@@ -38,6 +39,7 @@ const TEMPLATE_ART_COPY = {
   'editorial-studio-portfolio': ['INDEPENDENT JOURNAL', 'Form follows', 'feeling.'],
   'midnight-creative-portfolio': ['STUDY / 04', 'Signals after', 'dark'],
   'product-designer-portfolio': ['PRODUCT NOTE 01', 'Less friction,', 'more flow'],
+  'blue-creative-portfolio': ['CREATIVE PORTFOLIO', 'Ideas with', 'intention.'],
 };
 
 function splitContentBlocks(value) {
@@ -121,6 +123,7 @@ export function PortfolioView({ portfolio, editable = false, onUpdate, onTemplat
   const isIPortfolio = portfolio?.templateId === 'iportfolio-bootstrap';
   const isProfessional = portfolio?.templateId === 'professional-portfolio';
   const isPhotographer = portfolio?.templateId === 'photographer-portfolio';
+  const isBlueCreative = portfolio?.templateId === 'blue-creative-portfolio';
   const navLinks = TEMPLATE_NAV_LINKS[portfolio?.templateId] || [];
   const hasHeroCanvasImage = !isFolio && (portfolio?.canvasElements || []).some((element) => element.type === 'image' && !element.sectionId && element.y < 32);
   const header = sections.find((section) => section.type === 'header');
@@ -157,6 +160,7 @@ export function PortfolioView({ portfolio, editable = false, onUpdate, onTemplat
         <div className="template-nav__links">{navLinks.filter(([type]) => sectionHref(type)).map(([type, label]) => <a key={type} href={sectionHref(type)}>{label}</a>)}</div>
         {sectionHref('contact') && <a className="template-nav__cta" href={sectionHref('contact')}>{portfolio.templateId === 'developer-portfolio' ? 'Say hello' : portfolio.templateId === 'photographer-portfolio' ? 'Book a shoot' : 'Let’s talk'} <span aria-hidden="true">↗</span></a>}
       </nav>}
+      {isBlueCreative && <BlueCreativeContents sectionHref={sectionHref} />}
       {isFolio && <nav className="folio-nav" aria-label="Portfolio navigation">
         <a className="folio-nav__brand" href="#folio-hero">{header?.title || portfolio.title}</a>
         <div className="folio-nav__links">{FOLIO_LINKS.filter(([type]) => sectionHref(type)).map(([type, label]) => <a key={type} href={sectionHref(type)}>{label}</a>)}</div>
@@ -170,7 +174,8 @@ export function PortfolioView({ portfolio, editable = false, onUpdate, onTemplat
           const isPhotographerGallery = isPhotographer && section.type === 'gallery';
           const isTemplateGallery = ['model-portfolio', 'scrapbook-portfolio'].includes(portfolio.templateId) && section.type === 'gallery';
           const isImageGallery = isPhotographerGallery || isTemplateGallery;
-          const hasVisualList = !editable && !isImageGallery && ['projects', 'projects-work', 'gallery'].includes(section.type) && splitContentBlocks(section.body).length > 0;
+          const isBlueCreativeProject = isBlueCreative && ['projects', 'projects-work', 'gallery'].includes(section.type);
+          const hasVisualList = !editable && !isImageGallery && !isBlueCreativeProject && ['projects', 'projects-work', 'gallery'].includes(section.type) && splitContentBlocks(section.body).length > 0;
           const copyBounds = getSectionCopyBounds(sectionElements) || (section.image ? { left: 0, width: 68 } : null);
           const contentStyle = { '--section-offset-x': `${section.contentOffsetX || 0}px`, '--section-offset-y': `${section.contentOffsetY || 0}px` };
           if (section.type === 'header') return (
@@ -179,8 +184,13 @@ export function PortfolioView({ portfolio, editable = false, onUpdate, onTemplat
                 {isFolio && <span className="folio-hero__availability"><i /> Available for work</span>}
                 {isProfessional && <span className="professional-hero__availability"><i /> Open to thoughtful projects</span>}
                 {!isFolio && <span className="portfolio-page__eyebrow">{displayTitle || 'Your portfolio'}</span>}
-                {editable ? <input className="portfolio-page__hero-title" style={section.titleFontSize ? { fontSize: `${section.titleFontSize}px` } : undefined} aria-label="Your name" value={section.title || ''} onChange={(event) => onUpdate(section.id, 'title', event.target.value)} /> : <h1 style={section.titleFontSize ? { fontSize: `${section.titleFontSize}px` } : undefined}>{section.title || 'Your name'}</h1>}
-                {editable ? <textarea ref={resizeTextarea} data-auto-size="true" className="portfolio-page__hero-body" style={section.bodyFontSize ? { fontSize: `${section.bodyFontSize}px` } : undefined} aria-label="Your role and introduction" value={section.body || ''} onChange={(event) => { onUpdate(section.id, 'body', event.target.value); resizeTextarea(event.currentTarget); }} rows={3} /> : <p style={section.bodyFontSize ? { fontSize: `${section.bodyFontSize}px` } : undefined}><LinkifiedText>{section.body || ''}</LinkifiedText></p>}
+                {editable && isBlueCreative
+                  ? <BlueCreativeEditableHeroTitle section={section} onUpdate={onUpdate} />
+                  : editable ? <input className="portfolio-page__hero-title" style={section.titleFontSize ? { fontSize: `${section.titleFontSize}px` } : undefined} aria-label="Your name" value={section.title || ''} onChange={(event) => onUpdate(section.id, 'title', event.target.value)} />
+                    : <h1 style={section.titleFontSize ? { fontSize: `${section.titleFontSize}px` } : undefined}>{section.title || 'Your name'}</h1>}
+                {!isBlueCreative && (editable
+                  ? <textarea ref={resizeTextarea} data-auto-size="true" className="portfolio-page__hero-body" style={section.bodyFontSize ? { fontSize: `${section.bodyFontSize}px` } : undefined} aria-label="Your role and introduction" value={section.body || ''} onChange={(event) => { onUpdate(section.id, 'body', event.target.value); resizeTextarea(event.currentTarget); }} rows={3} />
+                  : <p style={section.bodyFontSize ? { fontSize: `${section.bodyFontSize}px` } : undefined}><LinkifiedText>{section.body || ''}</LinkifiedText></p>)}
                 {isProfessional && <div className="professional-hero__actions">{sectionHref('projects') && <a className="professional-button professional-button--dark" href={sectionHref('projects')}>Explore my work <span aria-hidden="true">↓</span></a>}{sectionHref('contact') && <a className="professional-button professional-button--text" href={sectionHref('contact')}>Get in touch <span aria-hidden="true">↗</span></a>}</div>}
                 {!isProfessional && !isFolio && navLinks.length > 0 && <div className="template-hero__actions">{(sectionHref('projects') || sectionHref('projects-work') || sectionHref('gallery')) && <a className="template-hero__primary" href={sectionHref('projects') || sectionHref('projects-work') || sectionHref('gallery')}>{portfolio.templateId === 'photographer-portfolio' ? 'View the collection' : portfolio.templateId === 'ux-case-study' || portfolio.templateId === 'product-designer-portfolio' ? 'Read the case study' : 'Explore selected work'} <span aria-hidden="true">↘</span></a>}{sectionHref('contact') && <a className="template-hero__secondary" href={sectionHref('contact')}>Get in touch <span aria-hidden="true">↗</span></a>}</div>}
                 {isFolio && <div className="folio-hero__actions">
@@ -188,6 +198,9 @@ export function PortfolioView({ portfolio, editable = false, onUpdate, onTemplat
                   {sectionHref('contact') && <a className="folio-button folio-button--light" href={sectionHref('contact')}>Get in touch</a>}
                 </div>}
               </SectionCopy>
+              {isBlueCreative && (editable
+                ? <BlueCreativeEditableHeroBody section={section} onUpdate={onUpdate} />
+                : <div className="blue-creative-hero-body-display" style={section.bodyFontSize ? { fontSize: `${section.bodyFontSize}px` } : undefined}><p><LinkifiedText>{section.body || ''}</LinkifiedText></p></div>)}
               {section.image && <div className="portfolio-section-media"><img className={`portfolio-page__image ${isFolio ? 'folio-hero__image' : ''}`} src={section.image} alt="Profile or portfolio" style={getSectionImageCropStyle(section)} /></div>}
               {isProfessional && !section.image && !sectionElements.length && <div className="professional-hero-art" aria-hidden="true"><span className="professional-hero-art__orbit" /><span className="professional-hero-art__initial">{(section.title || 'P').trim().charAt(0).toUpperCase()}</span><span className="professional-hero-art__caption">SELECTED WORK<br />2026 — PRESENT</span><i /></div>}
               {!isProfessional && !isFolio && navLinks.length > 0 && !section.image && !sectionElements.length && <TemplateHeroArtwork templateId={portfolio.templateId} />}
@@ -200,13 +213,15 @@ export function PortfolioView({ portfolio, editable = false, onUpdate, onTemplat
       <section data-section-id={section.id} className={`portfolio-page__section portfolio-page__section--canvas portfolio-page__section--${section.type} ${section.image ? 'portfolio-page__section--with-media' : ''} ${hasVisualList ? 'portfolio-page__section--has-visual-list' : ''} ${isFolio ? `folio-section folio-section--${section.type} ${section.image ? 'folio-section--with-media' : ''}` : ''} ${isProfessional ? 'professional-section' : ''}`} id={sectionId} key={section.id} style={theme.section && theme.section !== 'transparent' ? { backgroundColor: theme.section } : undefined}>
               <SectionCopy section={section} editable={editable} onUpdate={onUpdate} moveBounds={copyBounds} style={contentStyle}>
                 {isProfessional && <span className="professional-section__index">{String(index).padStart(2, '0')} <i /> {label}</span>}
-                {editable ? <input aria-label={`${label} heading`} style={section.titleFontSize ? { fontSize: `${section.titleFontSize}px` } : undefined} value={section.title || ''} onChange={(event) => onUpdate(section.id, 'title', event.target.value)} /> : <h2 style={section.titleFontSize ? { fontSize: `${section.titleFontSize}px` } : undefined}>{section.title || label}</h2>}
-                {isImageGallery ? null : editable ? <textarea ref={resizeTextarea} data-auto-size="true" style={section.bodyFontSize ? { fontSize: `${section.bodyFontSize}px` } : undefined} aria-label={`${label} content`} value={section.body || ''} onChange={(event) => { onUpdate(section.id, 'body', event.target.value); resizeTextarea(event.currentTarget); }} rows={Math.max(3, String(section.body || '').split('\n').length)} /> : <div className={section.bodyFontSize ? 'portfolio-section-body--custom' : undefined} style={section.bodyFontSize ? { '--section-body-size': `${section.bodyFontSize}px` } : undefined}><SectionDisplay section={section} templateId={portfolio.templateId} /></div>}
+                {editable ? isBlueCreative ? <BlueCreativeEditableHeading section={section} onUpdate={onUpdate} fallbackLabel={label} /> : <input aria-label={`${label} heading`} style={section.titleFontSize ? { fontSize: `${section.titleFontSize}px` } : undefined} value={section.title || ''} onChange={(event) => onUpdate(section.id, 'title', event.target.value)} /> : <h2 style={section.titleFontSize ? { fontSize: `${section.titleFontSize}px` } : undefined}>{section.title || label}</h2>}
+                {isImageGallery ? null : editable && isBlueCreative ? <BlueCreativeEditableBody section={section} onUpdate={onUpdate} /> : editable ? <textarea ref={resizeTextarea} data-auto-size="true" style={section.bodyFontSize ? { fontSize: `${section.bodyFontSize}px` } : undefined} aria-label={`${label} content`} value={section.body || ''} onChange={(event) => { onUpdate(section.id, 'body', event.target.value); resizeTextarea(event.currentTarget); }} rows={Math.max(3, String(section.body || '').split('\n').length)} /> : <div className={section.bodyFontSize ? 'portfolio-section-body--custom' : undefined} style={section.bodyFontSize ? { '--section-body-size': `${section.bodyFontSize}px` } : undefined}><SectionDisplay section={section} templateId={portfolio.templateId} /></div>}
               </SectionCopy>
-              {section.image && (editable || !['projects', 'projects-work', 'gallery'].includes(section.type) || ['model-portfolio', 'scrapbook-portfolio'].includes(portfolio.templateId)) && <div className="portfolio-section-media"><img className="portfolio-page__image" src={section.image} alt={`${label} visual`} style={getSectionImageCropStyle(section)} /></div>}
-              {isImageGallery && <PhotographerGallery section={section} editable={editable} onUpdate={onUpdate} onUploadImage={onUploadImage} className={portfolio.templateId === 'model-portfolio' ? 'photographer-gallery--model' : portfolio.templateId === 'scrapbook-portfolio' ? 'photographer-gallery--scrapbook' : ''} />}
+              {section.image && (editable || !['projects', 'projects-work', 'gallery'].includes(section.type) || ['model-portfolio', 'scrapbook-portfolio', 'blue-creative-portfolio'].includes(portfolio.templateId)) && <div className="portfolio-section-media"><img className="portfolio-page__image" src={section.image} alt={`${label} visual`} style={getSectionImageCropStyle(section)} /></div>}
+              {isImageGallery && <PhotographerGallery section={section} editable={editable} onUpdate={onUpdate} onUploadImage={onUploadImage} className={portfolio.templateId === 'model-portfolio' ? 'photographer-gallery--model' : portfolio.templateId === 'scrapbook-portfolio' ? 'photographer-gallery--scrapbook' : portfolio.templateId === 'blue-creative-portfolio' ? 'photographer-gallery--blue-creative' : ''} />}
+              {isBlueCreativeProject && <PhotographerGallery section={section} editable={editable} onUpdate={onUpdate} onUploadImage={onUploadImage} className={`photographer-gallery--blue-creative photographer-gallery--blue-creative-${section.type}`} />}
               {hasVisualList && <PortfolioVisualList section={section} templateId={portfolio.templateId} />}
               {sectionElements.length > 0 && <CanvasElementsLayer elements={sectionElements} editable={editable} selectedId={selectedCanvasElement} onUpdate={onCanvasElementUpdate} onSelect={onCanvasElementSelect} sectionBound />}
+              {isBlueCreative && ['about', 'education', 'experience', 'skills', 'projects', 'projects-work', 'gallery'].includes(section.type) && <BlueCreativePageFooter number={section.type === 'about' ? '01.' : section.type === 'education' ? '02.' : section.type === 'experience' ? '03.' : section.type === 'skills' ? '04.' : '05.'} />}
             </section>
           );
         })}
@@ -216,8 +231,32 @@ export function PortfolioView({ portfolio, editable = false, onUpdate, onTemplat
   </PortfolioComposition>;
 }
 
-function SectionDisplay({ section }) {
+function SectionDisplay({ section, templateId }) {
   const content = section.body || '';
+  if (templateId === 'blue-creative-portfolio' && section.type === 'about') {
+    const [intro = '', ...rest] = content.split('\n');
+    return <div className="blue-creative-intro-copy"><strong>{intro}</strong><p><LinkifiedText>{rest.join('\n').trim()}</LinkifiedText></p></div>;
+  }
+  if (templateId === 'blue-creative-portfolio' && ['projects', 'projects-work', 'gallery'].includes(section.type)) {
+    const [title = '', ...rest] = content.split('\n');
+    return <div className="blue-creative-project-copy"><strong>{title}</strong><p><LinkifiedText>{rest.join('\n').trim()}</LinkifiedText></p></div>;
+  }
+  if (templateId === 'blue-creative-portfolio' && section.type === 'skills') {
+    return <div className="blue-creative-skill-list">{splitContentBlocks(content).map((entry, index) => { const [title = '', ...detail] = entry.split('\n'); return <article key={`${section.id}-skill-${index}`}><h3>{title}</h3><p><LinkifiedText>{detail.join('\n')}</LinkifiedText></p></article>; })}</div>;
+  }
+  if (templateId === 'blue-creative-portfolio' && ['education', 'experience'].includes(section.type)) {
+    return <div className={`blue-creative-timeline blue-creative-timeline--${section.type}`}>{splitContentBlocks(content).map((entry, index) => {
+      const lines = entry.split('\n').map((line) => line.trim()).filter(Boolean);
+      const [first = '', second = '', third = '', ...detail] = lines;
+      if (section.type === 'education') {
+        const [school = first, year = ''] = first.includes('|') ? first.split('|').map((value) => value.trim()) : [first, second];
+        const description = first.includes('|') ? lines.slice(1) : lines.slice(2);
+        return <article key={`${section.id}-item-${index}`}><header><h3>{school}</h3><time>{year}</time></header><p><LinkifiedText>{description.join('\n')}</LinkifiedText></p></article>;
+      }
+      const [organization = first, role = second, year = third] = first.includes('|') ? first.split('|').map((value) => value.trim()) : [first, second, third];
+      return <article key={`${section.id}-item-${index}`}><header><span className="blue-creative-timeline__organization">{organization}</span><h3>{role}</h3><time>{year}</time></header><p><LinkifiedText>{(first.includes('|') ? lines.slice(1) : detail).join('\n')}</LinkifiedText></p></article>;
+    })}</div>;
+  }
   if (['skills', 'technical-skills', 'services', 'languages'].includes(section.type)) {
     return <ul className={`portfolio-skill-list portfolio-skill-list--${section.type}`}>{getSkillItems(content).map((skill, index) => <li key={`${section.id}-${index}`}><LinkifiedText>{skill}</LinkifiedText></li>)}</ul>;
   }
@@ -254,6 +293,11 @@ function PortfolioVisualList({ section, templateId }) {
 function PhotographerGallery({ section, editable, onUpdate, onUploadImage, className = '' }) {
   const photos = Array.isArray(section.galleryImages) ? section.galleryImages : [];
   const visiblePhotos = editable ? photos : photos.filter(Boolean);
+  const blueCreativeDefaults = {
+    projects: ['/blue-creative-portfolio/project-collective.webp', '/blue-creative-portfolio/project-portrait.webp', '/blue-creative-portfolio/project-desk.webp'],
+    'projects-work': ['/blue-creative-portfolio/project-website.webp', '/blue-creative-portfolio/project-website-detail.webp'],
+    gallery: ['/blue-creative-portfolio/project-studio.webp', '/blue-creative-portfolio/project-studio.webp'],
+  };
   const setPhoto = (index, image) => onUpdate?.(section.id, 'galleryImages', (currentPhotos = []) => {
     const nextPhotos = [...currentPhotos];
     nextPhotos[index] = image;
@@ -284,7 +328,10 @@ function PhotographerGallery({ section, editable, onUpdate, onUploadImage, class
       {visiblePhotos.map((image, index) => {
         const crop = section.galleryImageSettings?.[index] || {};
         return <figure className={`photographer-gallery__item ${image ? 'has-photo' : 'is-empty'}`} key={`${section.id}-photo-${index}`}>
-        {image ? <img src={image} alt={`Portfolio photograph ${index + 1}`} style={getImageCropStyle(crop.zoom, crop.x, crop.y)} /> : <span className="photographer-gallery__placeholder" aria-hidden="true"><i /><b /></span>}
+        {image ? <img src={image} alt={`Portfolio photograph ${index + 1}`} onError={(event) => {
+          const fallback = className.includes('blue-creative') ? blueCreativeDefaults[section.type]?.[index] : undefined;
+          if (fallback && event.currentTarget.src !== new URL(fallback, window.location.href).href) event.currentTarget.src = fallback;
+        }} style={getImageCropStyle(crop.zoom, crop.x, crop.y)} /> : <span className="photographer-gallery__placeholder" aria-hidden="true"><i /><b /></span>}
         {editable && <>
           <label className="photographer-gallery__upload">{image ? 'Replace photo' : '＋ Add photo'}<input type="file" accept="image/png,image/jpeg,image/webp,image/gif" aria-label={`${image ? 'Replace' : 'Add'} gallery photo ${index + 1}`} onChange={(event) => {
             const file = event.target.files?.[0];
@@ -316,6 +363,118 @@ function getSectionImageCropStyle(section) {
   return getImageCropStyle(section.imageZoom, section.imagePositionX ?? 50, section.imagePositionY ?? 50);
 }
 
+function BlueCreativeEditableHeading({ section, onUpdate, fallbackLabel }) {
+  const [editing, setEditing] = useState(false);
+  const fieldRef = useRef(null);
+  const titleStyle = section.titleFontSize ? { fontSize: `${section.titleFontSize}px` } : undefined;
+
+  useEffect(() => {
+    if (!editing || !fieldRef.current) return;
+    resizeTextarea(fieldRef.current);
+    fieldRef.current.focus();
+  }, [editing]);
+
+  if (editing) return <textarea
+    ref={fieldRef}
+    className="blue-creative-heading"
+    data-auto-size="true"
+    aria-label={`${SECTION_LIBRARY[section.type]?.label || section.type} heading`}
+    style={titleStyle}
+    value={section.title || ''}
+    onChange={(event) => {
+      onUpdate(section.id, 'title', event.target.value);
+      resizeTextarea(event.currentTarget);
+    }}
+    onBlur={() => setEditing(false)}
+    onKeyDown={(event) => {
+      if (event.key === 'Escape') event.currentTarget.blur();
+    }}
+    rows={2}
+  />;
+
+  return <h2 className="blue-creative-heading-display" style={titleStyle}>
+    {section.title || fallbackLabel}
+    <button type="button" className="blue-creative-heading-display__edit" aria-label={`Edit ${SECTION_LIBRARY[section.type]?.label || section.type} heading`} title="Edit heading" onClick={() => setEditing(true)}>✎</button>
+  </h2>;
+}
+
+function BlueCreativeEditableHeroTitle({ section, onUpdate }) {
+  const [editing, setEditing] = useState(false);
+  const fieldRef = useRef(null);
+  useEffect(() => {
+    if (editing) fieldRef.current?.focus();
+  }, [editing]);
+  if (editing) return <input
+    ref={fieldRef}
+    className="portfolio-page__hero-title blue-creative-hero-title-editing"
+    aria-label="Your name"
+    style={section.titleFontSize ? { fontSize: `${section.titleFontSize}px` } : undefined}
+    value={section.title || ''}
+    onChange={(event) => onUpdate(section.id, 'title', event.target.value)}
+    onBlur={() => setEditing(false)}
+    onKeyDown={(event) => { if (event.key === 'Escape') event.currentTarget.blur(); }}
+  />;
+  return <h1 className="blue-creative-hero-title-display" style={section.titleFontSize ? { fontSize: `${section.titleFontSize}px` } : undefined}>{section.title || 'Your name'}
+    <button type="button" className="blue-creative-heading-display__edit" aria-label="Edit your name" title="Edit title" onClick={() => setEditing(true)}>✎</button>
+  </h1>;
+}
+
+function BlueCreativeEditableHeroBody({ section, onUpdate }) {
+  const [editing, setEditing] = useState(false);
+  const fieldRef = useRef(null);
+  useEffect(() => {
+    if (editing) fieldRef.current?.focus();
+  }, [editing]);
+  if (editing) return <textarea
+    ref={fieldRef}
+    className="portfolio-page__hero-body blue-creative-hero-body-editing"
+    aria-label="Your role and introduction"
+    style={section.bodyFontSize ? { fontSize: `${section.bodyFontSize}px` } : undefined}
+    value={section.body || ''}
+    onChange={(event) => onUpdate(section.id, 'body', event.target.value)}
+    onBlur={() => setEditing(false)}
+    onKeyDown={(event) => { if (event.key === 'Escape') event.currentTarget.blur(); }}
+    rows={Math.max(1, String(section.body || '').split('\n').length)}
+  />;
+  return <div className="blue-creative-hero-body-display" style={section.bodyFontSize ? { fontSize: `${section.bodyFontSize}px` } : undefined}>
+    <p><LinkifiedText>{section.body || ''}</LinkifiedText></p>
+    <button type="button" className="blue-creative-heading-display__edit" aria-label="Edit introduction" title="Edit introduction" onClick={() => setEditing(true)}>✎</button>
+  </div>;
+}
+
+function BlueCreativeEditableBody({ section, onUpdate }) {
+  const [editing, setEditing] = useState(false);
+  const fieldRef = useRef(null);
+
+  useEffect(() => {
+    if (!editing || !fieldRef.current) return;
+    resizeTextarea(fieldRef.current);
+    fieldRef.current.focus();
+  }, [editing]);
+
+  if (editing) return <textarea
+    ref={fieldRef}
+    className="blue-creative-editor-text"
+    data-auto-size="true"
+    aria-label={`${SECTION_LIBRARY[section.type]?.label || section.type} content`}
+    value={section.body || ''}
+    onChange={(event) => {
+      onUpdate(section.id, 'body', event.target.value);
+      resizeTextarea(event.currentTarget);
+    }}
+    onBlur={() => setEditing(false)}
+    onKeyDown={(event) => {
+      if (event.key === 'Escape') event.currentTarget.blur();
+    }}
+    rows={Math.max(3, String(section.body || '').split('\n').length)}
+  />;
+
+  return <div className="blue-creative-editor-body" onDoubleClick={() => setEditing(true)}>
+    <div className="blue-creative-editor-body__preview"><SectionDisplay section={section} templateId="blue-creative-portfolio" /></div>
+    <button type="button" className="blue-creative-editor-body__edit" aria-label={`Edit ${SECTION_LIBRARY[section.type]?.label || section.type} content`} title="Edit text" onClick={() => setEditing(true)}>✎</button>
+  </div>;
+}
+
 function TemplateHeroArtwork({ templateId }) {
   const copy = TEMPLATE_ART_COPY[templateId];
   if (!copy) return null;
@@ -329,10 +488,30 @@ function TemplateHeroArtwork({ templateId }) {
   </div>;
 }
 
+function BlueCreativeContents({ sectionHref }) {
+  const entries = [
+    ['01.', 'Introduction', 'about'],
+    ['02.', 'Education Background', 'education'],
+    ['03.', 'Working Experience', 'experience'],
+    ['04.', 'Skill & Expertise', 'skills'],
+    ['05.', 'Previous Projects', 'projects'],
+    ['06.', 'Thank You', 'contact'],
+  ];
+  return <section className="blue-creative-contents" aria-labelledby="blue-creative-contents-title">
+    <h2 id="blue-creative-contents-title"><span>Table of</span><span>Contents.<i aria-hidden="true">⟶</i></span></h2>
+    <nav aria-label="Portfolio contents">{entries.map(([number, label, type]) => <a key={number} href={sectionHref(type)}><i aria-hidden="true" /><span>{number} {label}</span></a>)}</nav>
+    <footer><a href="mailto:hello@reallygreatsite.com">hello@reallygreatsite.com</a><a href="tel:+1234567890">+123-456-7890</a></footer>
+  </section>;
+}
+
+function BlueCreativePageFooter({ number }) {
+  return <footer className="blue-creative-page-footer"><span>{number}</span><a href="mailto:hello@reallygreatsite.com">hello@reallygreatsite.com</a><a href="tel:+1234567890">+123-456-7890</a></footer>;
+}
+
 function PortfolioComposition({ portfolio, editable, selectedCanvasElement, onCanvasElementUpdate, onCanvasElementSelect, children }) {
   const theme = portfolio?.theme || {};
-  const wideTemplates = ['folio-freelancer', 'editorial-studio-portfolio', 'architect-portfolio', 'professional-portfolio', 'developer-portfolio', 'creative-portfolio', 'ux-case-study', 'photographer-portfolio', 'model-portfolio', 'scrapbook-portfolio', 'midnight-creative-portfolio', 'product-designer-portfolio'];
-  const templateClass = wideTemplates.includes(portfolio?.templateId) ? 'portfolio-composition--wide' : portfolio?.templateId === 'grunge-portfolio' || portfolio?.templateId === 'iportfolio-bootstrap' ? 'portfolio-composition--full' : isResumeTemplate(portfolio?.templateId) ? 'portfolio-composition--resume' : '';
+  const wideTemplates = ['folio-freelancer', 'editorial-studio-portfolio', 'architect-portfolio', 'professional-portfolio', 'developer-portfolio', 'creative-portfolio', 'ux-case-study', 'photographer-portfolio', 'model-portfolio', 'scrapbook-portfolio', 'midnight-creative-portfolio', 'product-designer-portfolio', 'blue-creative-portfolio'];
+  const templateClass = portfolio?.templateId === 'blue-creative-portfolio' ? 'portfolio-composition--blue-creative' : wideTemplates.includes(portfolio?.templateId) ? 'portfolio-composition--wide' : portfolio?.templateId === 'grunge-portfolio' || portfolio?.templateId === 'iportfolio-bootstrap' ? 'portfolio-composition--full' : isResumeTemplate(portfolio?.templateId) ? 'portfolio-composition--resume' : '';
   const supportsSectionCanvas = portfolio?.templateId !== 'grunge-portfolio' && portfolio?.templateId !== 'iportfolio-bootstrap' && !isResumeTemplate(portfolio?.templateId);
   const sectionIds = new Set((portfolio?.sections || []).map((section) => section.id));
   const freeElements = (portfolio?.canvasElements || []).filter((element) => !supportsSectionCanvas || !sectionIds.has(element.sectionId));

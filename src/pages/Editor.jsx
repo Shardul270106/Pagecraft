@@ -18,14 +18,26 @@ const initialSection = (type, index) => ({
   body: type === 'header' ? 'Your role · A short introduction about what you do.' : `Add your ${SECTION_LIBRARY[type]?.label?.toLowerCase() || type} here. Tell visitors what makes your work worth exploring.`,
   image: '',
 });
-const normalizeSectionCanvas = (portfolio) => ({
+const normalizeSectionCanvas = (portfolio) => {
+  const isBlueCreative = portfolio.templateId === 'blue-creative-portfolio';
+  const shouldUpgradeBlueCreativeGallery = isBlueCreative && (portfolio.blueCreativeLayoutVersion || 0) < 1;
+  return {
   ...portfolio,
+  ...(isBlueCreative ? { blueCreativeLayoutVersion: 1 } : {}),
+  sections: (portfolio.sections || []).map((section) => {
+    if (!shouldUpgradeBlueCreativeGallery || section.type !== 'gallery') return section;
+    const photos = Array.isArray(section.galleryImages) ? section.galleryImages : [];
+    const firstPhoto = String(photos[0] || '');
+    if (photos.length !== 1 || !firstPhoto.endsWith('/blue-creative-portfolio/project-studio.webp')) return section;
+    return { ...section, galleryImages: [...photos, '/blue-creative-portfolio/project-studio.webp'] };
+  }),
   canvasElements: (portfolio.canvasElements || []).map((element) => {
     if (!element.sectionId || element.sectionCanvasVersion) return element;
     // Earlier saved objects used coordinates inside a narrow section media column.
     return { ...element, x: Math.min(100 - element.width * 0.32, 65 + (element.x || 0) * 0.32), width: Math.max(element.type === 'text' ? 30 : 8, element.width * 0.32), sectionCanvasVersion: 1 };
   }),
-});
+  };
+};
 
 export default function Editor() {
   const { id } = useParams();

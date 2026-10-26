@@ -740,8 +740,8 @@ export default function Editor() {
       {linkDialog && <div className="editor-link-dialog-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) closeLinkDialog(); }}>
         <form className="editor-link-dialog" role="dialog" aria-modal="true" aria-labelledby="editor-link-dialog-title" onSubmit={applyEditorLink} onKeyDown={(event) => { if (event.key === 'Escape') { event.preventDefault(); closeLinkDialog(); } }}>
           <header><div><h2 id="editor-link-dialog-title">Add link</h2><p>The selected text stays visible; the URL opens when it’s clicked.</p></div><button type="button" className="editor-link-dialog__close" aria-label="Close link dialog" onClick={closeLinkDialog}>×</button></header>
-          <label>Text to display<input value={linkDialog.label} onChange={(event) => setLinkDialog((current) => ({ ...current, label: event.target.value, error: '' }))} placeholder="@clickbyshardul" /></label>
-          <label>Link to<input ref={linkUrlInputRef} value={linkDialog.href} onChange={(event) => setLinkDialog((current) => ({ ...current, href: event.target.value, error: '' }))} placeholder="https://www.instagram.com/clickbyshardul" /></label>
+          <label>Text to display<input value={linkDialog.label} onChange={(event) => setLinkDialog((current) => ({ ...current, label: event.target.value, error: '' }))} placeholder="e.g. View my portfolio" /></label>
+          <label>Link to<input ref={linkUrlInputRef} value={linkDialog.href} onChange={(event) => setLinkDialog((current) => ({ ...current, href: event.target.value, error: '' }))} placeholder="https://yourdomain.com/profile" /></label>
           {linkDialog.error && <p className="editor-link-dialog__error" role="alert">{linkDialog.error}</p>}
           <footer><button type="button" className="editor-button" onClick={closeLinkDialog}>Cancel</button><button type="submit" className="editor-button editor-button--dark">Add link</button></footer>
         </form>

@@ -13,6 +13,7 @@ import NotFound from './pages/NotFound';
 import ResetPassword from './pages/ResetPassword';
 import { Navigate } from 'react-router-dom';
 import './LandingPage.css';
+import './responsive.css';
 
 import tabletSketch from './assets/home-art/tablet-sketch.webp';
 import designWorkstation from './assets/home-art/design-workstation.webp';

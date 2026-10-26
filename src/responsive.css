@@ -1,0 +1,100 @@
+/* Shared responsive guardrails for every route and published portfolio. */
+html,
+body,
+#root,
+.app {
+  width: 100%;
+  min-width: 320px;
+  min-height: 100%;
+}
+
+html { overflow-x: clip; }
+body { overflow-x: clip; }
+
+img,
+video,
+iframe,
+canvas,
+svg { max-width: 100%; }
+
+button,
+input,
+select,
+textarea { font: inherit; }
+
+button,
+[role="button"],
+a { -webkit-tap-highlight-color: transparent; }
+
+@media (max-width: 700px) {
+  .editor-shell { min-height: 100dvh; }
+  .editor-workspace { min-height: 0; }
+  .editor-topbar { gap: 8px 12px; }
+  .editor-document-title { min-width: 0; flex: 1 1 150px; }
+  .editor-document-title input { max-width: 100%; }
+  .editor-actions { min-width: 0; max-width: 100%; scrollbar-width: thin; }
+  .editor-canvas-wrap,
+  .editor-canvas,
+  .editor-canvas-zoom { min-width: 0; }
+  .editor-canvas-heading { gap: 8px; }
+  .editor-canvas-heading__actions { min-width: 0; }
+  .editor-canvas-heading__actions > * { min-width: 0; }
+  .editor-canvas-controls { flex-wrap: wrap; }
+  .editor-preview-toolbar { min-width: 0; }
+  .editor-preview-stage { min-width: 0; overflow-x: auto; }
+  .editor-preview-frame { max-width: 100%; }
+  .editor-sidebar__tabs { display: flex; max-width: 100%; overflow-x: auto; overscroll-behavior-x: contain; }
+  .editor-sidebar__tabs > * { flex: 0 0 auto; }
+  .editor-library { min-width: 0; }
+
+  .public-portfolio { min-height: 100dvh; }
+  .public-portfolio .portfolio-page,
+  .public-portfolio .resume-sheet { min-width: 0; }
+  .public-portfolio .resume-item,
+  .public-portfolio .resume-header,
+  .public-portfolio .resume-section,
+  .public-portfolio .portfolio-page__section { min-width: 0; }
+  .public-portfolio :is(p, h1, h2, h3, a, strong, span) { overflow-wrap: anywhere; }
+
+  .home__main { padding-right: max(16px, env(safe-area-inset-right)); padding-left: max(16px, env(safe-area-inset-left)); }
+  .home__projects-toolbar,
+  .home__projects-controls,
+  .home__filters { min-width: 0; max-width: 100%; }
+  .home__filters { scrollbar-width: thin; }
+
+  .navbar-wrap { padding-right: max(12px, env(safe-area-inset-right)); padding-left: max(12px, env(safe-area-inset-left)); }
+  .navbar__links { min-width: 0; gap: clamp(10px, 4vw, 20px); }
+  .navbar__actions { gap: 6px; }
+
+  .confirm-dialog,
+  .editor-link-dialog,
+  .editor-crop-dialog { width: min(100%, 520px); max-height: calc(100dvh - 24px); overflow-y: auto; }
+  .confirm-dialog__actions { flex-wrap: wrap; }
+  .confirm-dialog__actions > * { flex: 1 1 120px; }
+
+  .landing-home { overflow: clip; }
+  .landing-home__art { pointer-events: none; }
+}
+
+@media (max-width: 420px) {
+  .editor-topbar { padding-right: 10px; padding-left: 10px; }
+  .editor-brand { max-width: 112px; }
+  .editor-document-title { flex-basis: 125px; }
+  .editor-document-title input { width: 100% !important; }
+  .editor-button { min-height: 38px; }
+  .editor-canvas-heading { padding-right: 9px; padding-left: 9px; }
+  .editor-canvas-heading__actions { gap: 3px; }
+  .editor-canvas-heading__actions button { padding-right: 7px; padding-left: 7px; }
+  .editor-canvas-controls { font-size: 10px; }
+  .editor-library { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .public-portfolio .portfolio-page { padding-right: 16px; padding-left: 16px; }
+  .auth-modal { width: calc(100vw - 24px); max-height: calc(100dvh - 24px); }
+}
+
+@media (hover: none) and (pointer: coarse) {
+  button,
+  [role="button"],
+  input[type="checkbox"],
+  input[type="radio"],
+  select { touch-action: manipulation; }
+}

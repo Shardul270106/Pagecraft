@@ -34,7 +34,6 @@ const TEMPLATE_PREVIEW_COPY = {
   'midnight-creative-portfolio': ['Noah Rivera', 'Creative developer', 'AFTER HOURS'],
   'product-designer-portfolio': ['Jordan Lee', 'Product designer', 'WORK, WITH OUTCOMES'],
   'architect-portfolio': ['Avery Morgan', 'Architecture & interiors', 'SPACES IN FOCUS'],
-  'blue-creative-portfolio': ['Oliver Shaw', 'Creative designer', 'PREVIOUS PROJECTS'],
 };
 
 function HomeTemplatePreview({ template }) {

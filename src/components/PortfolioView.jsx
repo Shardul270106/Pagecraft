@@ -53,6 +53,11 @@ function resizeTextarea(textarea) {
   textarea.style.height = `${Math.max(currentHeight, textarea.scrollHeight + 2)}px`;
 }
 
+function getPortfolioTextSizeStyle(size) {
+  const pixels = Number(size);
+  return Number.isFinite(pixels) && pixels > 0 ? { fontSize: `${pixels}px` } : undefined;
+}
+
 function getProjectContent(entry) {
   const lines = entry.split('\n').map((line) => line.trim()).filter(Boolean);
   const first = (lines.shift() || '').replace(/^\d{1,2}\s*[/.—–-]\s*/, '');
@@ -148,7 +153,7 @@ export function PortfolioView({ portfolio, editable = false, onUpdate, onTemplat
 
   return <PortfolioComposition {...{ portfolio, editable, selectedCanvasElement, onCanvasElementUpdate, onCanvasElementSelect }}>
     <article className={`portfolio-page layout-${isFolio ? 'folio' : (theme.layout || 'modern')} portfolio-page--${portfolio.templateId || 'professional-portfolio'} ${isFolio ? 'portfolio-page--folio' : ''} ${hasHeroCanvasImage ? 'portfolio-page--image-flow' : ''}`} style={style}>
-      {isProfessional && <nav className="professional-nav" aria-label="Portfolio navigation">
+              {isProfessional && <nav className="professional-nav" aria-label="Portfolio navigation">
         <a className="professional-nav__brand" href="#professional-home" aria-label={`${header?.title || portfolio.title} home`}><span>{(header?.title || portfolio.title || 'P').trim().charAt(0).toUpperCase()}</span><b>{header?.title || portfolio.title}</b></a>
         <div className="professional-nav__links">
           {[["about", "About"], ["experience", "Experience"], ["projects", "Work"]].filter(([type]) => sectionHref(type)).map(([type, label]) => <a key={type} href={sectionHref(type)}>{label}</a>)}
@@ -180,6 +185,8 @@ export function PortfolioView({ portfolio, editable = false, onUpdate, onTemplat
           const hasVisualList = !editable && !isImageGallery && !isBlueCreativeProject && isPhotoCollection && hasProjectContent;
           const copyBounds = getSectionCopyBounds(sectionElements) || (section.image ? { left: 0, width: 68 } : null);
           const contentStyle = { '--section-offset-x': `${section.contentOffsetX || 0}px`, '--section-offset-y': `${section.contentOffsetY || 0}px` };
+          const titleSizeStyle = getPortfolioTextSizeStyle(section.titleFontSize);
+          const bodySizeStyle = getPortfolioTextSizeStyle(section.bodyFontSize);
           if (section.type === 'header') return (
             <header data-section-id={section.id} className={`portfolio-page__hero portfolio-page__hero--canvas ${section.image ? 'portfolio-page__hero--with-media' : ''} ${isFolio ? 'folio-hero' : ''}`} id={isFolio ? 'folio-hero' : isProfessional ? 'professional-home' : `${portfolio.templateId}-home`} key={section.id}>
               <SectionCopy section={section} editable={editable} onUpdate={onUpdate} moveBounds={copyBounds} className={isFolio ? 'folio-hero__copy' : ''} style={contentStyle}>
@@ -188,11 +195,11 @@ export function PortfolioView({ portfolio, editable = false, onUpdate, onTemplat
                 {!isFolio && <span className="portfolio-page__eyebrow">{displayTitle || 'Your portfolio'}</span>}
                 {editable && isBlueCreative
                   ? <BlueCreativeEditableHeroTitle section={section} onUpdate={onUpdate} />
-                  : editable ? <input className="portfolio-page__hero-title" style={section.titleFontSize ? { fontSize: `${section.titleFontSize}px` } : undefined} aria-label="Your name" value={section.title || ''} onChange={(event) => onUpdate(section.id, 'title', event.target.value)} />
-                    : <h1 style={section.titleFontSize ? { fontSize: `${section.titleFontSize}px` } : undefined}>{section.title || 'Your name'}</h1>}
+                  : editable ? <input className="portfolio-page__hero-title" style={titleSizeStyle} aria-label="Your name" value={section.title || ''} onChange={(event) => onUpdate(section.id, 'title', event.target.value)} />
+                    : <h1 style={titleSizeStyle}>{section.title || 'Your name'}</h1>}
                 {!isBlueCreative && (editable
-                  ? <textarea ref={resizeTextarea} data-auto-size="true" className="portfolio-page__hero-body" style={section.bodyFontSize ? { fontSize: `${section.bodyFontSize}px` } : undefined} aria-label="Your role and introduction" value={section.body || ''} onChange={(event) => { onUpdate(section.id, 'body', event.target.value); resizeTextarea(event.currentTarget); }} rows={3} />
-                  : <p style={section.bodyFontSize ? { fontSize: `${section.bodyFontSize}px` } : undefined}><LinkifiedText>{section.body || ''}</LinkifiedText></p>)}
+                  ? <textarea ref={resizeTextarea} data-auto-size="true" className="portfolio-page__hero-body" style={bodySizeStyle} aria-label="Your role and introduction" value={section.body || ''} onChange={(event) => { onUpdate(section.id, 'body', event.target.value); resizeTextarea(event.currentTarget); }} rows={3} />
+                  : <p style={bodySizeStyle}><LinkifiedText>{section.body || ''}</LinkifiedText></p>)}
                 {isProfessional && <div className="professional-hero__actions">{sectionHref('projects') && <a className="professional-button professional-button--dark" href={sectionHref('projects')}>Explore my work <span aria-hidden="true">↓</span></a>}{sectionHref('contact') && <a className="professional-button professional-button--text" href={sectionHref('contact')}>Get in touch <span aria-hidden="true">↗</span></a>}</div>}
                 {!isProfessional && !isFolio && navLinks.length > 0 && <div className="template-hero__actions">{(sectionHref('projects') || sectionHref('projects-work') || sectionHref('gallery')) && <a className="template-hero__primary" href={sectionHref('projects') || sectionHref('projects-work') || sectionHref('gallery')}>{portfolio.templateId === 'photographer-portfolio' ? 'View the collection' : portfolio.templateId === 'ux-case-study' || portfolio.templateId === 'product-designer-portfolio' ? 'Read the case study' : 'Explore selected work'} <span aria-hidden="true">↘</span></a>}{sectionHref('contact') && <a className="template-hero__secondary" href={sectionHref('contact')}>Get in touch <span aria-hidden="true">↗</span></a>}</div>}
                 {isFolio && <div className="folio-hero__actions">
@@ -215,8 +222,8 @@ export function PortfolioView({ portfolio, editable = false, onUpdate, onTemplat
       <section data-section-id={section.id} className={`portfolio-page__section portfolio-page__section--canvas portfolio-page__section--${section.type} ${section.image ? 'portfolio-page__section--with-media' : ''} ${hasVisualList ? 'portfolio-page__section--has-visual-list' : ''} ${isFolio ? `folio-section folio-section--${section.type} ${section.image ? 'folio-section--with-media' : ''}` : ''} ${isProfessional ? 'professional-section' : ''}`} id={sectionId} key={section.id} style={theme.section && theme.section !== 'transparent' ? { backgroundColor: theme.section } : undefined}>
               <SectionCopy section={section} editable={editable} onUpdate={onUpdate} moveBounds={copyBounds} style={contentStyle}>
                 {isProfessional && <span className="professional-section__index">{String(index).padStart(2, '0')} <i /> {label}</span>}
-                {editable ? isBlueCreative ? <BlueCreativeEditableHeading section={section} onUpdate={onUpdate} fallbackLabel={label} /> : <input aria-label={`${label} heading`} style={section.titleFontSize ? { fontSize: `${section.titleFontSize}px` } : undefined} value={section.title || ''} onChange={(event) => onUpdate(section.id, 'title', event.target.value)} /> : <h2 style={section.titleFontSize ? { fontSize: `${section.titleFontSize}px` } : undefined}>{section.title || label}</h2>}
-                {isImageGallery ? null : editable && isBlueCreative ? <BlueCreativeEditableBody section={section} onUpdate={onUpdate} /> : editable ? <textarea ref={resizeTextarea} data-auto-size="true" style={section.bodyFontSize ? { fontSize: `${section.bodyFontSize}px` } : undefined} aria-label={`${label} content`} value={section.body || ''} onChange={(event) => { onUpdate(section.id, 'body', event.target.value); resizeTextarea(event.currentTarget); }} rows={Math.max(3, String(section.body || '').split('\n').length)} /> : <div className={section.bodyFontSize ? 'portfolio-section-body--custom' : undefined} style={section.bodyFontSize ? { '--section-body-size': `${section.bodyFontSize}px` } : undefined}><SectionDisplay section={section} templateId={portfolio.templateId} /></div>}
+                {editable ? isBlueCreative ? <BlueCreativeEditableHeading section={section} onUpdate={onUpdate} fallbackLabel={label} /> : <input aria-label={`${label} heading`} style={titleSizeStyle} value={section.title || ''} onChange={(event) => onUpdate(section.id, 'title', event.target.value)} /> : isBlueCreative ? <h2><BlueCreativeHeadingText value={section.title || label} /></h2> : <h2 style={titleSizeStyle}>{section.title || label}</h2>}
+                {isImageGallery ? null : editable && isBlueCreative ? <BlueCreativeEditableBody section={section} onUpdate={onUpdate} /> : editable ? <textarea ref={resizeTextarea} data-auto-size="true" style={bodySizeStyle} aria-label={`${label} content`} value={section.body || ''} onChange={(event) => { onUpdate(section.id, 'body', event.target.value); resizeTextarea(event.currentTarget); }} rows={Math.max(3, String(section.body || '').split('\n').length)} /> : <div className={section.bodyFontSize ? 'portfolio-section-body--custom' : undefined} style={section.bodyFontSize ? { '--section-body-size': bodySizeStyle?.fontSize || `${section.bodyFontSize}px` } : undefined}><SectionDisplay section={section} templateId={portfolio.templateId} /></div>}
               </SectionCopy>
               {section.image && (!isPhotoCollection || isBlueCreativeProject) && <div className="portfolio-section-media"><img className="portfolio-page__image" src={section.image} alt={`${label} visual`} style={getSectionImageCropStyle(section)} /></div>}
               {isImageGallery && <PhotographerGallery section={section} editable={editable} onUpdate={onUpdate} onUploadImage={onUploadImage} className={portfolio.templateId === 'model-portfolio' ? 'photographer-gallery--model' : portfolio.templateId === 'scrapbook-portfolio' ? 'photographer-gallery--scrapbook' : portfolio.templateId === 'blue-creative-portfolio' ? 'photographer-gallery--blue-creative' : ''} />}
@@ -407,9 +414,14 @@ function BlueCreativeEditableHeading({ section, onUpdate, fallbackLabel }) {
   />;
 
   return <h2 className="blue-creative-heading-display" style={titleStyle}>
-    {section.title || fallbackLabel}
+    <BlueCreativeHeadingText value={section.title || fallbackLabel} />
     <button type="button" className="blue-creative-heading-display__edit" aria-label={`Edit ${SECTION_LIBRARY[section.type]?.label || section.type} heading`} title="Edit heading" onClick={() => setEditing(true)}>✎</button>
   </h2>;
+}
+
+function BlueCreativeHeadingText({ value }) {
+  const text = String(value || '');
+  return <>{text}{/[→⟶]/.test(text) ? null : <span className="blue-creative-heading-arrow" aria-hidden="true"> →</span>}</>;
 }
 
 function BlueCreativeEditableHeroTitle({ section, onUpdate }) {
@@ -519,7 +531,10 @@ function BlueCreativeContents({ sectionHref }) {
 }
 
 function BlueCreativePageFooter({ number }) {
-  return <footer className="blue-creative-page-footer"><span>{number}</span><a href="mailto:hello@reallygreatsite.com">hello@reallygreatsite.com</a><a href="tel:+1234567890">+123-456-7890</a></footer>;
+  return <>
+    <span className="blue-creative-page-number" aria-hidden="true">{number}</span>
+    <footer className="blue-creative-page-footer"><a href="mailto:hello@reallygreatsite.com">hello@reallygreatsite.com</a><a href="tel:+1234567890">+123-456-7890</a></footer>
+  </>;
 }
 
 function PortfolioComposition({ portfolio, editable, selectedCanvasElement, onCanvasElementUpdate, onCanvasElementSelect, children }) {

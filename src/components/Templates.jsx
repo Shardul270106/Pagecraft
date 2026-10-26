@@ -24,7 +24,6 @@ const TEMPLATE_PREVIEWS = {
   'resume-blue-corporate': ['Olivia Sanchez', 'Administrative manager', 'Work experience'],
   'resume-black-white-a4': ['Anaisha Parvati', 'Operations manager', 'Experience'],
   'resume-minimalist-cv': ['Isabel Mercado', 'Marketing manager', 'Expertise'],
-  'blue-creative-portfolio': ['Oliver Shaw', 'Creative designer', 'Previous projects'],
 };
 
 export default function Templates({ onPick, activeTemplateId, onStartBuilding }) {

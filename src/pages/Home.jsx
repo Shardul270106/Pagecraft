@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { api, clearSession } from '../lib/api';
 import { SECTION_LIBRARY, TEMPLATES } from '../data/templates';
+import ConfirmDialog from '../components/ConfirmDialog';
 import grungeWallpaper from '../assets/grunge/bg.jpg';
 import './Home.css';
 
@@ -16,7 +17,8 @@ const TEMPLATE_PREVIEW_COPY = {
   'photographer-portfolio': ['Quiet moments.', 'Photo journal · 2026', 'THE COLLECTION'],
   'folio-freelancer': ['Elliott Studio', 'Independent designer', 'FEATURED WORK'],
   'grunge-portfolio': ['Peter Jones', 'Creative direction', 'SELECTED WORKS'],
-  'iportfolio-bootstrap': ['Alex Smith', 'Designer & developer', 'FEATURED PROJECTS'],
+  'model-portfolio': ['Shawn Gracia', 'Model · Creative collaborator', 'PORTFOLIO'],
+  'scrapbook-portfolio': ['Korina Villanueva', 'Creative storyteller', 'PHOTO SCRAPS'],
   'resume-blue-corporate': ['Olivia Sanchez', 'Administrative manager', 'EXPERIENCE'],
   'resume-black-white-a4': ['Anaisha Parvati', 'Operations manager', 'EXPERIENCE'],
   'resume-minimalist-cv': ['Isabel Mercado', 'Marketing manager', 'EXPERTISE'],
@@ -48,10 +50,14 @@ export default function Home() {
   const requestedTab = searchParams.get('tab');
   const activeNav = requestedTab === 'projects' || requestedTab === 'account' ? requestedTab : 'templates';
   const [activeFilter, setActiveFilter] = useState('All');
+  const [projectType, setProjectType] = useState('all');
+  const [projectSort, setProjectSort] = useState('newest');
   const [portfolios, setPortfolios] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState(null);
+  const [deleting, setDeleting] = useState(false);
   const hasLoaded = useRef(false);
   const autoCreateStarted = useRef(false);
   const user = JSON.parse(localStorage.getItem('user') || 'null');
@@ -91,25 +97,16 @@ export default function Home() {
         faq: { title: 'FAQ', body: 'Project timelines vary with scope. Share a few details about your project and I’ll help you find the right next step.' },
         contact: { title: 'Let’s work together', body: 'Have a good project in mind? Get in touch and tell me what you are building.' },
       };
-      const iPortfolioCopy = {
-        header: { title: 'Alex Smith', body: "I'm Designer, Developer, Freelancer, Photographer" },
-        about: { title: 'About', body: 'Magnam dolores commodi suscipit. Necessitatibus eius consequatur ex aliquid fuga eum quidem. Sit sint consectetur velit. Quisquam quos quisquam cupiditate. Et nemo qui impedit suscipit alias ea. Quia fugiat sit in iste officiis commodi quidem hic quas.' },
-        experience: { title: 'Resume', body: 'Original iPortfolio resume content is preserved in the supplied site.' },
-        projects: { title: 'Portfolio', body: 'Original iPortfolio portfolio items are preserved in the supplied site.' },
-        services: { title: 'Services', body: 'Original iPortfolio services content is preserved in the supplied site.' },
-        testimonials: { title: 'Testimonials', body: 'Original iPortfolio testimonials are preserved in the supplied site.' },
-        contact: { title: 'Contact', body: 'Original iPortfolio contact section is preserved in the supplied site.' },
-      };
-      const isIPortfolio = template?.templateId === 'iportfolio-bootstrap';
       const draft = {
         title: template ? `${template.name} draft` : 'Untitled portfolio',
         templateId: template?.templateId || 'professional-portfolio',
         theme: template?.theme,
         sections: (template?.sections || ['header', 'about', 'projects', 'contact']).map((type, index) => ({
           id: `${type}-${Date.now()}-${index}`, type,
-          title: template?.templateId === 'grunge-portfolio' ? grungeCopy[type]?.title || SECTION_LIBRARY[type]?.label || type : isIPortfolio ? iPortfolioCopy[type]?.title || SECTION_LIBRARY[type]?.label || type : template?.defaultContent?.[type]?.title || (type === 'header' ? 'Your name' : SECTION_LIBRARY[type]?.label || type),
-          body: template?.templateId === 'grunge-portfolio' ? grungeCopy[type]?.body || `Add your ${SECTION_LIBRARY[type]?.label?.toLowerCase() || type} here.` : isIPortfolio ? iPortfolioCopy[type]?.body || '' : template?.defaultContent?.[type]?.body || (type === 'header' ? 'Your role · A short introduction about what you do.' : `Add your ${SECTION_LIBRARY[type]?.label?.toLowerCase() || type} here. Tell visitors what makes your work worth exploring.`),
+          title: template?.templateId === 'grunge-portfolio' ? grungeCopy[type]?.title || SECTION_LIBRARY[type]?.label || type : template?.defaultContent?.[type]?.title || (type === 'header' ? 'Your name' : SECTION_LIBRARY[type]?.label || type),
+          body: template?.templateId === 'grunge-portfolio' ? grungeCopy[type]?.body || `Add your ${SECTION_LIBRARY[type]?.label?.toLowerCase() || type} here.` : template?.defaultContent?.[type]?.body || (type === 'header' ? 'Your role · A short introduction about what you do.' : `Add your ${SECTION_LIBRARY[type]?.label?.toLowerCase() || type} here. Tell visitors what makes your work worth exploring.`),
           image: template?.defaultImages?.[type] || '',
+          galleryImages: type === 'gallery' ? template?.defaultGallery || [] : [],
         })),
       };
       const draftId = `draft-${globalThis.crypto?.randomUUID?.() || Date.now()}`;
@@ -125,16 +122,35 @@ export default function Home() {
     const template = TEMPLATES.find((item) => item.templateId === templateId);
     if (!template) return;
     autoCreateStarted.current = true;
+    // Consume the one-time template handoff before opening the editor. If the
+    // user presses Back, they should land on the template dashboard instead
+    // of replaying this query and immediately creating another draft.
+    navigate('/home', { replace: true });
     createPortfolio(template);
-  }, [searchParams]);
+  }, [navigate, searchParams]);
 
   const duplicate = async (id) => { try { await api(`/api/portfolios/${id}/duplicate`, { method: 'POST' }); await load(); } catch (err) { setError(err.message); } };
-  const remove = async (portfolio) => {
-    if (!window.confirm(`Delete “${portfolio.title}”? This cannot be undone.`)) return;
-    try { await api(`/api/portfolios/${portfolio.id}`, { method: 'DELETE' }); await load(); }
-    catch (err) { setError(err.message); }
+  const remove = (portfolio) => setPendingDelete(portfolio);
+  const confirmRemove = async () => {
+    if (!pendingDelete) return;
+    setDeleting(true);
+    setError('');
+    try {
+      await api(`/api/portfolios/${pendingDelete.id}`, { method: 'DELETE' });
+      setPendingDelete(null);
+      await load();
+    } catch (err) { setError(err.message); }
+    finally { setDeleting(false); }
   };
   const templates = TEMPLATES.filter((template) => activeFilter === 'All' || template.category === activeFilter.toLowerCase().replace(' ', '-'));
+  const visiblePortfolios = portfolios
+    .filter((portfolio) => {
+      if (projectType === 'all') return true;
+      const template = TEMPLATES.find((item) => item.templateId === portfolio.templateId);
+      return template?.category === projectType;
+    })
+    .slice()
+    .sort((a, b) => (projectSort === 'oldest' ? 1 : -1) * (new Date(a.updatedAt) - new Date(b.updatedAt)));
 
   return (
     <div className="home">
@@ -156,9 +172,47 @@ export default function Home() {
             <div className="home__template-info"><div className="home__template-copy"><div className="home__template-meta"><span>{FILTERS.find((filter) => filter.toLowerCase().replace(' ', '-') === template.category) || 'Portfolio'}</span><span>{template.sections.length} sections</span></div><h2>{template.name}</h2><p>{template.purpose}</p></div><button onClick={() => createPortfolio(template)} disabled={busy}>{busy ? 'Creating…' : 'Use template'} <span aria-hidden="true">↗</span></button></div>
           </article>)}</section>}
         </>}
-        {activeNav === 'projects' && <><div className="home__header"><div><span className="home__eyebrow">YOUR WORKSPACE</span><h1 className="home__title">My portfolios</h1><p className="home__subtitle">Open, duplicate, and publish your pages.</p></div></div>{loading ? <div className="home__loading" role="status">Loading your portfolios…</div> : portfolios.length ? <div className="home__projects">{portfolios.map((portfolio) => <article className="home__project-card" key={portfolio.id}><div className="home__project-art" style={{ background: portfolio.theme?.accent || '#e6e51e' }}><span>{portfolio.title.slice(0, 1).toUpperCase()}</span></div><div className="home__project-main"><h2>{portfolio.title}</h2><p>{portfolio.sections?.length || 0} sections · Updated {new Date(portfolio.updatedAt).toLocaleDateString()}</p><span className={`home__status ${portfolio.published ? 'is-published' : ''}`}>{portfolio.published ? 'Published' : 'Draft'}{portfolio.published ? ` · ${portfolio.visits || 0} visits` : ''}</span></div><div className="home__project-actions"><button type="button" onClick={() => navigate(`/editor/${portfolio.id}`)}>Edit</button><button type="button" onClick={() => duplicate(portfolio.id)}>Duplicate</button>{portfolio.published && <a href={`/p/${portfolio.slug}`} target="_blank" rel="noreferrer">View public page</a>}<button type="button" className="is-danger" onClick={() => remove(portfolio)}>Delete</button></div></article>)}</div> : <div className="home__empty"><h2>No portfolios yet</h2><p>Choose a template to create your first page.</p><button type="button" onClick={() => changeNav('templates')}>Browse templates</button></div>}</>}
+        {activeNav === 'projects' && <>
+          <div className="home__header">
+            <div><span className="home__eyebrow">YOUR WORKSPACE</span><h1 className="home__title">My portfolios</h1><p className="home__subtitle">Open, duplicate, and publish your pages.</p></div>
+          </div>
+          {loading ? <div className="home__loading" role="status">Loading your portfolios…</div> : portfolios.length ? <>
+            <div className="home__projects-toolbar">
+              <div className="home__projects-toolbar-title"><h2>Recent</h2><span>{visiblePortfolios.length} {visiblePortfolios.length === 1 ? 'portfolio' : 'portfolios'}</span></div>
+              <div className="home__projects-controls">
+                <label>Type<select value={projectType} onChange={(event) => setProjectType(event.target.value)}><option value="all">All types</option><option value="portfolio">Portfolio</option><option value="resume">Resume</option><option value="case-study">Case study</option></select></label>
+                <label>Sort<select value={projectSort} onChange={(event) => setProjectSort(event.target.value)}><option value="newest">Recently updated</option><option value="oldest">Least recent</option></select></label>
+              </div>
+            </div>
+            {visiblePortfolios.length ? <section className="home__projects" aria-label="Recent portfolios">{visiblePortfolios.map((portfolio) => {
+              const template = TEMPLATES.find((item) => item.templateId === portfolio.templateId) || {
+                templateId: 'professional-portfolio', category: 'portfolio', accent: 'highlighter-yellow', sections: portfolio.sections || [],
+              };
+              return <article className={`home__project-card home__project-card--${template.templateId}`} key={portfolio.id} style={{ '--project-accent': portfolio.theme?.accent || `var(--color-${template.accent})`, '--template-color': portfolio.theme?.accent || `var(--color-${template.accent})`, '--grunge-wallpaper': `url(${grungeWallpaper})` }}>
+                <button type="button" className="home__project-preview" onClick={() => navigate(`/editor/${portfolio.id}`)} aria-label={`Open ${portfolio.title}`}>
+                  <HomeTemplatePreview template={template} />
+                  <span className="home__project-preview-open">Open portfolio <b aria-hidden="true">↗</b></span>
+                </button>
+                <div className="home__project-main">
+                  <div className="home__project-copy"><h2>{portfolio.title}</h2><p>{portfolio.sections?.length || 0} sections · Updated {new Date(portfolio.updatedAt).toLocaleDateString()}</p></div>
+                  <span className={`home__status ${portfolio.published ? 'is-published' : ''}`}>{portfolio.published ? 'Published' : 'Draft'}{portfolio.published ? ` · ${portfolio.visits || 0} visits` : ''}</span>
+                </div>
+                <div className="home__project-actions"><button type="button" onClick={() => navigate(`/editor/${portfolio.id}`)}>Edit</button><button type="button" onClick={() => duplicate(portfolio.id)}>Duplicate</button>{portfolio.published && <a href={`/p/${portfolio.slug}`} target="_blank" rel="noreferrer">View live page</a>}<button type="button" className="is-danger" onClick={() => remove(portfolio)}>Delete</button></div>
+              </article>;
+            })}</section> : <div className="home__empty"><h2>No portfolios in this type</h2><p>Choose another type to see your recent work.</p><button type="button" onClick={() => setProjectType('all')}>Show all portfolios</button></div>}
+          </> : <div className="home__empty"><h2>No portfolios yet</h2><p>Choose a template to create your first page.</p><button type="button" onClick={() => changeNav('templates')}>Browse templates</button></div>}
+        </>}
         {activeNav === 'account' && <><div className="home__header"><div><span className="home__eyebrow">ACCOUNT</span><h1 className="home__title">Your profile</h1><p className="home__subtitle">Account details and session settings.</p></div></div><div className="home__account-card"><div className="home__avatar">{(user?.name || user?.email || 'P').slice(0, 1).toUpperCase()}</div><div><h2>{user?.name || 'Pagecraft user'}</h2><p>{user?.email || ''}</p><p>Signed in with {user?.provider || 'local account'}</p></div><button onClick={() => { clearSession(); navigate('/'); }}>Sign out</button></div></>}
       </main>
+      <ConfirmDialog
+        isOpen={Boolean(pendingDelete)}
+        title="Delete portfolio?"
+        message={pendingDelete ? `“${pendingDelete.title}” will be permanently deleted. This action cannot be undone.` : ''}
+        confirmLabel="Delete portfolio"
+        isBusy={deleting}
+        onCancel={() => setPendingDelete(null)}
+        onConfirm={confirmRemove}
+      />
     </div>
   );
 }

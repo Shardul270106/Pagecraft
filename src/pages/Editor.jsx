@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { api } from '../lib/api';
 import { SECTION_LIBRARY } from '../data/templates';
@@ -47,6 +48,7 @@ export default function Editor() {
   const [isPreview, setIsPreview] = useState(false);
   const [previewDevice, setPreviewDevice] = useState('desktop');
   const [selectedTemplateImage, setSelectedTemplateImage] = useState(null);
+  const [selectedTemplateImageSource, setSelectedTemplateImageSource] = useState('');
   const [selectedCanvasElement, setSelectedCanvasElement] = useState(null);
   const [selectedSectionId, setSelectedSectionId] = useState('');
   const [activePanel, setActivePanel] = useState('sections');
@@ -189,12 +191,22 @@ export default function Editor() {
   const changeTheme = (key, value) => setPortfolioTracked((current) => ({ ...current, theme: { ...current.theme, [key]: value } }));
   const updateSection = (sectionId, field, value) => setPortfolioTracked((current) => ({
     ...current,
-    sections: current.sections.map((section) => section.id === sectionId ? { ...section, [field]: value } : section),
-  }), ['title', 'body'].includes(field) ? `section:${sectionId}:${field}` : ['contentOffsetX', 'contentOffsetY'].includes(field) ? `section:${sectionId}:position` : null);
+    sections: current.sections.map((section) => section.id === sectionId ? { ...section, [field]: typeof value === 'function' ? value(section[field]) : value } : section),
+  }), ['title', 'body', 'titleFontSize', 'bodyFontSize'].includes(field) ? `section:${sectionId}:${field}` : ['contentOffsetX', 'contentOffsetY'].includes(field) ? `section:${sectionId}:position` : null);
   const updateTemplateImage = (imageId, value) => setPortfolioTracked((current) => {
     const images = Array.from({ length: Math.max(current.templateImages?.length || 0, imageId + 1) }, (_, index) => current.templateImages?.[index] || '');
     images[imageId] = value;
     return { ...current, templateImages: images };
+  });
+  const updateTemplateImageSettings = (imageId, key, value) => setPortfolioTracked((current) => {
+    const settings = Array.from({ length: Math.max(current.templateImageSettings?.length || 0, imageId + 1) }, (_, index) => current.templateImageSettings?.[index] || { zoom: 100, x: 50, y: 50 });
+    settings[imageId] = { ...settings[imageId], [key]: value };
+    return { ...current, templateImageSettings: settings };
+  });
+  const resetTemplateImageSettings = (imageId) => setPortfolioTracked((current) => {
+    const settings = Array.from({ length: Math.max(current.templateImageSettings?.length || 0, imageId + 1) }, (_, index) => current.templateImageSettings?.[index] || { zoom: 100, x: 50, y: 50 });
+    settings[imageId] = { zoom: 100, x: 50, y: 50 };
+    return { ...current, templateImageSettings: settings };
   });
   const addCanvasElement = (type, image = '', iconName = 'sparkles') => {
     const index = portfolioRef.current?.canvasElements?.length || 0;
@@ -462,14 +474,26 @@ export default function Editor() {
       </header>
       <div className="editor-workspace">
         <aside className="editor-sidebar" data-active-panel={activePanel}>
-          <nav className="editor-sidebar__tabs" aria-label="Editor tools" style={{ gridTemplateColumns: `repeat(${isIPortfolio ? 2 : portfolio.templateId === 'grunge-portfolio' ? 3 : 4}, minmax(0,1fr))` }}>
+          <nav className="editor-sidebar__tabs" aria-label="Editor tools" style={{ gridTemplateColumns: 'repeat(4, minmax(0,1fr))' }}>
             {[
               ['sections', 'Sections', '▤'], ['elements', 'Elements', '＋'],
-              ...(!isIPortfolio ? [['photos', 'Photos', '▧']] : []),
-              ...(!isIPortfolio && portfolio.templateId !== 'grunge-portfolio' ? [['theme', 'Theme', '◐']] : []),
+              ['photos', 'Photos', '▧'],
+              ['theme', 'Theme', '◐'],
             ].map(([key, label, icon]) => <button type="button" key={key} className={activePanel === key ? 'is-active' : ''} aria-pressed={activePanel === key} onClick={() => setActivePanel(key)}><span aria-hidden="true">{icon}</span>{label}</button>)}
           </nav>
-          {isIPortfolio ? <><div className="editor-panel" data-editor-panel="sections"><h2>Edit iPortfolio</h2><p>Click text in the page to edit it. Click a photo to select it, then replace it below. Changes autosave; the original theme and layout stay intact.</p><p className="editor-link-hint">Paste a full URL into page text to make it clickable in preview and on the published page.</p><p>Uploaded template images may total up to 5 MB.</p><p>Use Preview site to review the page without editing controls.</p>{selectedTemplateImage !== null && <><label>Replace selected image<input type="file" accept="image/png,image/jpeg,image/webp,image/gif" onChange={(event) => uploadImage(event.target.files?.[0], (url) => updateTemplateImage(selectedTemplateImage, url))} /></label>{portfolio.templateImages?.[selectedTemplateImage] && <button className="editor-button" onClick={() => updateTemplateImage(selectedTemplateImage, '')}>Restore original image</button>}</>}</div><CanvasElementControls {...{ portfolio, selectedCanvasElement, selectedSectionId, setSelectedSectionId, supportsSectionCanvas, addCanvasElement, uploadImage, updateCanvasElement, updateSection, removeCanvasElement, duplicateCanvasElement, moveCanvasElementLayer, alignCanvasElement }} /></> : <>
+          {isIPortfolio ? <>
+            <div className="editor-panel" data-editor-panel="sections"><h2>Edit iPortfolio</h2><p>Click text in the page to edit it. Click a photo to select it, then use the Photos tab to replace and crop it. Changes autosave; the original theme and layout stay intact.</p><p className="editor-link-hint">Paste a full URL into page text to make it clickable in preview and on the published page.</p><p>Uploaded template images may total up to 5 MB.</p><p>Use Preview site to review the page without editing controls.</p></div>
+            <div className="editor-panel editor-photo-panel" data-editor-panel="photos">
+              <div className="editor-photo-panel__heading"><div><h2>Selected photo</h2><p>Click an image in the page to select it.</p></div></div>
+              {selectedTemplateImage === null ? <p className="editor-photo-note">Select a photo on the canvas to replace or crop it.</p> : <div className="editor-photo-item">
+                <div className={`editor-photo-item__thumb ${(portfolio.templateImages?.[selectedTemplateImage] || selectedTemplateImageSource) ? 'has-image' : ''}`}>{(portfolio.templateImages?.[selectedTemplateImage] || selectedTemplateImageSource) ? <img src={portfolio.templateImages?.[selectedTemplateImage] || selectedTemplateImageSource} alt="Selected iPortfolio image" /> : <span aria-hidden="true">＋</span>}</div>
+                <div className="editor-photo-item__details"><strong>Image {selectedTemplateImage + 1}</strong><span>{portfolio.templateImages?.[selectedTemplateImage] ? 'Custom image' : 'Original template image'}</span></div>
+                <div className="editor-photo-item__actions"><label className="editor-photo-action" htmlFor="iportfolio-image-replace">Replace</label><input id="iportfolio-image-replace" className="editor-photo-input" type="file" accept="image/png,image/jpeg,image/webp,image/gif" onChange={(event) => { const file = event.target.files?.[0]; event.target.value = ''; if (file) uploadImage(file, (url) => { updateTemplateImage(selectedTemplateImage, url); resetTemplateImageSettings(selectedTemplateImage); }); }} />{portfolio.templateImages?.[selectedTemplateImage] && <button type="button" className="editor-photo-remove" onClick={() => { updateTemplateImage(selectedTemplateImage, ''); resetTemplateImageSettings(selectedTemplateImage); }}>Restore</button>}</div>
+                {(portfolio.templateImages?.[selectedTemplateImage] || selectedTemplateImageSource) && <PhotoAdjustControls src={portfolio.templateImages?.[selectedTemplateImage] || selectedTemplateImageSource} zoom={portfolio.templateImageSettings?.[selectedTemplateImage]?.zoom} x={portfolio.templateImageSettings?.[selectedTemplateImage]?.x} y={portfolio.templateImageSettings?.[selectedTemplateImage]?.y} onChange={(field, value) => updateTemplateImageSettings(selectedTemplateImage, field, value)} />}
+              </div>}
+            </div>
+            <CanvasElementControls {...{ portfolio, selectedCanvasElement, selectedSectionId, setSelectedSectionId, supportsSectionCanvas, addCanvasElement, uploadImage, updateCanvasElement, updateSection, removeCanvasElement, duplicateCanvasElement, moveCanvasElementLayer, alignCanvasElement }} />
+          </> : <>
           {isResume && <div className="editor-panel editor-resume-fields" data-editor-panel="sections"><h2>Edit resume content</h2><p>Open a section to edit its heading and details. Changes autosave and update the page preview.</p>{portfolio.sections.map((section) => {
             const label = SECTION_LIBRARY[section.type]?.label || section.type;
             return <details className="editor-resume-field" key={`fields-${section.id}`}>
@@ -485,62 +509,186 @@ export default function Editor() {
                 <span className="editor-drag-handle" aria-hidden="true">⠿</span><span>{SECTION_LIBRARY[section.type]?.label || section.type}</span><button type="button" className="editor-section-move" aria-label={`Move ${section.type} up`} disabled={index === 0} onClick={() => moveSectionByOffset(section.id, -1)}>↑</button><button type="button" className="editor-section-move" aria-label={`Move ${section.type} down`} disabled={index === portfolio.sections.length - 1} onClick={() => moveSectionByOffset(section.id, 1)}>↓</button><button type="button" aria-label={`Remove ${section.type}`} onClick={() => removeSection(section.id)}>×</button>
               </div>
             ))}</div>
+            <div className="editor-text-sizing"><h3>Text size</h3><label>Section<select value={selectedSectionId || portfolio.sections[0]?.id || ''} onChange={(event) => setSelectedSectionId(event.target.value)}>{portfolio.sections.map((section) => <option key={`size-${section.id}`} value={section.id}>{section.title || SECTION_LIBRARY[section.type]?.label || section.type}</option>)}</select></label>{(() => { const section = portfolio.sections.find((item) => item.id === (selectedSectionId || portfolio.sections[0]?.id)); if (!section) return null; const titleDefault = section.type === 'header' ? 56 : 28; const bodyDefault = section.type === 'header' ? 18 : 16; const isPhotoGallery = ['photographer-portfolio', 'model-portfolio', 'scrapbook-portfolio'].includes(portfolio.templateId) && section.type === 'gallery'; return <><label>Heading <span>{section.titleFontSize || titleDefault}px</span><input type="range" min="16" max="120" step="1" value={section.titleFontSize || titleDefault} onChange={(event) => updateSection(section.id, 'titleFontSize', Number(event.target.value))} /></label>{!isPhotoGallery && <label>Body <span>{section.bodyFontSize || bodyDefault}px</span><input type="range" min="10" max="60" step="1" value={section.bodyFontSize || bodyDefault} onChange={(event) => updateSection(section.id, 'bodyFontSize', Number(event.target.value))} /></label>}</>; })()}<p>Adjust the selected section. Changes save with your portfolio.</p></div>
             <div className="editor-add-section"><select value={newSection} onChange={(event) => setNewSection(event.target.value)} aria-label="Section type">{Object.entries(SECTION_LIBRARY).filter(([key]) => key !== 'header').map(([key, section]) => <option key={key} value={key}>{section.label}</option>)}</select><button onClick={addSection}>Add section</button></div>
           </div>
           {!isIPortfolio && <div className="editor-panel editor-photo-panel" data-editor-panel="photos">
             <div className="editor-photo-panel__heading">
               <div><h2>Section photos</h2><p>Add or replace images in your page.</p></div>
-              <span>{portfolio.sections.filter((section) => section.image).length}/{portfolio.sections.length}</span>
+              <span>{portfolio.sections.reduce((total, section) => total + (section.image ? 1 : 0) + (section.galleryImages?.filter(Boolean).length || 0), 0)} photos</span>
             </div>
             <div className="editor-photo-list">
               {portfolio.sections.map((section) => {
                 const label = SECTION_LIBRARY[section.type]?.label || section.type;
                 const inputId = `photo-upload-${section.id}`;
+                const isPhotoGallery = ['photographer-portfolio', 'model-portfolio', 'scrapbook-portfolio'].includes(portfolio.templateId) && section.type === 'gallery';
+                const galleryPhotos = Array.isArray(section.galleryImages) ? section.galleryImages : [];
+                const sectionPhoto = section.image || (isPhotoGallery ? galleryPhotos.find(Boolean) : '');
+                if (isPhotoGallery) return <div className="editor-photo-gallery" key={`photo-${section.id}`}>
+                  <div className="editor-photo-gallery__heading"><strong>{label}</strong><span>{galleryPhotos.filter(Boolean).length} photos</span></div>
+                  <div className="editor-photo-list">
+                    {galleryPhotos.map((photo, photoIndex) => {
+                      const galleryInputId = `${inputId}-${photoIndex}`;
+                      const photoCrop = section.galleryImageSettings?.[photoIndex] || {};
+                      const updateGalleryCrop = (field, value) => updateSection(section.id, 'galleryImageSettings', (currentSettings = []) => {
+                        const nextSettings = [...currentSettings];
+                        while (nextSettings.length <= photoIndex) nextSettings.push({ zoom: 100, x: 50, y: 50 });
+                        nextSettings[photoIndex] = { zoom: 100, x: 50, y: 50, ...nextSettings[photoIndex], [field]: value };
+                        return nextSettings;
+                      });
+                      const removeGalleryPhoto = () => {
+                        updateSection(section.id, 'galleryImages', (currentPhotos = []) => currentPhotos.filter((_, currentIndex) => currentIndex !== photoIndex));
+                        updateSection(section.id, 'galleryImageSettings', (currentSettings = []) => currentSettings.filter((_, currentIndex) => currentIndex !== photoIndex));
+                      };
+                      return <div className="editor-photo-item" key={`${section.id}-gallery-photo-${photoIndex}`}>
+                        <div className={`editor-photo-item__thumb ${photo ? 'has-image' : ''}`}>
+                          {photo ? <img src={photo} alt={`Photo ${photoIndex + 1} in ${label}`} /> : <span aria-hidden="true">＋</span>}
+                        </div>
+                        <div className="editor-photo-item__details"><strong>Photo {photoIndex + 1}</strong><span>{photo ? 'Gallery image' : 'Empty frame'}</span></div>
+                        <div className="editor-photo-item__actions">
+                          <label className="editor-photo-action" htmlFor={galleryInputId}>{photo ? 'Replace' : 'Add photo'}</label>
+                          <input id={galleryInputId} className="editor-photo-input" type="file" accept="image/png,image/jpeg,image/webp,image/gif" aria-label={`${photo ? 'Replace' : 'Add'} photo ${photoIndex + 1} in ${label}`} onChange={(event) => {
+                            const file = event.target.files?.[0];
+                            event.target.value = '';
+                            if (file) uploadImage(file, (url) => {
+                              updateSection(section.id, 'galleryImages', (currentPhotos = []) => currentPhotos.map((currentPhoto, currentIndex) => currentIndex === photoIndex ? url : currentPhoto));
+                              updateGalleryCrop('zoom', 100);
+                              updateGalleryCrop('x', 50);
+                              updateGalleryCrop('y', 50);
+                            });
+                          }} />
+                          <button type="button" className="editor-photo-remove" onClick={removeGalleryPhoto}>Remove</button>
+                        </div>
+                        {photo && <PhotoAdjustControls src={photo} zoom={photoCrop.zoom} x={photoCrop.x} y={photoCrop.y} aspect={section.type === 'header' ? '4 / 5' : '4 / 3'} onChange={updateGalleryCrop} />}
+                      </div>;
+                    })}
+                  </div>
+                  <label className={`editor-photo-action editor-photo-gallery__add ${galleryPhotos.length >= 30 ? 'is-disabled' : ''}`} aria-disabled={galleryPhotos.length >= 30}>＋ Add photo<input className="editor-photo-input" type="file" accept="image/png,image/jpeg,image/webp,image/gif" disabled={galleryPhotos.length >= 30} aria-label={`Add photo to ${label}`} onChange={(event) => {
+                    const file = event.target.files?.[0];
+                    event.target.value = '';
+                    if (file) uploadImage(file, (url) => {
+                      updateSection(section.id, 'galleryImages', (currentPhotos = []) => currentPhotos.length < 30 ? [...currentPhotos, url] : currentPhotos);
+                      updateSection(section.id, 'galleryImageSettings', (currentSettings = []) => {
+                        const nextSettings = [...currentSettings];
+                        while (nextSettings.length < galleryPhotos.length) nextSettings.push({ zoom: 100, x: 50, y: 50 });
+                        nextSettings.push({ zoom: 100, x: 50, y: 50 });
+                        return nextSettings;
+                      });
+                    });
+                  }} /></label>
+                </div>;
                 return <div className="editor-photo-item" key={`photo-${section.id}`}>
-                  <div className={`editor-photo-item__thumb ${section.image ? 'has-image' : ''}`}>
-                    {section.image ? <img src={section.image} alt={`Current photo in ${label}`} /> : <span aria-hidden="true">＋</span>}
+                  <div className={`editor-photo-item__thumb ${sectionPhoto ? 'has-image' : ''}`}>
+                    {sectionPhoto ? <img src={sectionPhoto} alt={`Current photo in ${label}`} /> : <span aria-hidden="true">＋</span>}
                   </div>
                   <div className="editor-photo-item__details">
                     <strong>{label}</strong>
-                    <span>{section.image ? 'Photo added' : 'No photo yet'}</span>
+                    <span>{isPhotoGallery ? `${galleryPhotos.filter(Boolean).length} photos in gallery` : sectionPhoto ? 'Photo added' : 'No photo yet'}</span>
                   </div>
                   <div className="editor-photo-item__actions">
-                    <label className="editor-photo-action" htmlFor={inputId}>{section.image ? 'Replace' : 'Add photo'}</label>
+                    <label className="editor-photo-action" htmlFor={inputId}>{isPhotoGallery ? 'Add photo' : sectionPhoto ? 'Replace' : 'Add photo'}</label>
                     <input
                       id={inputId}
                       className="editor-photo-input"
                       type="file"
                       accept="image/png,image/jpeg,image/webp,image/gif"
-                      aria-label={`${section.image ? 'Replace' : 'Add'} photo for ${label}`}
+                      aria-label={`${sectionPhoto ? 'Replace' : 'Add'} photo for ${label}`}
                       onChange={(event) => {
                         const file = event.target.files?.[0];
-                        if (file) uploadImage(file, (url) => updateSection(section.id, 'image', url));
+                        if (file) uploadImage(file, (url) => {
+                          updateSection(section.id, 'image', url);
+                          updateSection(section.id, 'imageZoom', 100);
+                          updateSection(section.id, 'imagePositionX', 50);
+                          updateSection(section.id, 'imagePositionY', 50);
+                        });
                         event.target.value = '';
                       }}
                     />
                     {section.image && <button type="button" className="editor-photo-remove" onClick={() => updateSection(section.id, 'image', '')}>Remove</button>}
                   </div>
+                  {section.image && <PhotoAdjustControls src={section.image} zoom={section.imageZoom} x={section.imagePositionX} y={section.imagePositionY} aspect={section.type === 'header' ? '4 / 5' : '4 / 3'} onChange={(field, value) => updateSection(section.id, field === 'zoom' ? 'imageZoom' : field === 'x' ? 'imagePositionX' : 'imagePositionY', value)} />}
                 </div>;
               })}
             </div>
             <p className="editor-photo-note">PNG, JPG, WebP, or GIF · Up to 5 MB per image</p>
           </div>}
           <CanvasElementControls {...{ portfolio, selectedCanvasElement, selectedSectionId, setSelectedSectionId, supportsSectionCanvas, addCanvasElement, uploadImage, updateCanvasElement, updateSection, removeCanvasElement, duplicateCanvasElement, moveCanvasElementLayer, alignCanvasElement }} />
-          {portfolio.templateId === 'grunge-portfolio' ? <div className="editor-panel" data-editor-panel="theme"><h2>Grunge styling</h2><p>The original charcoal paper background, monochrome palette, and texture are kept intact. Edit the sections and replace the sample images below.</p></div> : <div className="editor-panel" data-editor-panel="theme"><h2>Theme</h2><label>Accent colour<div className="editor-swatch-row">{COLORS.map((color) => <button key={color} aria-label={`Set accent ${color}`} className={`editor-swatch ${portfolio.theme?.accent === color ? 'selected' : ''}`} style={{ background: color }} onClick={() => changeTheme('accent', color)} />)}</div></label><ColorWheel label="Custom accent" value={portfolio.theme?.accent || '#e6e51e'} onChange={(value) => changeTheme('accent', value)} />
-            <label>Page background<div className="editor-swatch-row">{BACKGROUNDS.map((color) => <button key={color} aria-label={`Set background ${color}`} className={`editor-swatch ${portfolio.theme?.background === color ? 'selected' : ''}`} style={{ background: color }} onClick={() => changeTheme('background', color)} />)}</div></label><ColorWheel label="Custom background" value={portfolio.theme?.background || '#ffffff'} onChange={(value) => changeTheme('background', value)} />
+          </>}
+          <div className="editor-panel" data-editor-panel="theme"><h2>Theme</h2>{isIPortfolio && <label className="editor-size-control"><span>Text size <strong>{portfolio.theme?.textScale ?? 100}%</strong></span><input type="range" min="75" max="150" step="5" value={portfolio.theme?.textScale ?? 100} onChange={(event) => changeTheme('textScale', Number(event.target.value))} /></label>}<label>Accent colour<div className="editor-swatch-row">{COLORS.map((color) => <button type="button" key={color} aria-label={`Set accent ${color}`} aria-pressed={portfolio.theme?.accent === color} className={`editor-swatch ${portfolio.theme?.accent === color ? 'selected' : ''}`} style={{ background: color }} onClick={() => changeTheme('accent', color)} />)}</div></label><ColorWheel label="Custom accent" value={portfolio.theme?.accent || '#e6e51e'} onChange={(value) => changeTheme('accent', value)} />
+            <label>Page background<div className="editor-swatch-row">{BACKGROUNDS.map((color) => <button type="button" key={color} aria-label={`Set background ${color}`} aria-pressed={portfolio.theme?.background === color} className={`editor-swatch ${portfolio.theme?.background === color ? 'selected' : ''}`} style={{ background: color }} onClick={() => changeTheme('background', color)} />)}</div></label><ColorWheel label="Custom background" value={portfolio.theme?.background || '#ffffff'} onChange={(value) => changeTheme('background', value)} />
             <div className="editor-theme-control"><strong>Section color</strong><div className="editor-swatch-row"><button type="button" aria-label="Use transparent section color" aria-pressed={!portfolio.theme?.section || portfolio.theme.section === 'transparent'} className={`editor-swatch editor-swatch--transparent ${!portfolio.theme?.section || portfolio.theme.section === 'transparent' ? 'selected' : ''}`} onClick={() => changeTheme('section', 'transparent')}>×</button>{['#ffffff', '#f7f5ee', '#f3f6ff', '#fff1e8', '#eaf5ef'].map((color) => <button type="button" key={color} aria-label={`Set section color ${color}`} aria-pressed={portfolio.theme?.section === color} className={`editor-swatch ${portfolio.theme?.section === color ? 'selected' : ''}`} style={{ background: color }} onClick={() => changeTheme('section', color)} />)}<label className="editor-native-color" title="Choose custom section color">Custom<input type="color" aria-label="Custom section color" value={portfolio.theme?.section && portfolio.theme.section !== 'transparent' ? portfolio.theme.section : '#ffffff'} onChange={(event) => changeTheme('section', event.target.value)} /></label></div></div>
             <div className="editor-font-library"><strong>Font style library</strong><p>Choose a typeface to apply across your portfolio.</p><div className="editor-font-library__grid">{FONTS.map((font) => <button type="button" key={font} className={portfolio.theme?.font === font ? 'is-active' : ''} onClick={() => changeTheme('font', font)} aria-pressed={portfolio.theme?.font === font} style={{ fontFamily: `'${font}', sans-serif` }}><span>Aa</span><small>{font}</small></button>)}</div></div>
-          </div>}
-          </>}
+          </div>
         </aside>
         <section className="editor-canvas-wrap"><div className="editor-canvas-heading"><div><span className="editor-live-dot" /> Live preview</div><div className="editor-canvas-heading__actions"><div className="editor-zoom-controls" role="group" aria-label="Canvas zoom" title="Use Ctrl/Cmd + mouse wheel over the page to zoom"><button type="button" aria-label="Zoom out" onClick={() => setCanvasZoom((zoom) => Math.max(30, zoom - 10))} disabled={canvasZoom <= 30}>−</button><input aria-label="Canvas zoom" type="range" min="30" max="180" step="5" value={canvasZoom} onChange={(event) => setCanvasZoom(Number(event.target.value))} /><span>{canvasZoom}%</span><button type="button" aria-label="Zoom in" onClick={() => setCanvasZoom((zoom) => Math.min(180, zoom + 10))} disabled={canvasZoom >= 180}>＋</button><button type="button" onClick={() => setCanvasZoom(100)}>Fit</button></div>{!isIPortfolio && <button type="button" className="editor-button" onClick={save} disabled={saving}>{saving ? 'Saving…' : 'Save now'}</button>}</div></div>
-          <div ref={editorCanvasRef} className={`editor-canvas ${portfolio.templateId === 'grunge-portfolio' ? 'editor-canvas--grunge' : ''} ${isIPortfolio ? 'editor-canvas--iportfolio' : ''}`} onDragOver={(event) => event.preventDefault()} onDrop={handleCanvasDrop}><div className="editor-canvas-zoom" style={{ zoom: canvasZoom / 100 }}><PortfolioView portfolio={portfolio} editable selectedCanvasElement={selectedCanvasElement} onCanvasElementSelect={selectCanvasElement} onCanvasElementUpdate={updateCanvasElement} onCanvasWheelZoom={zoomCanvasByWheel} onUndo={undo} onRedo={redo} onUploadImage={uploadImage} onTemplateContentChange={(templateContent) => changeField('templateContent', templateContent)} onTemplateImageSelect={setSelectedTemplateImage} onUpdate={updateSection} /></div></div>
+          <div ref={editorCanvasRef} className={`editor-canvas ${portfolio.templateId === 'grunge-portfolio' ? 'editor-canvas--grunge' : ''} ${isIPortfolio ? 'editor-canvas--iportfolio' : ''}`} onDragOver={(event) => event.preventDefault()} onDrop={handleCanvasDrop}><div className="editor-canvas-zoom" style={{ zoom: canvasZoom / 100 }}><PortfolioView portfolio={portfolio} editable selectedCanvasElement={selectedCanvasElement} onCanvasElementSelect={selectCanvasElement} onCanvasElementUpdate={updateCanvasElement} onCanvasWheelZoom={zoomCanvasByWheel} onUndo={undo} onRedo={redo} onUploadImage={uploadImage} onTemplateContentChange={(templateContent) => changeField('templateContent', templateContent)} onTemplateImageSelect={(index, src) => { setSelectedTemplateImage(index); setSelectedTemplateImageSource(src || ''); setActivePanel('photos'); }} onUpdate={updateSection} /></div></div>
         </section>
       </div>
       {publicUrl && <div className="editor-publish-toast" role="status">Published: <a href={publicUrl} target="_blank" rel="noreferrer">{publicUrl}</a><button onClick={() => navigator.clipboard?.writeText(publicUrl)}>Copy link</button></div>}
     </main>
   );
 
+}
+
+function PhotoAdjustControls({ src, zoom = 100, x = 50, y = 50, aspect = '4 / 3', onChange }) {
+  const [draft, setDraft] = useState(null);
+  const dragRef = useRef(null);
+  const openEditor = () => setDraft({ zoom: zoom || 100, x: x ?? 50, y: y ?? 50 });
+  const update = (key, value) => setDraft((current) => current ? { ...current, [key]: value } : current);
+  const beginPan = (event) => {
+    if (event.button !== 0) return;
+    event.preventDefault();
+    event.currentTarget.setPointerCapture(event.pointerId);
+    dragRef.current = { pointerId: event.pointerId, x: event.clientX, y: event.clientY };
+  };
+  const pan = (event) => {
+    const drag = dragRef.current;
+    if (!drag || drag.pointerId !== event.pointerId) return;
+    const bounds = event.currentTarget.getBoundingClientRect();
+    const dx = (event.clientX - drag.x) / Math.max(1, bounds.width) * 100;
+    const dy = (event.clientY - drag.y) / Math.max(1, bounds.height) * 100;
+    dragRef.current = { ...drag, x: event.clientX, y: event.clientY };
+    setDraft((current) => current ? {
+      ...current,
+      x: Math.min(100, Math.max(0, current.x + dx)),
+      y: Math.min(100, Math.max(0, current.y + dy)),
+    } : current);
+  };
+  const close = () => { dragRef.current = null; setDraft(null); };
+  const apply = () => {
+    if (!draft) return;
+    onChange('zoom', draft.zoom);
+    onChange('x', draft.x);
+    onChange('y', draft.y);
+    close();
+  };
+  const style = draft ? getPhotoCropPreviewStyle(draft) : {};
+
+  return <>
+    <button type="button" className="editor-photo-adjust-trigger" onClick={openEditor}>Adjust photo</button>
+    {draft && createPortal(<div className="editor-crop-dialog-backdrop" onPointerDown={(event) => { if (event.target === event.currentTarget) close(); }}>
+      <section className="editor-crop-dialog" role="dialog" aria-modal="true" aria-labelledby="editor-crop-title">
+        <header><div><h2 id="editor-crop-title">Adjust photo</h2><p>Drag the photo to reposition it. Use the slider or scroll to zoom.</p></div><button type="button" aria-label="Close photo editor" onClick={close}>×</button></header>
+        <div className="editor-crop-viewport" style={{ aspectRatio: aspect }} onPointerDown={beginPan} onPointerMove={pan} onPointerUp={() => { dragRef.current = null; }} onPointerCancel={() => { dragRef.current = null; }} onWheel={(event) => { event.preventDefault(); setDraft((current) => current ? { ...current, zoom: Math.min(250, Math.max(100, current.zoom + (event.deltaY < 0 ? 5 : -5))) } : current); }}>
+          <img src={src} alt="Crop preview" draggable="false" style={style} />
+          <span className="editor-crop-viewport__hint">DRAG TO REPOSITION</span>
+        </div>
+        <div className="editor-crop-controls">
+          <label>Zoom <span>{draft.zoom}%</span><input type="range" min="100" max="250" step="1" value={draft.zoom} onChange={(event) => update('zoom', Number(event.target.value))} /></label>
+          <label>Horizontal <span>{Math.round(draft.x)}%</span><input type="range" min="0" max="100" step="1" value={draft.x} onChange={(event) => update('x', Number(event.target.value))} /></label>
+          <label>Vertical <span>{Math.round(draft.y)}%</span><input type="range" min="0" max="100" step="1" value={draft.y} onChange={(event) => update('y', Number(event.target.value))} /></label>
+        </div>
+        <footer><button type="button" className="editor-crop-reset" onClick={() => setDraft({ zoom: 100, x: 50, y: 50 })}>Reset</button><div><button type="button" onClick={close}>Cancel</button><button type="button" className="editor-button--dark" onClick={apply}>Done</button></div></footer>
+      </section>
+    </div>, document.body)}
+  </>;
+}
+
+function getPhotoCropPreviewStyle({ zoom, x, y }) {
+  return {
+    width: '100%', height: '100%', objectFit: 'cover', objectPosition: `${x}% ${y}%`,
+    transform: `scale(${zoom / 100})`, transformOrigin: 'center', pointerEvents: 'none',
+  };
 }
 
 function CanvasElementControls({ portfolio, selectedCanvasElement, selectedSectionId, setSelectedSectionId, supportsSectionCanvas, addCanvasElement, uploadImage, updateCanvasElement, updateSection, removeCanvasElement, duplicateCanvasElement, moveCanvasElementLayer, alignCanvasElement }) {
@@ -569,7 +717,8 @@ function CanvasElementControls({ portfolio, selectedCanvasElement, selectedSecti
       <p className="editor-element-shortcuts">Arrow keys nudge · Shift + arrows move faster · Ctrl/Cmd + D duplicates · Delete removes</p>
       {element.type === 'text' && <label>Text<textarea value={element.text} rows={3} onChange={(event) => updateCanvasElement(element.id, { text: event.target.value })} /></label>}
       {element.type === 'image' && <>
-        <label className="editor-image-replace">Replace image<input type="file" accept="image/png,image/jpeg,image/webp,image/gif" onChange={(event) => { const file = event.target.files?.[0]; if (file) uploadImage(file, (url) => updateCanvasElement(element.id, { image: url })); event.target.value = ''; }} /></label>
+        <label className="editor-image-replace">Replace image<input type="file" accept="image/png,image/jpeg,image/webp,image/gif" onChange={(event) => { const file = event.target.files?.[0]; if (file) uploadImage(file, (url) => updateCanvasElement(element.id, { image: url, imageZoom: 100, imagePositionX: 50, imagePositionY: 50 })); event.target.value = ''; }} /></label>
+        {element.image && <PhotoAdjustControls src={element.image} zoom={element.imageZoom} x={element.imagePositionX} y={element.imagePositionY} onChange={(field, value) => updateCanvasElement(element.id, { [field === 'zoom' ? 'imageZoom' : field === 'x' ? 'imagePositionX' : 'imagePositionY']: value })} />}
         <div className="editor-image-fit" role="group" aria-label="Image crop mode"><span>Image crop</span><div><button type="button" className={(element.imageFit || 'cover') === 'cover' ? 'is-active' : ''} aria-pressed={(element.imageFit || 'cover') === 'cover'} onClick={() => updateCanvasElement(element.id, { imageFit: 'cover' })}>Fill</button><button type="button" className={element.imageFit === 'contain' ? 'is-active' : ''} aria-pressed={element.imageFit === 'contain'} onClick={() => updateCanvasElement(element.id, { imageFit: 'contain' })}>Fit</button></div></div>
       </>}
       <div className="editor-element-action-grid">

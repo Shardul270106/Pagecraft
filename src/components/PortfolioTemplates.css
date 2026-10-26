@@ -333,6 +333,46 @@
 .editor-preview-frame.is-mobile .portfolio-page--product-designer-portfolio .portfolio-page__hero h1,.editor-preview-frame.is-mobile .portfolio-page--product-designer-portfolio .portfolio-page__hero-title { font-size: 44px; }
 .editor-preview-frame.is-mobile .portfolio-page--architect-portfolio .portfolio-page__hero h1,.editor-preview-frame.is-mobile .portfolio-page--architect-portfolio .portfolio-page__hero-title { font-size: 42px; }
 .editor-preview-frame.is-mobile .portfolio-page--developer-portfolio .portfolio-page__section,.editor-preview-frame.is-mobile .portfolio-page--creative-portfolio .portfolio-page__section,.editor-preview-frame.is-mobile .portfolio-page--ux-case-study .portfolio-page__section,.editor-preview-frame.is-mobile .portfolio-page--photographer-portfolio .portfolio-page__section,.editor-preview-frame.is-mobile .portfolio-page--editorial-studio-portfolio .portfolio-page__section,.editor-preview-frame.is-mobile .portfolio-page--midnight-creative-portfolio .portfolio-page__section,.editor-preview-frame.is-mobile .portfolio-page--product-designer-portfolio .portfolio-page__section,.editor-preview-frame.is-mobile .portfolio-page--architect-portfolio .portfolio-page__section { grid-template-columns: 1fr; gap: 10px; min-height: 0; padding: 30px 0; }
+.portfolio-page--photographer-portfolio .photographer-gallery { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); grid-auto-rows: 210px; gap: 14px; margin-top: 12px; }
+.portfolio-page--photographer-portfolio .photographer-gallery__item { position: relative; min-width: 0; min-height: 0; margin: 0; overflow: hidden; border: 1px solid #ffffff1a; background: #252b28; }
+.portfolio-page--photographer-portfolio .photographer-gallery__item:first-child { grid-row: span 2; }
+.portfolio-page--photographer-portfolio .photographer-gallery__item img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform .35s ease; }
+.portfolio-page--photographer-portfolio .photographer-gallery__item:hover img { transform: scale(1.025); }
+.portfolio-page--photographer-portfolio .photographer-gallery__placeholder { position: absolute; inset: 0; overflow: hidden; background: linear-gradient(145deg,#303a34,#596254 46%,#a2957c); }
+.portfolio-page--photographer-portfolio .photographer-gallery__item:nth-child(3n + 2) .photographer-gallery__placeholder { background: linear-gradient(155deg,#7a8173,#c4b89a 48%,#4e6156); }
+.portfolio-page--photographer-portfolio .photographer-gallery__item:nth-child(3n) .photographer-gallery__placeholder { background: linear-gradient(135deg,#34473e,#899681 52%,#d1c4a8); }
+.portfolio-page--photographer-portfolio .photographer-gallery__placeholder::before,.portfolio-page--photographer-portfolio .photographer-gallery__placeholder::after { position: absolute; display: block; content: ''; }
+.portfolio-page--photographer-portfolio .photographer-gallery__placeholder::before { inset: 0; opacity: .45; background: linear-gradient(180deg,#1112 0 30%,transparent 68%,#1115); }
+.portfolio-page--photographer-portfolio .photographer-gallery__placeholder::after { right: -14%; bottom: -42%; width: 82%; aspect-ratio: 1; border: 1px solid #fff5; border-radius: 50%; }
+.portfolio-page--photographer-portfolio .photographer-gallery__placeholder i { position: absolute; right: 5%; bottom: 16%; width: 60%; height: 1px; background: #fff8; transform: rotate(-24deg); }
+.portfolio-page--photographer-portfolio .photographer-gallery__placeholder b { position: absolute; right: 18%; bottom: 15%; width: 28%; height: 45%; border: 1px solid #ffffff52; background: #1b201d55; }
+.portfolio-page--photographer-portfolio .photographer-gallery__upload { position: absolute; inset: auto 10px 10px; display: flex; min-height: 38px; align-items: center; justify-content: center; border: 1px solid #ffffff55; background: #141815cc; color: #f3f1e9; font: 600 11px/1 Inter,Arial,sans-serif; letter-spacing: .02em; opacity: 0; cursor: pointer; transition: opacity .18s ease,background .18s ease; }
+.portfolio-page--photographer-portfolio .photographer-gallery__item:hover .photographer-gallery__upload,.portfolio-page--photographer-portfolio .photographer-gallery__item:focus-within .photographer-gallery__upload,.portfolio-page--photographer-portfolio .photographer-gallery__item.is-empty .photographer-gallery__upload { opacity: 1; }
+.portfolio-page--photographer-portfolio .photographer-gallery__upload:hover { background: #101310f2; }
+.portfolio-page--photographer-portfolio .photographer-gallery__upload input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+.portfolio-page--photographer-portfolio .photographer-gallery__remove { position: absolute; top: 9px; right: 9px; display: grid; width: 30px; height: 30px; place-items: center; border: 1px solid #ffffff65; border-radius: 50%; background: #141815cc; color: #fff; font-size: 19px; cursor: pointer; }
+.portfolio-page--photographer-portfolio .photographer-gallery__upload:focus-within,.portfolio-page--photographer-portfolio .photographer-gallery__remove:focus-visible { outline: 2px solid #e6e51e; outline-offset: 2px; opacity: 1; }
+.portfolio-page--photographer-portfolio .photographer-gallery__add-frame { display: inline-flex; min-height: 42px; align-items: center; justify-content: center; gap: 8px; margin-top: 16px; padding: 0 15px; border: 1px dashed #e6e51e80; background: #1c211e; color: #f0efe9; font: 600 11px/1 Inter,Arial,sans-serif; cursor: pointer; transition: border-color .18s ease,background .18s ease; }
+.portfolio-page--photographer-portfolio .photographer-gallery__add-frame:hover { border-color: #e6e51e; background: #232a25; }
+.portfolio-page--photographer-portfolio .photographer-gallery__add-frame:focus-visible { outline: 2px solid #e6e51e; outline-offset: 3px; }
+.portfolio-page--photographer-portfolio .photographer-gallery__add-frame:disabled { opacity: .5; cursor: not-allowed; }
+@media (max-width: 760px) {
+  .portfolio-page--photographer-portfolio .photographer-gallery { grid-template-columns: repeat(2,minmax(0,1fr)); grid-auto-rows: 170px; gap: 10px; }
+  .portfolio-page--photographer-portfolio .photographer-gallery__item:first-child { grid-row: span 1; }
+}
+@media (max-width: 480px) {
+  .portfolio-page--photographer-portfolio .photographer-gallery { grid-template-columns: 1fr; grid-auto-rows: 230px; }
+}
+@media (prefers-reduced-motion: reduce) { .portfolio-page--photographer-portfolio .photographer-gallery__item img,.portfolio-page--photographer-portfolio .photographer-gallery__upload,.portfolio-page--photographer-portfolio .photographer-gallery__add-frame { transition: none; } }
+
+/* Theme choices are applied after each template's art direction so the editor controls work consistently. */
+.portfolio-page :is(h1,h2,h3,p,a,button,input,textarea,li,small,strong,b,span,figcaption),
+.resume-sheet :is(h1,h2,h3,p,a,button,input,textarea,li,small,strong,b,span),
+.portfolio-world--grunge :is(h1,h2,h3,p,a,button,input,textarea,li,small,strong,b,span,figcaption) { font-family: var(--portfolio-font,inherit) !important; }
+.portfolio-page .template-nav__cta:hover,.portfolio-page .template-hero__primary,.portfolio-page .professional-nav__cta,
+.portfolio-world--grunge .grunge-nav__links a:hover,.portfolio-world--grunge .grunge-hero__links a:hover,
+.portfolio-world--grunge .grunge-profile-upload { border-color: color-mix(in srgb,var(--portfolio-accent) 65%,transparent); background-color: var(--portfolio-accent); color: #171717; }
+.portfolio-world--grunge .grunge-kicker { color: var(--portfolio-accent); }
 .editor-preview-frame.is-mobile .portfolio-page--developer-portfolio .template-hero-art,.editor-preview-frame.is-mobile .portfolio-page--creative-portfolio .template-hero-art,.editor-preview-frame.is-mobile .portfolio-page--ux-case-study .template-hero-art,.editor-preview-frame.is-mobile .portfolio-page--photographer-portfolio .template-hero-art,.editor-preview-frame.is-mobile .portfolio-page--editorial-studio-portfolio .template-hero-art,.editor-preview-frame.is-mobile .portfolio-page--midnight-creative-portfolio .template-hero-art,.editor-preview-frame.is-mobile .portfolio-page--product-designer-portfolio .template-hero-art { width: min(100%, 360px); min-height: 255px; justify-self: center; }
 .editor-preview-frame.is-mobile .portfolio-page--photographer-portfolio .template-hero-art { min-height: 300px; }
 .editor-preview-frame.is-mobile .portfolio-page--architect-portfolio .portfolio-page__architect-art { width: min(100%,360px); min-height: 250px; justify-self: center; }
@@ -504,4 +544,242 @@
 .editor-preview-frame.is-mobile .portfolio-page .portfolio-page__section--canvas.portfolio-page__section--with-media > .portfolio-section-media {
   grid-column: 1;
   grid-row: 2;
+}
+
+.portfolio-section-body--custom,.portfolio-section-body--custom * { font-size: var(--section-body-size) !important; }
+.resume-section[style*="--resume-body-size"] > :not(.resume-section__title),.resume-section[style*="--resume-body-size"] > :not(.resume-section__title) * { font-size: var(--resume-body-size) !important; }
+
+/* Model portfolio: warm studio paper, bright yellow accents, and an image-led introduction. */
+.portfolio-page--model-portfolio { width: min(100%,1160px); padding: clamp(26px,5vw,66px); color: #28251b; background: #fffdf4; font-family: var(--portfolio-font,'Playfair Display'),Georgia,serif; }
+.portfolio-page--model-portfolio .template-nav { min-height: 72px; border-color: #2d281b30; }
+.portfolio-page--model-portfolio .template-nav__brand,.portfolio-page--model-portfolio .template-nav__links a,.portfolio-page--model-portfolio .template-nav__cta { color: #342e1f; }
+.portfolio-page--model-portfolio .template-nav__cta { border-color: #30291d; border-radius: 0; }
+.portfolio-page--model-portfolio .portfolio-page__hero--canvas { display: grid; grid-template-columns: minmax(0,1.05fr) minmax(280px,.8fr); align-items: center; gap: clamp(26px,5vw,76px); min-height: min(76vh,720px); padding: clamp(44px,7vw,92px) 0; border: 0; }
+.portfolio-page--model-portfolio .portfolio-section-copy { width: 100%; }
+.portfolio-page--model-portfolio .portfolio-page__eyebrow { padding: 0; background: transparent; color: #8a7921; font: 700 10px/1.5 Inter,Arial,sans-serif; letter-spacing: .18em; text-transform: uppercase; }
+.portfolio-page--model-portfolio .portfolio-page__hero h1,.portfolio-page--model-portfolio .portfolio-page__hero-title { max-width: 640px; margin: 22px 0 16px; color: #29251c; font: 500 clamp(58px,8vw,112px)/.87 'Playfair Display',Georgia,serif; letter-spacing: -.065em; }
+.portfolio-page--model-portfolio .portfolio-page__hero p,.portfolio-page--model-portfolio .portfolio-page__hero-body { max-width: 460px; color: #716b58; font: 400 clamp(15px,1.5vw,18px)/1.75 Inter,Arial,sans-serif; }
+.portfolio-page--model-portfolio .portfolio-page__hero .portfolio-section-media { position: relative; min-height: 440px; margin: 0; padding: 13px; background: #f3df00; transform: rotate(2deg); }
+.portfolio-page--model-portfolio .portfolio-page__hero .portfolio-page__image { width: 100%; height: min(58vw,560px); max-height: 560px; margin: 0; border-radius: 0; object-fit: cover; }
+.portfolio-page--model-portfolio .template-hero__primary { background: #e8d400; color: #242118; }
+.portfolio-page--model-portfolio .portfolio-page__section { padding: clamp(38px,6vw,70px) 0; border-color: #4c43251f; }
+.portfolio-page--model-portfolio .portfolio-page__section h2,.portfolio-page--model-portfolio .portfolio-page__section input { color: #2d281d; font: 500 clamp(25px,3.4vw,44px)/1.05 'Playfair Display',Georgia,serif; }
+.portfolio-page--model-portfolio .portfolio-page__section p,.portfolio-page--model-portfolio .portfolio-page__section textarea { color: #69634f; font: 400 14px/1.9 Inter,Arial,sans-serif; }
+.portfolio-page--model-portfolio .portfolio-page__section--gallery { display: block; }
+.portfolio-page--model-portfolio .photographer-gallery--model { grid-template-columns: repeat(4,minmax(0,1fr)); grid-auto-rows: clamp(170px,22vw,290px); gap: 13px; }
+.portfolio-page--model-portfolio .photographer-gallery--model .photographer-gallery__item { border: 7px solid #fff; background: #e9e4d4; box-shadow: 0 8px 24px #4e401c1c; }
+.portfolio-page--model-portfolio .photographer-gallery--model .photographer-gallery__item:first-child { grid-row: span 2; }
+.portfolio-page--model-portfolio .photographer-gallery--model .photographer-gallery__add-frame { border-color: #aa9a31; background: #f5e86a; color: #302a19; }
+.portfolio-page--model-portfolio .portfolio-page__section--contact { margin-top: 32px; padding: 36px; border: 0; background: #f3df00; }
+
+/* Scrapbook portfolio: ruled paper, warm ink, and taped photo prints. */
+.portfolio-page--scrapbook-portfolio { width: min(100%,1160px); padding: clamp(24px,4.5vw,60px); color: #382d26; background-color: #f7f0e5; background-image: repeating-linear-gradient(0deg,transparent 0 31px,#b5c1c52b 32px,#b5c1c52b 33px,transparent 34px 42px),radial-gradient(ellipse at 12% 5%,#fff8ea 0,transparent 50%); font-family: var(--portfolio-font,'DM Sans'),sans-serif; }
+.portfolio-page--scrapbook-portfolio .template-nav { min-height: 76px; border-bottom: 2px dashed #855b4b55; }
+.portfolio-page--scrapbook-portfolio .template-nav__brand,.portfolio-page--scrapbook-portfolio .template-nav__links a { color: #533f33; }
+.portfolio-page--scrapbook-portfolio .template-nav__brand > span { border: 0; border-radius: 3px; background: #c92e25; color: #fff7e8; transform: rotate(-5deg); }
+.portfolio-page--scrapbook-portfolio .template-nav__cta { border: 0; border-radius: 2px; background: #c92e25; color: #fff9eb; transform: rotate(1deg); }
+.portfolio-page--scrapbook-portfolio .portfolio-page__hero--canvas { display: grid; grid-template-columns: minmax(0,1.05fr) minmax(270px,.9fr); align-items: center; gap: clamp(30px,5vw,72px); min-height: min(75vh,700px); padding: clamp(46px,7vw,90px) 0; border-bottom: 2px dashed #855b4b55; }
+.portfolio-page--scrapbook-portfolio .portfolio-page__eyebrow { padding: 0; background: transparent; color: #b63228; font: 700 10px/1.5 Inter,Arial,sans-serif; letter-spacing: .2em; text-transform: uppercase; }
+.portfolio-page--scrapbook-portfolio .portfolio-page__hero h1,.portfolio-page--scrapbook-portfolio .portfolio-page__hero-title { margin: 23px 0 16px; color: #b92e25; font: 800 clamp(52px,8vw,100px)/.88 'Trebuchet MS',sans-serif; letter-spacing: -.075em; transform: rotate(-2deg); }
+.portfolio-page--scrapbook-portfolio .portfolio-page__hero p,.portfolio-page--scrapbook-portfolio .portfolio-page__hero-body { max-width: 450px; color: #69543f; font-size: clamp(15px,1.5vw,18px); line-height: 1.7; }
+.portfolio-page--scrapbook-portfolio .portfolio-page__hero .portfolio-section-media { position: relative; margin: 8px 14px 20px; padding: 13px 13px 42px; background: #fffdf7; box-shadow: 2px 8px 18px #503a2c30; transform: rotate(3deg); }
+.portfolio-page--scrapbook-portfolio .portfolio-page__hero .portfolio-section-media::before { position: absolute; z-index: 1; top: -11px; left: 34%; width: 112px; height: 26px; background: #dfc878bf; content: ''; transform: rotate(-5deg); }
+.portfolio-page--scrapbook-portfolio .portfolio-page__hero .portfolio-page__image { width: 100%; height: min(55vw,480px); max-height: 480px; margin: 0; border-radius: 0; object-fit: cover; }
+.portfolio-page--scrapbook-portfolio .template-hero__primary { background: #c83228; color: #fff9ec; transform: rotate(-1deg); }
+.portfolio-page--scrapbook-portfolio .portfolio-page__section { position: relative; margin: 26px 0; padding: clamp(28px,4vw,48px); border: 1px solid #d6c5a9; border-radius: 2px 8px 3px 7px; background: #fffaf0e8; box-shadow: 3px 6px 15px #48372912; }
+.portfolio-page--scrapbook-portfolio .portfolio-page__section:nth-of-type(even) { background: #f8e7cfe8; transform: rotate(.25deg); }
+.portfolio-page--scrapbook-portfolio .portfolio-page__section h2,.portfolio-page--scrapbook-portfolio .portfolio-page__section input { color: #6e4e35; font: 800 clamp(28px,4.5vw,54px)/.98 'Trebuchet MS',sans-serif; letter-spacing: -.04em; }
+.portfolio-page--scrapbook-portfolio .portfolio-page__section p,.portfolio-page--scrapbook-portfolio .portfolio-page__section textarea { color: #5e5145; font-size: 14px; line-height: 1.85; }
+.portfolio-page--scrapbook-portfolio .portfolio-page__section--gallery { display: block; padding: clamp(24px,4vw,44px); }
+.portfolio-page--scrapbook-portfolio .photographer-gallery--scrapbook { grid-template-columns: repeat(4,minmax(0,1fr)); grid-auto-rows: clamp(155px,19vw,235px); gap: 24px; padding: 8px 3px 18px; }
+.portfolio-page--scrapbook-portfolio .photographer-gallery--scrapbook .photographer-gallery__item { overflow: visible; border: 9px solid #fffdf8; border-bottom-width: 31px; background: #e7ddcb; box-shadow: 2px 7px 14px #49362b38; }
+.portfolio-page--scrapbook-portfolio .photographer-gallery--scrapbook .photographer-gallery__item:nth-child(3n + 1) { transform: rotate(-2deg); }
+.portfolio-page--scrapbook-portfolio .photographer-gallery--scrapbook .photographer-gallery__item:nth-child(3n + 2) { transform: rotate(1.7deg); }
+.portfolio-page--scrapbook-portfolio .photographer-gallery--scrapbook .photographer-gallery__item:first-child { grid-row: span 2; }
+.portfolio-page--scrapbook-portfolio .photographer-gallery--scrapbook .photographer-gallery__item img { height: 100%; }
+.portfolio-page--scrapbook-portfolio .photographer-gallery--scrapbook .photographer-gallery__add-frame { border: 2px dashed #bd3026; background: #fffaf0; color: #852820; }
+.portfolio-page--scrapbook-portfolio .portfolio-page__section--contact { border: 0; background: #c93228; transform: rotate(-.25deg); }
+.portfolio-page--scrapbook-portfolio .portfolio-page__section--contact h2,.portfolio-page--scrapbook-portfolio .portfolio-page__section--contact p { color: #fff8e9; }
+.template-preview__page--model-portfolio { background: #fffbea; }
+.template-preview__page--model-portfolio .template-preview__copy strong { color: #413718; font: 500 24px/1 'Playfair Display',Georgia,serif; }
+.template-preview__page--model-portfolio .template-preview__portrait { border: 5px solid #f1dc00; border-radius: 0; }
+.template-preview__page--model-portfolio .template-preview__tiles span { background: linear-gradient(145deg,#e5bb8c,#5d5947 55%,#dfd2ba); }
+.template-preview__page--scrapbook-portfolio { background: repeating-linear-gradient(0deg,#f8f0e3 0 14px,#d5d9d330 15px,#f8f0e3 17px); }
+.template-preview__page--scrapbook-portfolio .template-preview__copy strong { color: #b92e25; font-family: 'Trebuchet MS',sans-serif; }
+.template-preview__page--scrapbook-portfolio .template-preview__portrait { border: 5px solid white; border-radius: 0; box-shadow: 2px 4px 8px #543b2c40; transform: rotate(4deg); }
+.template-preview__page--scrapbook-portfolio .template-preview__tiles span { border: 5px solid white; background: linear-gradient(145deg,#b59270,#e8ddca 50%,#bf3025); box-shadow: 2px 3px 6px #543b2c30; }
+@media (max-width:700px) {
+ .portfolio-page--model-portfolio .portfolio-page__hero--canvas,.portfolio-page--scrapbook-portfolio .portfolio-page__hero--canvas { grid-template-columns:1fr; gap:30px; min-height:0; padding:48px 0; }
+ .portfolio-page--model-portfolio .portfolio-page__hero .portfolio-section-media,.portfolio-page--scrapbook-portfolio .portfolio-page__hero .portfolio-section-media { min-height:0; width:min(calc(100% - 20px),440px); margin:8px auto 22px; }
+ .portfolio-page--model-portfolio .portfolio-page__hero .portfolio-page__image,.portfolio-page--scrapbook-portfolio .portfolio-page__hero .portfolio-page__image { height:min(112vw,480px); }
+ .portfolio-page--model-portfolio .photographer-gallery--model,.portfolio-page--scrapbook-portfolio .photographer-gallery--scrapbook { grid-template-columns:repeat(2,minmax(0,1fr)); grid-auto-rows:180px; gap:13px; }
+ .portfolio-page--model-portfolio .photographer-gallery--model .photographer-gallery__item:first-child,.portfolio-page--scrapbook-portfolio .photographer-gallery--scrapbook .photographer-gallery__item:first-child { grid-row:span 2; }
+}
+.portfolio-page--model-portfolio .photographer-gallery--model,.portfolio-page--scrapbook-portfolio .photographer-gallery--scrapbook { display: grid; margin-top: 12px; }
+.portfolio-page--model-portfolio .photographer-gallery--model .photographer-gallery__item,.portfolio-page--scrapbook-portfolio .photographer-gallery--scrapbook .photographer-gallery__item { position: relative; min-width: 0; min-height: 0; margin: 0; }
+.portfolio-page--model-portfolio .photographer-gallery--model .photographer-gallery__item img,.portfolio-page--scrapbook-portfolio .photographer-gallery--scrapbook .photographer-gallery__item img { display: block; width: 100%; object-fit: cover; }
+.portfolio-page--model-portfolio .photographer-gallery--model .photographer-gallery__placeholder,.portfolio-page--scrapbook-portfolio .photographer-gallery--scrapbook .photographer-gallery__placeholder { position: absolute; inset: 0; background: linear-gradient(145deg,#f4e9c9,#c9b783 50%,#85886d); }
+.portfolio-page--model-portfolio .photographer-gallery--model .photographer-gallery__upload,.portfolio-page--scrapbook-portfolio .photographer-gallery--scrapbook .photographer-gallery__upload { position: absolute; inset: auto 8px 8px; display: flex; min-height: 34px; align-items: center; justify-content: center; background: #241f1dcc; color: white; font: 600 10px Inter,Arial,sans-serif; opacity: 0; cursor: pointer; }
+.portfolio-page--model-portfolio .photographer-gallery--model .photographer-gallery__upload input,.portfolio-page--scrapbook-portfolio .photographer-gallery--scrapbook .photographer-gallery__upload input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+.portfolio-page--model-portfolio .photographer-gallery--model .photographer-gallery__item:hover .photographer-gallery__upload,.portfolio-page--model-portfolio .photographer-gallery--model .photographer-gallery__item:focus-within .photographer-gallery__upload,.portfolio-page--scrapbook-portfolio .photographer-gallery--scrapbook .photographer-gallery__item:hover .photographer-gallery__upload,.portfolio-page--scrapbook-portfolio .photographer-gallery--scrapbook .photographer-gallery__item:focus-within .photographer-gallery__upload { opacity: 1; }
+.portfolio-page--model-portfolio .photographer-gallery--model .photographer-gallery__remove,.portfolio-page--scrapbook-portfolio .photographer-gallery--scrapbook .photographer-gallery__remove { position: absolute; z-index: 1; top: 7px; right: 7px; width: 28px; height: 28px; border: 0; border-radius: 50%; background: #241f1dcc; color: #fff; font-size: 18px; cursor: pointer; }
+.portfolio-page--scrapbook-portfolio .portfolio-page__section--gallery h2 { margin-bottom: 23px; color: #bd3026; }
+.portfolio-page--model-portfolio .portfolio-page__section--gallery h2 { margin-bottom: 23px; font-size: clamp(42px,7vw,78px); }
+
+/* Keep the new editorial layouts inside their preview and published containers. */
+.portfolio-page--model-portfolio,.portfolio-page--scrapbook-portfolio { box-sizing: border-box; min-width: 0; }
+.portfolio-page--model-portfolio .portfolio-page__hero--canvas,.portfolio-page--scrapbook-portfolio .portfolio-page__hero--canvas { min-width: 0; }
+.portfolio-page--model-portfolio .portfolio-section-media,.portfolio-page--scrapbook-portfolio .portfolio-section-media { box-sizing: border-box; min-width: 0; }
+.portfolio-page--model-portfolio .photographer-gallery__item,.portfolio-page--scrapbook-portfolio .photographer-gallery__item { box-sizing: border-box; }
+.portfolio-page--scrapbook-portfolio .portfolio-page__section:nth-of-type(even),.portfolio-page--scrapbook-portfolio .portfolio-page__section--contact { transform: none; }
+.portfolio-page--model-portfolio .portfolio-page__hero h1,.portfolio-page--scrapbook-portfolio .portfolio-page__hero h1 { text-wrap: balance; overflow-wrap: anywhere; }
+.portfolio-page--model-portfolio .portfolio-page__hero--canvas > .portfolio-section-copy,.portfolio-page--scrapbook-portfolio .portfolio-page__hero--canvas > .portfolio-section-copy { min-width: 0; }
+
+/* Keep the two PDF-derived templates calm and predictable while their fields are edited. */
+.portfolio-page--model-portfolio .portfolio-section-copy > textarea,
+.portfolio-page--scrapbook-portfolio .portfolio-section-copy > textarea {
+  box-sizing: border-box !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-height: 0 !important;
+  padding: 3px 6px !important;
+  border: 1px solid transparent !important;
+  border-radius: 5px !important;
+  background: transparent !important;
+  overflow: hidden;
+  resize: vertical;
+}
+.portfolio-page--model-portfolio .portfolio-section-copy > textarea:hover,
+.portfolio-page--scrapbook-portfolio .portfolio-section-copy > textarea:hover {
+  border-color: #8d805244 !important;
+  background: #ffffff80 !important;
+}
+.portfolio-page--model-portfolio .portfolio-section-copy > textarea:focus,
+.portfolio-page--scrapbook-portfolio .portfolio-section-copy > textarea:focus {
+  border-color: #9a8b35 !important;
+  background: #fffefa !important;
+  outline: 2px solid #9a8b3526;
+}
+.portfolio-page--model-portfolio .portfolio-page__hero .portfolio-section-media,
+.portfolio-page--scrapbook-portfolio .portfolio-page__hero .portfolio-section-media {
+  min-height: 0;
+  transform: none;
+}
+.portfolio-page--model-portfolio .portfolio-page__hero .portfolio-page__image,
+.portfolio-page--scrapbook-portfolio .portfolio-page__hero .portfolio-page__image {
+  box-sizing: border-box;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 5;
+  max-height: 620px;
+  margin: 0;
+  object-fit: cover;
+  object-position: center 30%;
+}
+.portfolio-page--model-portfolio .photographer-gallery--model .photographer-gallery__item img,
+.portfolio-page--scrapbook-portfolio .photographer-gallery--scrapbook .photographer-gallery__item img {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  object-fit: cover;
+}
+.portfolio-page--model-portfolio .portfolio-section-media,
+.portfolio-page--scrapbook-portfolio .portfolio-section-media,
+.portfolio-page--model-portfolio .photographer-gallery__item,
+.portfolio-page--scrapbook-portfolio .photographer-gallery__item {
+  overflow: hidden;
+}
+.portfolio-page--scrapbook-portfolio .portfolio-page__hero .portfolio-section-media::before { top: 8px; }
+.portfolio-page--model-portfolio .portfolio-page__section--with-media,
+.portfolio-page--scrapbook-portfolio .portfolio-page__section--with-media {
+  grid-template-columns: minmax(0, 1fr) minmax(180px, 34%);
+  align-items: center;
+  gap: clamp(20px, 3vw, 40px);
+}
+.portfolio-page--model-portfolio .portfolio-page__section--with-media > .portfolio-section-copy,
+.portfolio-page--scrapbook-portfolio .portfolio-page__section--with-media > .portfolio-section-copy {
+  width: 100%;
+  max-width: 100%;
+  margin-inline: 0;
+}
+.portfolio-page--model-portfolio .portfolio-page__section--with-media > .portfolio-section-media,
+.portfolio-page--scrapbook-portfolio .portfolio-page__section--with-media > .portfolio-section-media {
+  grid-column: 2;
+  grid-row: 1;
+  width: 100%;
+}
+.portfolio-page--model-portfolio .portfolio-page__section--with-media .portfolio-page__image,
+.portfolio-page--scrapbook-portfolio .portfolio-page__section--with-media .portfolio-page__image {
+  width: 100%;
+  max-height: 340px;
+  margin: 0;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+}
+@media (max-width: 700px) {
+  .portfolio-page--model-portfolio .portfolio-page__section--with-media,
+  .portfolio-page--scrapbook-portfolio .portfolio-page__section--with-media,
+  .portfolio-page--model-portfolio .portfolio-page__hero--with-media,
+  .portfolio-page--scrapbook-portfolio .portfolio-page__hero--with-media {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .portfolio-page--model-portfolio .portfolio-page__section--with-media > .portfolio-section-media,
+  .portfolio-page--scrapbook-portfolio .portfolio-page__section--with-media > .portfolio-section-media {
+    grid-column: 1;
+    grid-row: 2;
+    width: min(100%, 460px);
+  }
+}
+.editor-preview-frame.is-mobile .portfolio-page--model-portfolio .portfolio-page__section--with-media,
+.editor-preview-frame.is-mobile .portfolio-page--scrapbook-portfolio .portfolio-page__section--with-media,
+.editor-preview-frame.is-mobile .portfolio-page--model-portfolio .portfolio-page__hero--with-media,
+.editor-preview-frame.is-mobile .portfolio-page--scrapbook-portfolio .portfolio-page__hero--with-media {
+  grid-template-columns: minmax(0, 1fr);
+}
+.editor-preview-frame.is-mobile .portfolio-page--model-portfolio .portfolio-page__section--with-media > .portfolio-section-media,
+.editor-preview-frame.is-mobile .portfolio-page--scrapbook-portfolio .portfolio-page__section--with-media > .portfolio-section-media {
+  grid-column: 1;
+  grid-row: 2;
+  width: min(100%, 300px);
+}
+
+/* Apply crop framing consistently to section and canvas images across templates. */
+.portfolio-page .portfolio-section-media { overflow: hidden; }
+.portfolio-canvas-element--image { overflow: hidden; }
+.portfolio-canvas-element--image img { transform-origin: center; }
+.resume-student__portrait-frame { display: block; width: 92px; height: 92px; flex: 0 0 auto; overflow: hidden; border: 1px solid #d9d8cb; border-radius: 50%; background: #eeedcf; }
+.resume-student__portrait { display: block; width: 100%; height: 100%; border: 0; border-radius: 50%; object-fit: cover; }
+@media (max-width: 760px) { .resume-student__portrait-frame { width: 65px; height: 65px; } }
+.editor-preview-frame.is-mobile .resume-student__portrait-frame { width: 62px; height: 62px; }
+
+/* Gallery edit controls stay visible in the editor, including touch and keyboard use. */
+.portfolio-page--model-portfolio .photographer-gallery--model.is-editable .photographer-gallery__upload,
+.portfolio-page--scrapbook-portfolio .photographer-gallery--scrapbook.is-editable .photographer-gallery__upload {
+  z-index: 2;
+  inset: auto 8px 8px;
+  min-height: 34px;
+  border: 1px solid #ffffff66;
+  background: #201c18e8;
+  color: #fff;
+  opacity: 1;
+  cursor: pointer;
+}
+.portfolio-page--model-portfolio .photographer-gallery--model.is-editable .photographer-gallery__remove,
+.portfolio-page--scrapbook-portfolio .photographer-gallery--scrapbook.is-editable .photographer-gallery__remove {
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid #ffffffa6;
+  box-shadow: 0 2px 8px #0004;
+  line-height: 1;
+}
+.portfolio-page--model-portfolio .photographer-gallery--model.is-editable .photographer-gallery__upload:focus-within,
+.portfolio-page--scrapbook-portfolio .photographer-gallery--scrapbook.is-editable .photographer-gallery__upload:focus-within,
+.portfolio-page--model-portfolio .photographer-gallery--model.is-editable .photographer-gallery__remove:focus-visible,
+.portfolio-page--scrapbook-portfolio .photographer-gallery--scrapbook.is-editable .photographer-gallery__remove:focus-visible {
+  outline: 2px solid #6257e8;
+  outline-offset: 2px;
 }

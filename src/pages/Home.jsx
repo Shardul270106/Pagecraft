@@ -119,6 +119,19 @@ export default function Home() {
     load();
   }, []);
 
+  useEffect(() => {
+    if (activeNav !== 'projects') return undefined;
+    const refreshProjects = () => {
+      if (document.visibilityState === 'visible') load();
+    };
+    window.addEventListener('focus', refreshProjects);
+    document.addEventListener('visibilitychange', refreshProjects);
+    return () => {
+      window.removeEventListener('focus', refreshProjects);
+      document.removeEventListener('visibilitychange', refreshProjects);
+    };
+  }, [activeNav]);
+
   const createPortfolio = async (template) => {
     setBusy(true); setError('');
     try {

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { API_URL } from '../lib/api';
 import { PortfolioView } from '../components/PortfolioView';
@@ -10,8 +10,12 @@ export default function PublicPortfolio() {
   const [portfolio, setPortfolio] = useState(null);
   const [error, setError] = useState('');
   const [attempt, setAttempt] = useState(0);
+  const requestedPageRef = useRef('');
 
   useEffect(() => {
+    const requestKey = `${slug}:${attempt}`;
+    if (requestedPageRef.current === requestKey) return undefined;
+    requestedPageRef.current = requestKey;
     let current = true;
     setPortfolio(null);
     setError('');

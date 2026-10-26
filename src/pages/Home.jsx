@@ -96,6 +96,7 @@ export default function Home() {
       setProfileName(result.user.name);
       setProfileSlug(result.user.publicSlug || '');
       setProfileMessage(result.message || 'Profile updated.');
+      await load();
     } catch (err) {
       setProfileMessage(err.message);
     } finally {

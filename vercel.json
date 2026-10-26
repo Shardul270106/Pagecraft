@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    { "source": "/p/:slug", "destination": "/index.html" },
+    { "source": "/home", "destination": "/index.html" },
+    { "source": "/editor/:id", "destination": "/index.html" },
+    { "source": "/reset-password", "destination": "/index.html" }
+  ]
+}

@@ -1,6 +1,21 @@
-# Pagecraft frontend
+<p align="center">
+  <img src="./public/favicon.svg" alt="Pagecraft logo" width="88" height="88" />
+</p>
 
-The frontend is the React 19 single-page application served by Vite. It provides the public marketing site, account entry points, portfolio dashboard, visual editor, print/PDF flow, and public portfolio pages. The backend and database are documented in [`../Backend/README.md`](../Backend/README.md); the short project overview and feature map live in [`../README.md`](../README.md).
+<h1 align="center">Pagecraft</h1>
+
+<p align="center"><em>Pick a template. Shape your story. Publish your portfolio.</em></p>
+
+<p align="center">
+  <a href="https://react.dev/"><img alt="React 19" src="https://img.shields.io/badge/React-19-149eca?logo=react&logoColor=white" /></a>
+  <a href="https://vite.dev/"><img alt="Vite 8" src="https://img.shields.io/badge/Vite-8-646cff?logo=vite&logoColor=white" /></a>
+  <a href="https://reactrouter.com/"><img alt="React Router 7" src="https://img.shields.io/badge/React_Router-7-ca4245?logo=reactrouter&logoColor=white" /></a>
+  <a href="https://expressjs.com/"><img alt="Express API" src="https://img.shields.io/badge/API-Express-333333?logo=express&logoColor=white" /></a>
+</p>
+
+<hr />
+
+<p align="center">The React frontend for Pagecraft: a visual portfolio builder with editable templates, live preview, and publishing.</p>
 
 ## Run the frontend
 

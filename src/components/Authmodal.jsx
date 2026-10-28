@@ -31,10 +31,10 @@ export default function AuthModal({
     container.replaceChildren();
     const width = Math.max(180, Math.min(400, Math.floor(container.getBoundingClientRect().width)));
     googleId.renderButton(container, {
-      theme: 'outline',
+      theme: 'filled_black',
       size: 'large',
       text: 'continue_with',
-      shape: 'rectangular',
+      shape: 'pill',
       logo_alignment: 'left',
       width,
     });

@@ -381,14 +381,16 @@
 
 .auth-modal__google-button {
   display: grid;
-  min-height: 40px;
+  width: 100%;
+  min-height: 44px;
   place-items: center;
   color: #666;
   font: 400 12px/1.4 var(--font-inter), sans-serif;
   text-align: center;
 }
 
-.auth-modal__google-button > div { width: 100%; }
+.auth-modal__google-button > div { width: min(100%, 400px); }
+.auth-modal__google-button [role="status"] { color: #74746f; }
 
 
 /* ==========================================================================

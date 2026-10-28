@@ -379,44 +379,16 @@
    GOOGLE BUTTON
    ========================================================================== */
 
-.auth-modal__social-btn {
-  display: flex;
-
-  align-items: center;
-  justify-content: center;
-
-  gap: 10px;
-
-  width: 100%;
-
-  padding: 13px 20px;
-
-  border: 1px solid var(--color-hairline-gray);
-
-  border-radius: var(--radius-inputs);
-
-  background: var(--color-paper-white);
-
-  font-family: var(--font-inter);
-
-  font-weight: var(--font-weight-medium);
-
-  font-size: 14px;
-
-  color: var(--color-carbon);
-
-  cursor: pointer;
-
-  transition:
-    background 0.15s ease,
-    border-color 0.15s ease;
+.auth-modal__google-button {
+  display: grid;
+  min-height: 40px;
+  place-items: center;
+  color: #666;
+  font: 400 12px/1.4 var(--font-inter), sans-serif;
+  text-align: center;
 }
 
-.auth-modal__social-btn:hover {
-  background: var(--color-graphite-mist);
-
-  border-color: var(--color-shadow-gray);
-}
+.auth-modal__google-button > div { width: 100%; }
 
 
 /* ==========================================================================

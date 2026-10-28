@@ -18,6 +18,7 @@ let googleResponseHandler = null;
 export default function Navbar({ authRequest, selectedTemplateId, onOpenAuth, onCloseAuth }) {
   const [authOpen, setAuthOpen] = useState(false);
   const [authTab, setAuthTab] = useState('login');
+  const [googleReady, setGoogleReady] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [apiError, setApiError] = useState('');
   const navigate = useNavigate();
@@ -42,12 +43,15 @@ export default function Navbar({ authRequest, selectedTemplateId, onOpenAuth, on
     const scriptUrl = 'https://accounts.google.com/gsi/client';
     let script = document.querySelector(`script[src="${scriptUrl}"]`);
     const initializeGoogle = () => {
-      if (googleInitialized || !GOOGLE_CLIENT_ID || !window.google?.accounts?.id) return;
-      window.google.accounts.id.initialize({
-        client_id: GOOGLE_CLIENT_ID,
-        callback: (response) => googleResponseHandler?.(response),
-      });
-      googleInitialized = true;
+      if (!GOOGLE_CLIENT_ID || !window.google?.accounts?.id) return;
+      if (!googleInitialized) {
+        window.google.accounts.id.initialize({
+          client_id: GOOGLE_CLIENT_ID,
+          callback: (response) => googleResponseHandler?.(response),
+        });
+        googleInitialized = true;
+      }
+      setGoogleReady(true);
     };
 
     if (window.google?.accounts?.id) initializeGoogle();
@@ -102,20 +106,6 @@ export default function Navbar({ authRequest, selectedTemplateId, onOpenAuth, on
 
   googleResponseHandlerRef.current = handleGoogleResponse;
   googleResponseHandler = (response) => googleResponseHandlerRef.current?.(response);
-
-  // Triggered by the "Continue with Google" button in AuthModal
-  function handleGoogleClick() {
-    if (!GOOGLE_CLIENT_ID) {
-      setApiError('Google sign-in is not configured for this site.');
-      return;
-    }
-    if (!window.google?.accounts?.id || !googleInitialized) {
-      setApiError('Google sign-in is still loading. Try again in a moment.');
-      return;
-    }
-
-    window.google.accounts.id.prompt();
-  }
 
   // Handles local email+password signup/login
   async function handleAuthSubmit(mode, data) {
@@ -232,7 +222,8 @@ export default function Navbar({ authRequest, selectedTemplateId, onOpenAuth, on
         onClose={() => { setAuthOpen(false); onCloseAuth?.(); }}
         initialTab={authTab}
         onSubmit={handleAuthSubmit}
-        onGoogleClick={handleGoogleClick}
+        googleConfigured={Boolean(GOOGLE_CLIENT_ID)}
+        googleReady={googleReady}
         onForgotPassword={handleForgotPassword}
         isLoading={isLoading}
         apiError={apiError}
